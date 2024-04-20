@@ -1,0 +1,3 @@
+uvicorn:
+  no_color: true
+  version: 0.17.6
