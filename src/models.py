@@ -12,10 +12,6 @@ NameStr = Annotated[
 ]
 
 
-class HTTPSuccess(BaseModel):
-    msg: str = "Success"
-
-
 class TimeStampMixin(object):
     """Timestamping mixin"""
 
@@ -45,3 +41,7 @@ class CowboyBase(BaseModel):
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%SZ") if v else None,
             SecretStr: lambda v: v.get_secret_value() if v else None,
         }
+
+
+class HTTPSuccess(BaseModel):
+    msg: str = "Success"

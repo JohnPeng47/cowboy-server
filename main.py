@@ -161,7 +161,7 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             log.exception(e)
             response = JSONResponse(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                content={"detail": e.errors()},
+                content={"detail": e.errors(), "error": True},
             )
         except ValueError as e:
             log.exception(e)
@@ -170,7 +170,8 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
                 content={
                     "detail": [
                         {"msg": "Unknown", "loc": ["Unknown"], "type": "Unknown"}
-                    ]
+                    ],
+                    "error": True,
                 },
             )
         except Exception as e:
@@ -180,7 +181,8 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
                 content={
                     "detail": [
                         {"msg": "Unknown", "loc": ["Unknown"], "type": "Unknown"}
-                    ]
+                    ],
+                    "error": True,
                 },
             )
 
