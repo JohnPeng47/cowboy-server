@@ -30,8 +30,11 @@ from logging import getLogger
 import yaml
 
 from src.auth.views import auth_router
+from src.repo.views import repo_router
 
 from src.database.core import engine, sessionmaker
+
+log = getLogger(__name__)
 
 
 async def not_found(request, exc):
@@ -44,7 +47,7 @@ async def not_found(request, exc):
 exception_handlers = {404: not_found}
 
 
-app = FastAPI(exception_handlers=exception_handlers, openapi_url="")
+app = FastAPI(exception_handlers=exception_handlers, openapi_url="/docs/openapi.json")
 
 # local testing
 origins = [
@@ -148,7 +151,46 @@ def db_session_middleware(request: Request, call_next):
 #         return HTMLResponse(content=content)
 
 
+class ExceptionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> StreamingResponse:
+        try:
+            response = await call_next(request)
+        except ValidationError as e:
+            log.exception(e)
+            response = JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"detail": e.errors()},
+            )
+        except ValueError as e:
+            log.exception(e)
+            response = JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={
+                    "detail": [
+                        {"msg": "Unknown", "loc": ["Unknown"], "type": "Unknown"}
+                    ]
+                },
+            )
+        except Exception as e:
+            log.exception(e)
+            response = JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "detail": [
+                        {"msg": "Unknown", "loc": ["Unknown"], "type": "Unknown"}
+                    ]
+                },
+            )
+
+        return response
+
+
+app.add_middleware(ExceptionMiddleware)
+
 app.include_router(auth_router)
+app.include_router(repo_router)
 
 
 if __name__ == "__main__":

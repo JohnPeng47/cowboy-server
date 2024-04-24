@@ -7,6 +7,7 @@ from alembic import context
 from src.database.core import Base  # Wherever your Base is defined
 
 from src.auth.models import CowboyUser
+from src.repo.models import RepoConfig
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -22,6 +23,10 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+print("Registered models: ")
+for table in target_metadata.tables:
+    print(table)
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

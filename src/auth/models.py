@@ -1,10 +1,12 @@
 from typing import List
 from datetime import datetime, timedelta
 
+import string
+import secrets
 import bcrypt
 from jose import jwt
 from typing import Optional
-from pydantic import validator, Field
+from pydantic import validator, Field, BaseModel
 from pydantic.networks import EmailStr
 
 from sqlalchemy import DateTime, Column, String, LargeBinary, Integer, Boolean
@@ -14,6 +16,20 @@ from sqlalchemy.sql.schema import ForeignKey
 from src.config import COWBOY_JWT_ALG, COWBOY_JWT_EXP, COWBOY_JWT_SECRET
 from src.database.core import Base
 from src.models import TimeStampMixin, CowboyBase, PrimaryKey, NameStr
+
+
+def generate_password():
+    """Generates a reasonable password if none is provided."""
+    alphanumeric = string.ascii_letters + string.digits
+    while True:
+        password = "".join(secrets.choice(alphanumeric) for i in range(10))
+        if (
+            any(c.islower() for c in password)
+            and any(c.isupper() for c in password)  # noqa
+            and sum(c.isdigit() for c in password) >= 3  # noqa
+        ):
+            break
+    return password
 
 
 def hash_password(password: str):
@@ -31,6 +47,8 @@ class CowboyUser(Base, TimeStampMixin):
     password = Column(LargeBinary, nullable=False)
     last_mfa_time = Column(DateTime, nullable=True)
     experimental_features = Column(Boolean, default=False)
+
+    # repos = relationship("Repo", backref="cowboy_user")
 
     # search_vector = Column(
     #     TSVectorType("email", regconfig="pg_catalog.simple", weights={"email": "A"})
@@ -76,8 +94,7 @@ class UserRegister(UserLogin):
     @validator("password", pre=True, always=True)
     def password_required(cls, v):
         # we generate a password for those that don't have one
-        # password = v or generate_password()
-        password = v
+        password = v or generate_password()
         return hash_password(password)
 
 
@@ -111,6 +128,11 @@ class UserCreate(CowboyBase):
 
 class UserRegisterResponse(CowboyBase):
     token: Optional[str] = Field(None, nullable=True)
+
+
+# Errors
+class UserExistsError(BaseModel):
+    error = "User already exists"
 
 
 # class UserPagination(Pagination):

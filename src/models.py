@@ -12,6 +12,10 @@ NameStr = Annotated[
 ]
 
 
+class HTTPSuccess(BaseModel):
+    msg: str = "Success"
+
+
 class TimeStampMixin(object):
     """Timestamping mixin"""
 

@@ -16,12 +16,7 @@ from src.config import COWBOY_JWT_SECRET
 log = logging.getLogger(__name__)
 
 
-from .models import (
-    CowboyUser,
-    UserRegister,
-    UserUpdate,
-    UserCreate,
-)
+from .models import CowboyUser, UserRegister, UserUpdate, UserCreate, UserLogin
 
 InvalidCredentialException = HTTPException(
     status_code=HTTP_401_UNAUTHORIZED,
@@ -123,6 +118,8 @@ def get_current_user(request: Request) -> CowboyUser:
         log.exception(f"Failed to extract user email")
         raise InvalidCredentialException
 
+    # kinda of strange ... if user exists, we generate a random password
+    # for the user here ...
     return get_or_create(
         db_session=request.state.db,
         user_in=UserRegister(email=user_email),
