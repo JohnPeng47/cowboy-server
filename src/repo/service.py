@@ -3,6 +3,7 @@ from typing import Dict
 from .models import RepoConfig
 
 from src.auth.models import CowboyUser
+from src.tasks import fork_repo
 
 from starlette.status import HTTP_409_CONFLICT
 
@@ -45,6 +46,10 @@ def create(*, db_session, curr_user: CowboyUser, repo_in: Dict) -> RepoConfig:
         **repo_in.dict(),
         user_id=curr_user.id,
     )
+
+    # fork the repo to submit our PRs against
+    # forked_url = fork_repo(repo.url)
+    # repo.forked_url = forked_url
 
     db_session.add(repo)
     db_session.commit()

@@ -2,13 +2,12 @@ from pydantic import BaseModel
 from typing import List, Any, Optional, Dict
 
 from sqlalchemy import create_engine, Column, Integer, String, JSON, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.ext.declarative import declarative_base
 
 from src.models import CowboyBase
 from src.database.core import Base
 
 
+# TODO: remove fields we dont need
 class RepoConfig(Base):
     """
     Stores configuration for a repository
