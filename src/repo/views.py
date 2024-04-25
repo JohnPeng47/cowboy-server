@@ -5,8 +5,8 @@ from src.auth.service import get_current_user, CowboyUser
 from pydantic.error_wrappers import ErrorWrapper, ValidationError
 
 
-from .service import create, get, delete
-from .models import RepoConfig, RepoConfigCreate
+from .service import create_or_update, get, delete, list
+from .models import RepoConfig, RepoConfigCreate, RepoConfigList
 
 from src.exceptions import InvalidConfigurationError
 from src.models import HTTPSuccess
@@ -36,7 +36,9 @@ def create_repo(
             model=RepoConfigCreate,
         )
 
-    repo = create(db_session=db_session, repo_in=repo_in, curr_user=current_user)
+    repo = create_or_update(
+        db_session=db_session, repo_in=repo_in, curr_user=current_user
+    )
 
     # need as_dict to convert cloned_folders to list
     return repo.as_dict()
@@ -48,8 +50,9 @@ def delete_repo(
     db_session: Session = Depends(get_db),
     current_user: CowboyUser = Depends(get_current_user),
 ):
-    repo = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
-    if not repo:
+    deleted = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
+
+    if not deleted:
         raise ValidationError(
             [
                 ErrorWrapper(
@@ -62,3 +65,12 @@ def delete_repo(
             model=RepoConfigCreate,
         )
     return HTTPSuccess()
+
+
+@repo_router.get("/repo/list", response_model=RepoConfigList)
+def list_repos(
+    db_session: Session = Depends(get_db),
+    current_user: CowboyUser = Depends(get_current_user),
+):
+    repos = list(db_session=db_session, curr_user=current_user)
+    return RepoConfigList(repo_list=repos)

@@ -48,6 +48,12 @@ class CustomBase:
         """Returns a dict representation of a model."""
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+    def update(self, obj):
+        """Updates a model with values from another model."""
+        for key, value in obj.dict().items():
+            if key in self.dict():
+                setattr(self, key, value)
+
     @property
     def _id_str(self):
         ids = inspect(self).identity

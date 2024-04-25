@@ -1,7 +1,6 @@
-from pydantic import BaseModel
 from typing import List, Any, Optional, Dict
 
-from sqlalchemy import create_engine, Column, Integer, String, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, JSON, ForeignKey
 
 from src.models import CowboyBase
 from src.database.core import Base
@@ -81,6 +80,10 @@ class RepoConfigBase(CowboyBase):
 
 class RepoConfigCreate(RepoConfigBase):
     repo_name: str
+
+
+class RepoConfigList(CowboyBase):
+    repo_list: List[RepoConfigBase]
 
 
 # class RepoConfigDelete(BaseModel):
