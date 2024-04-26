@@ -18,3 +18,5 @@ def gen_random_name():
     """
 
     return "".join(random.choices(string.ascii_lowercase, k=8))
+
+
