@@ -18,19 +18,22 @@ from starlette.routing import compile_path
 from starlette.responses import Response, StreamingResponse, FileResponse
 from starlette.staticfiles import StaticFiles
 
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from queue import Queue
 import os
 import uvicorn
 from logging import getLogger
 import yaml
 
+from src.task_queue.core import TaskQueue
 from src.auth.views import auth_router
 from src.repo.views import repo_router
+from src.test_modules.views import tm_router
+from src.task_queue.views import task_queue_router
 
 from src.database.core import engine, sessionmaker
 
@@ -147,6 +150,14 @@ def db_session_middleware(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+def add_task_queue(request: Request, call_next):
+    request.state.task_queue = TaskQueue()
+    response = call_next(request)
+
+    return response
+
+
 # STATIC_DIR = "build"
 # app.mount("/static", StaticFiles(directory=os.path.join(STATIC_DIR, "static")))
 
@@ -200,6 +211,8 @@ app.add_middleware(ExceptionMiddleware)
 
 app.include_router(auth_router)
 app.include_router(repo_router)
+app.include_router(tm_router)
+app.include_router(task_queue_router)
 
 
 if __name__ == "__main__":
@@ -216,6 +229,7 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=3000,
-        reload=False,
+        reload=True,
+        reload_excludes=["./repos"],
         # log_config="uvicorn.yaml",
     )

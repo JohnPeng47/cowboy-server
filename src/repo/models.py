@@ -73,9 +73,13 @@ class RepoConfigBase(CowboyBase):
     repo_name: str
     url: str
     forked_url: str
-    cloned_folders: List[str]
+    # cloned_folders: List[str]
     source_folder: str
     python_conf: Dict[str, Any]
+
+
+class RepoConfigGet(RepoConfigBase):
+    pass
 
 
 class RepoConfigCreate(RepoConfigBase):

@@ -6,7 +6,7 @@ from pydantic.error_wrappers import ErrorWrapper, ValidationError
 
 
 from .service import create_or_update, get, delete, list
-from .models import RepoConfig, RepoConfigCreate, RepoConfigList
+from .models import RepoConfigBase, RepoConfigCreate, RepoConfigList, RepoConfigGet
 
 from src.exceptions import InvalidConfigurationError
 from src.models import HTTPSuccess
@@ -65,6 +65,29 @@ def delete_repo(
             model=RepoConfigCreate,
         )
     return HTTPSuccess()
+
+
+@repo_router.get("/repo/get/{repo_name}", response_model=RepoConfigGet)
+def get_repo(
+    repo_name: str,
+    db_session: Session = Depends(get_db),
+    current_user: CowboyUser = Depends(get_current_user),
+):
+    repo = get(db_session=db_session, repo_name=repo_name, curr_user=current_user)
+    if not repo:
+        raise ValidationError(
+            [
+                ErrorWrapper(
+                    InvalidConfigurationError(
+                        msg="A repo with this name does not exist."
+                    ),
+                    loc="repo_name",
+                )
+            ],
+            model=RepoConfigGet,
+        )
+
+    return repo
 
 
 @repo_router.get("/repo/list", response_model=RepoConfigList)

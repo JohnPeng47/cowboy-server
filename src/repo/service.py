@@ -2,13 +2,12 @@ from typing import Dict, List
 
 from starlette.status import HTTP_409_CONFLICT
 
-from lib.baseline import get_tm_target_coverage
-
 from src.auth.models import CowboyUser
 from src.test_modules.models import TestModule
 
 from .models import RepoConfig, RepoConfigCreate
-from .repo_ctxt import RepoTestContext, create_repo, delete_repo
+
+from src.repo_ctxt import RepoTestContext, create_repo, delete_repo
 
 
 def get(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
