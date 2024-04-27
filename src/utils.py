@@ -1,6 +1,7 @@
 import functools
 import random
 import string
+import uuid
 
 
 # nested level get() function
@@ -20,3 +21,8 @@ def gen_random_name():
     return "".join(random.choices(string.ascii_lowercase, k=8))
 
 
+def generate_id():
+    """
+    Generates a random UUID
+    """
+    return str(uuid.uuid4())

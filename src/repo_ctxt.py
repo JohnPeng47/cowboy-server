@@ -16,6 +16,7 @@ from src.config import REPOS_ROOT
 from src.utils import gen_random_name
 
 from src.repo.models import RepoConfig
+from src.utils import generate_id
 
 
 def del_file(func, path, exc_info):
@@ -81,7 +82,7 @@ class RepoTestContext:
         repo_conf: RepoConfig,
     ):
         # experiment id for tracking different runs
-        self.exp_id = str(uuid.uuid4())[:8]
+        self.exp_id = generate_id()[:8]
 
         self.repo_path = Path(repo_conf.source_folder)
         self.git_repo = GitRepo(self.repo_path)

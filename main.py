@@ -1,7 +1,6 @@
 import time
 import logging
 from os import path
-from uuid import uuid1
 from typing import Optional, Final
 from contextvars import ContextVar
 

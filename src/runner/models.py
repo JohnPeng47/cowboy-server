@@ -15,8 +15,18 @@ class FunctionArg:
     path: str
 
 
-class RunTestTask(Task):
+@dataclass
+class RunTestTaskArgs:
     exclude_tests: List[Tuple[FunctionArg, str]]
     include_tests: List[str]
     patch_contents: str
     patch_file_path: str
+
+
+class RunTestTask(Task):
+    args: Optional[RunTestTaskArgs]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.args = RunTestTaskArgs(*args, **kwargs)

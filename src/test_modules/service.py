@@ -9,7 +9,7 @@ from src.runner.service import run_test
 from typing import List
 
 
-def get_tgt_coverage(
+async def get_tgt_coverage(
     *,
     task_queue: TaskQueue,
     curr_user: CowboyUser,
@@ -19,6 +19,6 @@ def get_tgt_coverage(
     """Generates a target coverage for a test module."""
 
     repo_ctxt = RepoTestContext(repo_config)
-    base_cov = run_test(curr_user.id, repo_config.repo_name, task_queue)
+    base_cov = await run_test(curr_user.id, repo_config.repo_name, task_queue)
 
     # tms = get_tm_target_coverage(repo_ctxt, test_modules, base_cov)

@@ -1,13 +1,14 @@
-from uuid import uuid4
 from enum import Enum
 
 from pydantic import BaseModel
-from typing import List
+from typing import List, Annotated, Optional, Any
+
+from src.utils import generate_id
 
 
 class TaskStatus(Enum):
     PENDING = "PENDING"
-    RUNNING = "RUNNING"
+    STARTED = "STARTED"
     COMPLETE = "COMPLETE"
     FAILED = "FAILED"
 
@@ -21,10 +22,15 @@ class Task(BaseModel):
     """
 
     repo_name: str
-    task_id: str = Field(default_factory=lambda: str(uuid4()))
+    task_id: str = Field(default_factory=lambda: generate_id())
     result: dict = Field(default_factory=dict)
     status: str = Field(default=TaskStatus.PENDING.value)
+    args: Optional[Any]
 
 
-class ListTasks(BaseModel):
-    tasks: List[Task]
+class GetTaskResponse(Task):
+    pass
+
+
+class ListTasksResponse(BaseModel):
+    tasks: Optional[List[Task]]

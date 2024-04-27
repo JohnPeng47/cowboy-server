@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks
 
 from src.database.core import Session, get_db
 from src.auth.service import get_current_user, CowboyUser
@@ -15,7 +15,7 @@ tm_router = APIRouter()
 
 
 @tm_router.post("/tm/baseline", response_model=HTTPSuccess)
-def get_tm_target_coverage(
+async def get_tm_target_coverage(
     request: GetTargetCovRequest,
     background_tasks: BackgroundTasks,
     db_session: Session = Depends(get_db),
@@ -26,6 +26,7 @@ def get_tm_target_coverage(
         db_session=db_session, curr_user=current_user, repo_name=request.repo_name
     )
 
+    # NOTE: don't need to await here because we dont need to return the result right away
     background_tasks.add_task(
         get_tgt_coverage,
         task_queue=task_queue,
@@ -33,5 +34,7 @@ def get_tm_target_coverage(
         repo_config=repo_conf,
         tm_names=request.test_modules,
     )
+
+    # background_tasks.add_task(await_future)
 
     return HTTPSuccess()
