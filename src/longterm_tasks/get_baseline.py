@@ -1,8 +1,8 @@
 from src.repo_ctxt import RepoTestContext
 
-from lib.repo.source_repo import SourceRepo
-from lib.coverage import TestCoverage
-from lib.test_modules.test_module import TestModule
+from cowboy_lib.repo.source_repo import SourceRepo
+from cowboy_lib.coverage import TestCoverage
+from cowboy_lib.test_modules.test_module import TestModule
 
 
 from logging import getLogger

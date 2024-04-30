@@ -21,4 +21,6 @@ async def get_tgt_coverage(
     repo_ctxt = RepoTestContext(repo_config)
     base_cov = await run_test(curr_user.id, repo_config.repo_name, task_queue)
 
+    print(base_cov.coverage)
+
     # tms = get_tm_target_coverage(repo_ctxt, test_modules, base_cov)

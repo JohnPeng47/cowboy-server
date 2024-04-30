@@ -33,6 +33,12 @@ class TaskEvent:
     def task_id(self):
         return self.task.task_id
 
+    def __eq__(self, other):
+        return self.task_id == other.task_id
+
+    # def __hash__(self):
+    #     return sum([ord(c) for c in self.task_id])
+
 
 class TaskQueue:
     """
@@ -52,7 +58,7 @@ class TaskQueue:
     def __init__(self):
         if not self._initialized:
             # Initialize instance variables only once
-            self.queue: Dict[str, List[TaskQueue]] = defaultdict(list)
+            self.queue: Dict[str, List[TaskEvent]] = defaultdict(list)
             self.locks = defaultdict(list)
             self._initialized = True  # Mark as initialized
 
@@ -70,24 +76,33 @@ class TaskQueue:
 
     def complete(self, user_id: int, task_id: str, res):
         with self._acquire_lock(user_id):
-            t = next(filter(lambda x: x.task_id == task_id, self.queue[user_id]))
-            t.complete(res)
+            for i in range(len(self.queue[user_id])):
+                if self.queue[user_id][i].task_id == task_id:
+                    t = self.queue[user_id].pop(i)
+                    t.complete(res)
+                    break
 
-    def get(self, user_id: int) -> Task:
-        """
-        Returns the first PENDING task and changes its status to STARTED
-        """
-        with self._acquire_lock(user_id):
-            if len(self.queue[user_id]) == 0:
-                return None
+    # def get(self, user_id: int) -> Task:
+    #     """
+    #     Returns the first PENDING task and changes its status to STARTED
+    #     """
+    #     with self._acquire_lock(user_id):
+    #         if len(self.queue[user_id]) == 0:
+    #             return None
 
-            return self.queue[user_id].pop()
+    #         return self.queue[user_id].pop()
 
     def get_all(self, user_id: int) -> List[Task]:
         with self._acquire_lock(user_id):
+            if len(self.queue[user_id]) == 0:
+                return []
+
             tasks = []
-            while len(self.queue[user_id]) > 0:
-                tasks.append(self.queue[user_id].pop(0))
+            for t in filter(
+                lambda t: t.task.status == TaskStatus.PENDING.value, self.queue[user_id]
+            ):
+                t.task.status = TaskStatus.STARTED.value
+                tasks.append(t.task)
 
             return tasks
 

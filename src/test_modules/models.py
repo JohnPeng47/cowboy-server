@@ -10,12 +10,12 @@ from pathlib import Path
 from typing import List
 from logging import getLogger
 
-from lib.repo.source_repo import SourceRepo
+from cowboy_lib.repo.source_repo import SourceRepo
 from src.database.core import Base
 from src.ast.models import NodeModel
 
-from lib.test_modules.test_module import TestModule
-from lib.test_modules.target_code import TargetCode
+from cowboy_lib.test_modules.test_module import TestModule
+from cowboy_lib.test_modules.target_code import TargetCode
 
 
 class IncompatibleCommit(Exception):

@@ -1,5 +1,5 @@
-from lib.repo.source_repo import SourceRepo
-from lib.repo.repository import GitRepo
+from cowboy_lib.repo.source_repo import SourceRepo
+from cowboy_lib.repo.repository import GitRepo
 
 from pathlib import Path
 import uuid

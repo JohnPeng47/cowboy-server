@@ -28,9 +28,9 @@ class Task(BaseModel):
     args: Optional[Any]
 
 
-class GetTaskResponse(Task):
+class CompleteTaskRequest(Task):
     pass
 
 
-class ListTasksResponse(BaseModel):
-    tasks: Optional[List[Task]]
+class GetTaskResponse(Task):
+    pass

@@ -10,6 +10,8 @@ from src.repo.service import get as get_repoconf
 from .models import GetTargetCovRequest
 from .service import get_tgt_coverage
 
+import asyncio
+
 
 tm_router = APIRouter()
 
@@ -26,13 +28,24 @@ async def get_tm_target_coverage(
         db_session=db_session, curr_user=current_user, repo_name=request.repo_name
     )
 
+    # When ran like this, task execution does not continue execuing the await block
+    # inside get_tgt_coverage after a task has been updated by the client
+    # background_tasks.add_task(
+    #     get_tgt_coverage,
+    #     task_queue=task_queue,
+    #     curr_user=current_user,
+    #     repo_config=repo_conf,
+    #     tm_names=request.test_modules,
+    # )
+
     # NOTE: don't need to await here because we dont need to return the result right away
-    background_tasks.add_task(
-        get_tgt_coverage,
-        task_queue=task_queue,
-        curr_user=current_user,
-        repo_config=repo_conf,
-        tm_names=request.test_modules,
+    asyncio.create_task(
+        get_tgt_coverage(
+            task_queue=task_queue,
+            curr_user=current_user,
+            repo_config=repo_conf,
+            tm_names=request.test_modules,
+        )
     )
 
     # background_tasks.add_task(await_future)
