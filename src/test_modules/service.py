@@ -21,7 +21,7 @@ def create_all_tms(
     test_modules = iter_test_modules(repo_ctxt.src_repo)
 
     for tm in test_modules:
-        create_tm(db_session=db_session, repo_conf=repo_conf, tm=tm)
+        create_tm(db_session=db_session, repo_id=repo_conf.id, tm=tm)
 
 
 def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
@@ -35,7 +35,7 @@ def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
 
     for node in tm.nodes:
         create_node(
-            db_session=db_session, node=node, repo_id=repo_id, test_module=tm_model
+            db_session=db_session, node=node, repo_id=repo_id, tm_model=tm_model
         )
 
     db_session.add(tm_model)

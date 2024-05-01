@@ -29,7 +29,7 @@ from src.task_queue.views import task_queue_router
 
 from src.database.core import engine, sessionmaker
 
-import logfire
+# import logfire
 
 log = getLogger(__name__)
 
@@ -220,8 +220,8 @@ app.include_router(tm_router)
 app.include_router(task_queue_router)
 
 
-logfire.configure(console=False)
-logfire.instrument_fastapi(app)
+# logfire.configure(console=False)
+# logfire.instrument_fastapi(app)
 
 if __name__ == "__main__":
     uvicorn_version = uvicorn.__version__
@@ -238,5 +238,5 @@ if __name__ == "__main__":
         port=3000,
         reload=True,
         reload_excludes=["./repos"],
-        log_config=config,
+        # log_config=config,
     )

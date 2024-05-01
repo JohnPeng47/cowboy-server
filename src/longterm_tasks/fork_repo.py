@@ -10,16 +10,17 @@ from git import Diff
 
 # is this the right way? Feel like proper way is to load config
 # at single point upstream and then pass it down .. but idk
-from dotenv import load_dotenv
 
-load_dotenv()
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+# from dotenv import load_dotenv
+
+# load_dotenv()
+# GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 
 logger = getLogger("test_results")
 
 
 class GithubAPI:
-    access_token = GITHUB_TOKEN
+    access_token = "1234"
 
     def _make_github_api_request(self, url: str):
         headers = {
