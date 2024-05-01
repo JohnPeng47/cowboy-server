@@ -34,3 +34,4 @@ async def run_test(
 
     cov_res = json_to_coverage_result(res)
     return cov_res
+    

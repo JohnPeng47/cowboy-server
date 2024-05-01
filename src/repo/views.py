@@ -56,6 +56,7 @@ def delete_repo(
     db_session: Session = Depends(get_db),
     current_user: CowboyUser = Depends(get_current_user),
 ):
+    print("hgoepgjgeejogpeg")
     deleted = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
 
     if not deleted:

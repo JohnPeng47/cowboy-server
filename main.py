@@ -1,6 +1,3 @@
-import time
-import logging
-from os import path
 from typing import Optional, Final
 from contextvars import ContextVar
 
@@ -8,8 +5,6 @@ from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 from pydantic.error_wrappers import ValidationError
 
-from sqlalchemy import inspect
-from sqlalchemy.orm import scoped_session
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.routing import compile_path
@@ -22,8 +17,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from queue import Queue
-import os
 import uvicorn
 from logging import getLogger
 import yaml
@@ -36,7 +29,7 @@ from src.task_queue.views import task_queue_router
 
 from src.database.core import engine, sessionmaker
 
-# import logfire
+import logfire
 
 log = getLogger(__name__)
 
@@ -227,8 +220,8 @@ app.include_router(tm_router)
 app.include_router(task_queue_router)
 
 
-# logfire.configure()
-# logfire.instrument_fastapi(app)
+logfire.configure(console=False)
+logfire.instrument_fastapi(app)
 
 if __name__ == "__main__":
     uvicorn_version = uvicorn.__version__
@@ -236,9 +229,8 @@ if __name__ == "__main__":
     # doesnt work ??
     # disable_uvicorn_logging()
 
-    with open("uvicorn.yaml", "w") as f:
-        config = {"uvicorn": {"no_color": True, "version": uvicorn_version}}
-        yaml.dump(config, f)
+    with open("uvicorn.yaml", "r") as f:
+        config = yaml.safe_load(f)
 
     uvicorn.run(
         "main:app",
@@ -246,5 +238,5 @@ if __name__ == "__main__":
         port=3000,
         reload=True,
         reload_excludes=["./repos"],
-        # log_config="uvicorn.yaml",
+        log_config=config,
     )

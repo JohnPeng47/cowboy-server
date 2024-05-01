@@ -89,9 +89,10 @@ async def get_tgt_coverage(
 
     repo_ctxt = RepoTestContext(repo_config)
     base_cov = await run_test(curr_user.id, repo_config.repo_name, task_queue)
-    test_modules = query_tms_by_name(
+    tm_models = query_tms_by_name(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
+    test_modules = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
 
     for tm in test_modules:
         # these enriched tms have test to source file mappings

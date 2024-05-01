@@ -1,3 +1,30 @@
-uvicorn:
-  no_color: true
-  version: 0.17.6
+version: 1
+disable_existing_loggers: False
+formatters:
+  simple:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout  # Use sys.stderr for standard error
+
+loggers:
+  uvicorn:
+    level: DEBUG
+    handlers: [console]
+    propagate: no
+  uvicorn.error:
+    level: DEBUG
+    handlers: [console]
+    propagate: no
+  uvicorn.access:
+    level: DEBUG
+    handlers: [console]
+    propagate: no
+
+root:
+  level: DEBUG
+  handlers: [console]

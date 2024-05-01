@@ -1,0 +1,4 @@
+[submodule "cowboy_lib"]
+	path = cowboy_lib
+	url = https://github.com/JohnPeng47/cowboy-lib.git
+    branch = main
