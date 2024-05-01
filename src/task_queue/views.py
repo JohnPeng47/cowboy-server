@@ -1,12 +1,14 @@
+from cowboy_lib.api.runner.shared import Task
+
 from .service import list_tasks, dequeue_task, complete_task
-from .models import Task, GetTaskResponse, CompleteTaskRequest
+from .models import CompleteTaskRequest
 from fastapi import APIRouter, Depends
 
 from src.task_queue.core import TaskQueue, get_queue
 from src.auth.service import get_current_user
 from src.auth.models import CowboyUser
 
-from typing import List, Optional
+from typing import List
 
 task_queue_router = APIRouter()
 

@@ -105,6 +105,10 @@ def get_request_id() -> Optional[str]:
     return _request_id_ctx_var.get()
 
 
+# these paths do not require DB
+NO_DB_PATHS = ["/task/get"]
+
+
 @app.middleware("http")
 def db_session_middleware(request: Request, call_next):
     # request_id = str(uuid1())
@@ -136,6 +140,11 @@ def db_session_middleware(request: Request, call_next):
     #     )
 
     try:
+        # can't do this because every request needs access to user auth which reuqires db
+        # if request.url.path in NO_DB_PATHS:
+        #     print("Skipping for path: ", request.url.path)
+        #     return call_next(request)
+
         # session = scoped_session(sessionmaker(), scopefunc=get_request_id)
         session = sessionmaker(bind=engine)
         request.state.db = session()
@@ -143,7 +152,9 @@ def db_session_middleware(request: Request, call_next):
     except Exception as e:
         raise e from None
     finally:
-        request.state.db.close()
+        db = getattr(request.state, "db", None)
+        if db:
+            db.close()
 
     # _request_id_ctx_var.reset(ctx_token)
     return response

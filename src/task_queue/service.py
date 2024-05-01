@@ -1,11 +1,8 @@
-from src.database.core import Base, Session
-from queue import Queue
+from cowboy_lib.api.runner.shared import Task
 
 from typing import Optional, List, Dict
-from .models import Task, TaskStatus
 
 from src.task_queue.core import TaskQueue
-from src.auth.models import CowboyUser
 
 
 def list_tasks(*, task_queue: TaskQueue, user_id: int, n: int) -> Optional[List[Task]]:

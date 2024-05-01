@@ -1,5 +1,6 @@
+from cowboy_lib.api.runner.shared import Task, TaskStatus
+
 from fastapi import Request
-from queue import Queue
 
 from threading import Lock
 from collections import defaultdict
@@ -7,8 +8,6 @@ from collections import defaultdict
 from typing import List
 from asyncio import Event
 
-from .models import Task, TaskStatus
-from src.utils import generate_id
 from typing import Dict
 
 
