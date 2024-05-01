@@ -9,6 +9,10 @@ from src.database.core import Base  # Wherever your Base is defined
 from src.auth.models import CowboyUser
 from src.repo.models import RepoConfig
 
+from src.ast.models import NodeModel
+from src.test_modules.models import TestModuleModel, TargetCodeModel
+
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

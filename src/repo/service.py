@@ -1,9 +1,4 @@
-from typing import Dict, List
-
-from starlette.status import HTTP_409_CONFLICT
-
 from src.auth.models import CowboyUser
-from src.test_modules.models import TestModule
 
 from .models import RepoConfig, RepoConfigCreate
 

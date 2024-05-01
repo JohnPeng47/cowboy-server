@@ -17,6 +17,7 @@ class NodeModel(Base):
     node_type = Column(String)
 
     test_module_id = Column(Integer, ForeignKey("test_modules.id"))
+    repo_id = Column(Integer, ForeignKey("repo_config.id"))
 
     # chunks = relationship("TargetCodeModel", backref="nodes")
 

@@ -1,19 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from src.database.core import Session, get_db
-from src.auth.service import get_current_user, CowboyUser
+from src.exceptions import InvalidConfigurationError
+from src.models import HTTPSuccess
+from src.repo_ctxt import RepoTestContext
 
 from pydantic.error_wrappers import ErrorWrapper, ValidationError
 
+from src.auth.service import get_current_user, CowboyUser
+from src.test_modules.service import create_all_tms
 
 from .service import create_or_update, get, delete, list
-from .models import RepoConfigBase, RepoConfigCreate, RepoConfigList, RepoConfigGet
-
-from src.exceptions import InvalidConfigurationError
-from src.models import HTTPSuccess
+from .models import RepoConfigCreate, RepoConfigList, RepoConfigGet
 
 repo_router = APIRouter()
 
 
+# also create the test_modules here as well
+# and nodes
 @repo_router.post("/repo/create", response_model=RepoConfigCreate)
 def create_repo(
     repo_in: RepoConfigCreate,
@@ -36,12 +39,15 @@ def create_repo(
             model=RepoConfigCreate,
         )
 
-    repo = create_or_update(
+    repo_config = create_or_update(
         db_session=db_session, repo_in=repo_in, curr_user=current_user
     )
+    # create test modules
+    repo_ctxt = RepoTestContext(repo_config)
+    create_all_tms(db_session=db_session, repo_conf=repo_config, repo_ctxt=repo_ctxt)
 
     # need as_dict to convert cloned_folders to list
-    return repo.as_dict()
+    return repo_config.as_dict()
 
 
 @repo_router.delete("/repo/delete/{repo_name}", response_model=HTTPSuccess)
