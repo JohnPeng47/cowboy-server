@@ -1,6 +1,7 @@
 from cowboy_lib.ast.code import ASTNode
 
 from src.database.core import Session
+from src.test_modules.models import TestModuleModel
 
 from .models import NodeModel
 
@@ -19,13 +20,14 @@ def get_node(*, db_session: Session, node_name: str, repo_id: int, node_type: st
 
 
 def create_node(
-    *, db_session: Session, node: ASTNode, repo_id: int, test_module_id: int
+    *, db_session: Session, node: ASTNode, repo_id: int, tm_model: TestModuleModel
 ):
     node = NodeModel(
         name=node.name,
         node_type=node.node_type.value,
         repo_id=repo_id,
-        test_module_id=test_module_id,
+        test_module_id=tm_model.id,
+        testfilepath=tm_model.testfilepath,
     )
 
     db_session.add(node)

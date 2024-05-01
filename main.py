@@ -36,14 +36,16 @@ from src.task_queue.views import task_queue_router
 
 from src.database.core import engine, sessionmaker
 
+# import logfire
+
 log = getLogger(__name__)
 
 
-def disable_uvicorn_logging():
-    uvicorn_error = logging.getLogger("uvicorn.error")
-    uvicorn_error.disabled = True
-    uvicorn_access = logging.getLogger("uvicorn.access")
-    uvicorn_access.disabled = True
+# def disable_uvicorn_logging():
+#     uvicorn_error = logging.getLogger("uvicorn.error")
+#     uvicorn_error.disabled = True
+#     uvicorn_access = logging.getLogger("uvicorn.access")
+#     uvicorn_access.disabled = True
 
 
 async def not_found(request, exc):
@@ -225,11 +227,14 @@ app.include_router(tm_router)
 app.include_router(task_queue_router)
 
 
+# logfire.configure()
+# logfire.instrument_fastapi(app)
+
 if __name__ == "__main__":
     uvicorn_version = uvicorn.__version__
 
     # doesnt work ??
-    disable_uvicorn_logging()
+    # disable_uvicorn_logging()
 
     with open("uvicorn.yaml", "w") as f:
         config = {"uvicorn": {"no_color": True, "version": uvicorn_version}}
