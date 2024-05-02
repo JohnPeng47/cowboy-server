@@ -29,8 +29,18 @@ class NodeModel(Base):
 
     # # decorators = Column
 
-    test_module_id = Column(Integer, ForeignKey("test_modules.id"))
-    repo_id = Column(Integer, ForeignKey("repo_config.id"))
+    repo_id = Column(Integer, ForeignKey("repo_config.id", ondelete="CASCADE"))
+    # Node is either related to test_modules or target_code
+    test_module_id = Column(
+        Integer,
+        ForeignKey("test_modules.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    target_code_id = Column(
+        Integer,
+        ForeignKey("target_code.id", ondelete="CASCADE"),
+        nullable=True,
+    )
 
     # chunks = relationship("TargetCodeModel", backref="nodes")
 

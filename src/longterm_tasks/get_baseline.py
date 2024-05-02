@@ -1,6 +1,6 @@
 from cowboy_lib.repo.source_repo import SourceRepo
 from cowboy_lib.coverage import TestCoverage, CoverageResult
-from cowboy_lib.test_modules.test_module import TestModule
+from cowboy_lib.test_modules.test_module import TestModule, TargetCode
 from cowboy_lib.utils import testfiles_in_coverage
 
 from src.repo_ctxt import RepoTestContext
@@ -27,7 +27,7 @@ async def get_tm_target_coverage(
     user_id: int,
     repo_name: str,
     task_queue: TaskQueue,
-) -> Tuple[List[TestModule], TestCoverage]:
+) -> Tuple[TestModule, List[TargetCode]]:
     """
     Test augmenting existing test classes by deleting random test methods, and then
     having LLM strategy generate them. Coverage is taken:
@@ -36,8 +36,6 @@ async def get_tm_target_coverage(
 
     The diff measures how well we are able to supplant the coverage of the deleted methods
     """
-
-    print(tm)
 
     if testfiles_in_coverage(base_cov.coverage, repo_ctxt.src_repo):
         raise TestInCoverageException
@@ -101,4 +99,4 @@ async def get_tm_target_coverage(
 
     logger.info(f"Saved as {repo_ctxt.exp_id}")
 
-    return tm
+    return tm, tm.chunks

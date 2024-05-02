@@ -27,11 +27,8 @@ async def run_test(
         patch_file=patch_file,
     )
 
-    print("Running test ... ", task)
-
     future = enqueue_task_and_wait(task_queue=task_queue, user_id=user_id, task=task)
     res = await future.wait()
 
     cov_res = json_to_coverage_result(res)
     return cov_res
-    
