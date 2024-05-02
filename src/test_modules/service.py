@@ -8,6 +8,9 @@ from src.database.core import Session
 from src.runner.service import run_test
 from src.ast.service import create_node
 
+from sqlalchemy.orm import joinedload
+
+
 from .models import TestModuleModel, TestModule
 from .iter_tms import iter_test_modules
 
@@ -20,6 +23,7 @@ def create_all_tms(
     """Create all test modules for a repo."""
     test_modules = iter_test_modules(repo_ctxt.src_repo)
 
+    print("Creating with repo_id: ", repo_conf.id)
     for tm in test_modules:
         create_tm(db_session=db_session, repo_id=repo_conf.id, tm=tm)
 
@@ -33,13 +37,14 @@ def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
         repo_id=repo_id,
     )
 
+    # need to commit before so node has access to tm_model.id
+    db_session.add(tm_model)
+    db_session.commit()
+
     for node in tm.nodes:
         create_node(
             db_session=db_session, node=node, repo_id=repo_id, tm_model=tm_model
         )
-
-    db_session.add(tm_model)
-    db_session.commit()
 
     return tm_model
 
@@ -51,18 +56,11 @@ def query_tms_by_name(
     Query by name and return all if no names are provided
     """
 
+    query = db_session.query(TestModuleModel).filter(TestModuleModel.repo_id == repo_id)
     if tm_names:
-        return (
-            db_session.query(TestModuleModel)
-            .filter(
-                TestModuleModel.repo_id == repo_id, TestModuleModel.name in tm_names
-            )
-            .all()
-        )
+        query = query.filter(TestModuleModel.name.in_(tm_names))
 
-    return (
-        db_session.query(TestModuleModel).filter(TestModuleModel.repo_id == repo_id)
-    ).all()
+    return query.all()
 
 
 # def update_tm(*, db_session: Session, repo_conf: RepoConfig, tm: TestModule):
@@ -87,12 +85,15 @@ async def get_tgt_coverage(
 ):
     """Generates a target coverage for a test module."""
 
+    print(tm_names)
     repo_ctxt = RepoTestContext(repo_config)
     base_cov = await run_test(curr_user.id, repo_config.repo_name, task_queue)
     tm_models = query_tms_by_name(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
+    print(tm_models[0].nodes)
     test_modules = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
+    print(test_modules)
 
     for tm in test_modules:
         # these enriched tms have test to source file mappings

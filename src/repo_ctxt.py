@@ -40,7 +40,7 @@ def del_file(func, path, exc_info):
         raise
 
 
-def create_repo(repo_conf: RepoConfig) -> RepoConfig:
+def create_repo(repo_conf: RepoConfig):
     """
     Forks the URL and clones the repo
     """
@@ -48,9 +48,9 @@ def create_repo(repo_conf: RepoConfig) -> RepoConfig:
         # forked_url = fork_repo(repo_conf.url)
         # TODO: troubleshoot this later
         forked_url = ""
-        cloned_path = clone_repo(repo_conf)
+        source_repo_path = clone_repo(repo_conf)
 
-    return forked_url, str(cloned_path)
+    return forked_url, str(source_repo_path)
 
 
 def clone_repo(repo_conf: RepoConfig) -> Path:
@@ -67,11 +67,18 @@ def clone_repo(repo_conf: RepoConfig) -> Path:
 
 
 def delete_repo(repo_name: str):
+    import platform
+
     """
     Deletes a repo from the db and all its cloned folders
     """
     repo_path = Path(REPOS_ROOT) / repo_name
-    shutil.rmtree(repo_path, onerror=del_file)
+
+    print("Deleting folders!!!")
+    if platform.system() == "Windows":
+        shutil.rmtree(repo_path, onerror=del_file)
+    else:
+        shutil.rmtree(repo_path)
 
 
 # TODO: make this into factory constructor

@@ -23,12 +23,16 @@ class TestModuleModel(Base):
     commit_sha = Column(String)
 
     repo_id = Column(Integer, ForeignKey("repo_config.id"))
-    nodes = relationship("NodeModel", backref="test_modules")
+    nodes = relationship(
+        "NodeModel", backref="test_modules", foreign_keys="[NodeModel.test_module_id]"
+    )
 
     def serialize(self, source_repo: SourceRepo) -> TestModule:
         """
         Convert model back to TestModule
         """
+        print("Serializing nodes: ", len(self.nodes))
+
         return TestModule(
             test_file=source_repo.get_file(Path(self.testfilepath)),
             commit_sha=self.commit_sha,

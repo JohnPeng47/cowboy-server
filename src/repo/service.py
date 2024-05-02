@@ -3,6 +3,11 @@ from src.auth.models import CowboyUser
 from .models import RepoConfig, RepoConfigCreate
 
 from src.repo_ctxt import RepoTestContext, create_repo, delete_repo
+from src.test_modules.service import create_all_tms
+
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 def get(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
@@ -31,9 +36,9 @@ def delete(*, db_session, curr_user: CowboyUser, repo_name: int) -> RepoConfig:
     if repo:
         db_session.delete(repo)
         db_session.commit()
-        return repo
 
-    delete_repo(repo_name)
+        delete_repo(repo_name)
+        return repo
 
     return None
 
@@ -55,6 +60,11 @@ def create(
 
     db_session.add(repo_conf)
     db_session.commit()
+
+    # create test modules
+    repo_ctxt = RepoTestContext(repo_conf)
+    logger.info(f"Creating tms with source repo: ", repo_ctxt.src_repo)
+    create_all_tms(db_session=db_session, repo_conf=repo_conf, repo_ctxt=repo_ctxt)
 
     return repo_conf
 

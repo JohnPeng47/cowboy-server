@@ -42,10 +42,6 @@ def create_repo(
     repo_config = create_or_update(
         db_session=db_session, repo_in=repo_in, curr_user=current_user
     )
-    # create test modules
-    repo_ctxt = RepoTestContext(repo_config)
-    create_all_tms(db_session=db_session, repo_conf=repo_config, repo_ctxt=repo_ctxt)
-
     # need as_dict to convert cloned_folders to list
     return repo_config.as_dict()
 
