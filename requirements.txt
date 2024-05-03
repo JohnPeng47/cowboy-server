@@ -1,0 +1,14 @@
+alembic
+fastapi
+sqlalchemy
+uvicorn
+gitpython
+pydantic==1.10.11
+psycopg2
+psycopg2-binary
+python-jose
+pydantic[email]
+tiktoken
+openai 
+simple_parsing
+tenacity

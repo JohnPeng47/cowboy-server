@@ -10,7 +10,6 @@ from starlette.requests import Request
 from starlette.routing import compile_path
 
 from starlette.responses import Response, StreamingResponse, FileResponse
-from starlette.staticfiles import StaticFiles
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +25,7 @@ from src.auth.views import auth_router
 from src.repo.views import repo_router
 from src.test_modules.views import tm_router
 from src.task_queue.views import task_queue_router
+from src.test_gen.views import test_gen_router
 
 from src.database.core import engine, sessionmaker
 
@@ -218,6 +218,7 @@ app.include_router(auth_router)
 app.include_router(repo_router)
 app.include_router(tm_router)
 app.include_router(task_queue_router)
+app.include_router(test_gen_router)
 
 
 # logfire.configure(console=False)

@@ -89,7 +89,6 @@ class TestModuleModel(Base):
         """
         Convert model back to TestModule
         """
-        print("Serializing nodes: ", len(self.nodes))
 
         return TestModule(
             test_file=source_repo.get_file(Path(self.testfilepath)),

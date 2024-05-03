@@ -4,8 +4,9 @@ from cowboy_lib.test_modules.test_module import TestModule, TargetCode
 from cowboy_lib.utils import testfiles_in_coverage
 
 from src.repo_ctxt import RepoTestContext
-from src.runner.service import run_test
 from src.task_queue.core import TaskQueue
+
+from src.runner.service import run_test
 
 from logging import getLogger
 from typing import List, Tuple

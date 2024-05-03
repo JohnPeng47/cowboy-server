@@ -1,5 +1,7 @@
 # from .models import TestModule
+# Long term tasks represent tasks that we potentially want to offload to celery
 from src.longterm_tasks import get_tm_target_coverage
+
 from src.task_queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.repo_ctxt import RepoTestContext
@@ -16,13 +18,13 @@ from .iter_tms import iter_test_modules
 from typing import List
 
 
+# TODO: get rid of this
 def create_all_tms(
     *, db_session: Session, repo_conf: RepoConfig, repo_ctxt: RepoTestContext
 ):
     """Create all test modules for a repo."""
     test_modules = iter_test_modules(repo_ctxt.src_repo)
 
-    print("Creating with repo_id: ", repo_conf.id)
     for tm in test_modules:
         create_tm(db_session=db_session, repo_id=repo_conf.id, tm=tm)
 
@@ -75,7 +77,7 @@ def create_target_code(
     return target_code
 
 
-def query_tms_by_name(
+def get_tms_by_names(
     *, db_session: Session, repo_id: str, tm_names: List[str]
 ) -> List[TestModuleModel]:
     """
@@ -87,6 +89,20 @@ def query_tms_by_name(
         query = query.filter(TestModuleModel.name.in_(tm_names))
 
     return query.all()
+
+
+def get_tm_by_name(
+    *, db_session: Session, repo_id: str, tm_name: str
+) -> TestModuleModel:
+    """
+    Query by name and return all if no names are provided
+    """
+
+    query = db_session.query(TestModuleModel).filter(TestModuleModel.repo_id == repo_id)
+    if tm_name:
+        query = query.filter(TestModuleModel.name == tm_name)
+
+    return query.one_or_none()
 
 
 def update_tm(*, db_session: Session, tm_model: TestModuleModel):
@@ -111,7 +127,7 @@ async def get_tgt_coverage(
 
     repo_ctxt = RepoTestContext(repo_config)
     base_cov = await run_test(curr_user.id, repo_config.repo_name, task_queue)
-    tm_models = query_tms_by_name(
+    tm_models = get_tms_by_names(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
     test_modules = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
@@ -159,5 +175,3 @@ async def get_tgt_coverage(
 
             tm_model.target_chunks = target_chunks
             update_tm(db_session=db_session, tm_model=tm_model)
-
-    print("FINISHED RUNNING")

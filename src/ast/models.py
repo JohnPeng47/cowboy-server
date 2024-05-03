@@ -45,9 +45,7 @@ class NodeModel(Base):
     # chunks = relationship("TargetCodeModel", backref="nodes")
 
     def to_astnode(self, source_repo: SourceRepo):
-        print("Finding node with: ", self.name, self.testfilepath, self.node_type)
         node = source_repo.find_node(self.name, self.testfilepath, self.node_type)
-        print("Found node: ", node)
         return node
 
     @classmethod
