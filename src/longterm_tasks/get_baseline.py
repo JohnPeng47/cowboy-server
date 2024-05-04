@@ -6,7 +6,7 @@ from cowboy_lib.utils import testfiles_in_coverage
 from src.repo_ctxt import RepoTestContext
 from src.task_queue.core import TaskQueue
 
-from src.runner.service import run_test
+from src.runner.service import run_test, RunServiceArgs
 
 from logging import getLogger
 from typing import List, Tuple
@@ -25,9 +25,7 @@ async def get_tm_target_coverage(
     repo_ctxt: RepoTestContext,
     tm: TestModule,
     base_cov: CoverageResult,
-    user_id: int,
-    repo_name: str,
-    task_queue: TaskQueue,
+    run_args: RunServiceArgs,
 ) -> Tuple[TestModule, List[TargetCode]]:
     """
     Test augmenting existing test classes by deleting random test methods, and then
@@ -47,7 +45,8 @@ async def get_tm_target_coverage(
     print("Running initial test ... ", tm.name)
 
     module_cov = await run_test(
-        user_id, repo_name, task_queue, include_tests=only_module
+        run_args,
+        include_tests=only_module,
     )
 
     module_diff = base_cov.coverage - module_cov.coverage
@@ -63,9 +62,7 @@ async def get_tm_target_coverage(
 
             # exclude_test = get_exclude_path(test, tm.test_file.path)
             single_cov = await run_test(
-                user_id,
-                repo_name,
-                task_queue,
+                run_args,
                 exclude_tests=[(test, tm.test_file.path)],
                 include_tests=only_module,
             )

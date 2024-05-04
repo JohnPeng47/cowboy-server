@@ -20,12 +20,11 @@ from cowboy_lib.coverage import TestCoverage, TestError
 from cowboy_lib.llm.models import OpenAIModel, ModelArguments
 
 from src.runner.service import run_test, RunServiceArgs
-
-from cowboy_lib.repo.repository import PatchFile
-
+from src.exceptions import CowboyRunTimeException
 
 from typing import Tuple, List
 
+from src.config import LLM_RETRIES
 
 from logging import getLogger
 
@@ -129,15 +128,25 @@ class Composer:
         no_improve_tests = []
 
         for _ in range(n_times):
+            retries = LLM_RETRIES
+            src_file = None
+            while retries > 0 and not src_file:
+                try:
+                    prompt = self.strat.build_prompt()
+                    llm_res = await invoke_llm_async(
+                        prompt,
+                        model=self.model,
+                        n_times=1,
+                    )
 
-            prompt = self.strat.build_prompt()
-            llm_res = await invoke_llm_async(
-                prompt,
-                model=self.model,
-                n_times=1,
-            )
+                    src_file = self.strat.parse_llm_res(llm_res[0])
+                except SyntaxError:
+                    print(f"Retrying ... {retries} left")
+                    retries -= 1
+                    continue
 
-            src_file = self.strat.parse_llm_res(llm_res[0])
+            if not src_file:
+                raise CowboyRunTimeException("LLM generation failed")
 
             test_result = [StratResult(src_file, self.test_input.path)]
 

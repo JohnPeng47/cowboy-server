@@ -7,7 +7,7 @@ from src.repo.models import RepoConfig
 from src.repo_ctxt import RepoTestContext
 from src.auth.models import CowboyUser
 from src.database.core import Session
-from src.runner.service import run_test
+from src.runner.service import run_test, RunServiceArgs
 from src.ast.service import create_node
 
 from src.ast.models import NodeModel
@@ -126,7 +126,9 @@ async def get_tgt_coverage(
     """Generates a target coverage for a test module."""
 
     repo_ctxt = RepoTestContext(repo_config)
-    base_cov = await run_test(curr_user.id, repo_config.repo_name, task_queue)
+    run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
+    
+    base_cov = await run_test(run_args)
     tm_models = get_tms_by_names(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
@@ -136,7 +138,7 @@ async def get_tgt_coverage(
     for tm_model, tm in zip(tm_models, test_modules):
         # generate src to test mappings
         tm, targets = await get_tm_target_coverage(
-            repo_ctxt, tm, base_cov, curr_user.id, repo_config.repo_name, task_queue
+            repo_ctxt, tm, base_cov, run_args
         )
 
         # store chunks and their nodes

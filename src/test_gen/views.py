@@ -18,12 +18,17 @@ async def augment_test_route(
     curr_user=Depends(get_current_user),
     task_queue=Depends(get_queue),
 ):
-    await augment_test(
+    improved_tests, failed_tests, no_improve_tests = await augment_test(
         task_queue=task_queue,
         db_session=db_session,
         curr_user=curr_user,
         tm_name=request.tm_name,
         repo_name=request.repo_name,
     )
+
+    print("Results: ", improved_tests, failed_tests, no_improve_tests)
+
+    for improved, cov in improved_tests:
+        print("Improved tests:", improved.name)
 
     return HTTPSuccess()

@@ -46,8 +46,4 @@ async def augment_test(
         test_input=test_module.serialize(src_repo),
     )
 
-    await composer.generate_test(n_times=1)
-
-    # test_cases, strat_result = composer.run()
-
-    # return test_cases, strat_result
+    return await composer.generate_test(n_times=3)

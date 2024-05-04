@@ -27,6 +27,8 @@ from src.test_modules.views import tm_router
 from src.task_queue.views import task_queue_router
 from src.test_gen.views import test_gen_router
 
+from src.exceptions import CowboyRunTimeException
+
 from src.database.core import engine, sessionmaker
 
 # import logfire
@@ -193,6 +195,17 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
                 content={
                     "detail": [
                         {"msg": "Unknown", "loc": ["Unknown"], "type": "Unknown"}
+                    ],
+                    "error": True,
+                },
+            )
+        except CowboyRunTimeException as e:
+            log.exception(e)
+            response = JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "detail": [
+                        {"msg": f"Runtime error: {e.message}"}
                     ],
                     "error": True,
                 },
