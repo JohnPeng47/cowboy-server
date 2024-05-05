@@ -1,10 +1,10 @@
 from cowboy_lib.coverage import CoverageResult, TestError, TestCoverage
-from cowboy_lib.repo.repository import PatchFile, GitRepo
+from cowboy_lib.repo.repository import PatchFile
 from cowboy_lib.repo.source_file import Function
 
 from .eval_base import Evaluator
 
-from typing import Tuple, Optional, List, TYPE_CHECKING
+from typing import Tuple, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.test_gen.types import StratResult
@@ -73,6 +73,9 @@ class AugmentAdditiveEvaluator(Evaluator):
             if cov_diff:
                 new_funcs = self.get_new_funcs(test_file, tm.path)
                 for func in new_funcs:
+                    print("Generated Func: ", func.name)
+                    print("Code: ", func.to_code())
+
                     test_error = cov_res.get_failed(func.name)
                     if test_error:
                         failed_tests.append((func, test_error))

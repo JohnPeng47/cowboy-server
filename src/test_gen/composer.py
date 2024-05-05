@@ -133,6 +133,7 @@ class Composer:
             while retries > 0 and not src_file:
                 try:
                     prompt = self.strat.build_prompt()
+                    print("Prompt: ", prompt)
                     llm_res = await invoke_llm_async(
                         prompt,
                         model=self.model,

@@ -204,9 +204,7 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             response = JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
-                    "detail": [
-                        {"msg": f"Runtime error: {e.message}"}
-                    ],
+                    "detail": [{"msg": f"Runtime error: {e.message}"}],
                     "error": True,
                 },
             )

@@ -49,8 +49,14 @@ class Evaluator(ABC):
             cov_ptched = await run_test(
                 service_args=self.run_args, patch_file=patch_file
             )
+            print(
+                f"Total failed patched: {cov_ptched.total_failed}/{cov_ptched.total_tests}"
+            )
+            print(f"Total failed base: {base_cov.total_failed}/{base_cov.total_tests}")
 
             cov_diff = base_cov.coverage - cov_ptched.coverage
+            print("Patched vs base: ", cov_diff)
+
             test_results.append((cov_ptched, cov_diff, test_file))
 
         return test_results

@@ -8,7 +8,7 @@ from src.repo_ctxt import RepoTestContext
 from src.auth.models import CowboyUser
 from src.database.core import Session
 from src.runner.service import run_test, RunServiceArgs
-from src.ast.service import create_node
+from src.ast.service import create_node, create_or_update_node
 
 from src.ast.models import NodeModel
 
@@ -115,6 +115,9 @@ def update_tm(*, db_session: Session, tm_model: TestModuleModel):
     return tm_model
 
 
+# TODO: need to add a check here to not rerun baseline for nodes that
+# have not been changed ... but need to be aware of repo changes and how this affects
+# nodes
 async def get_tgt_coverage(
     *,
     db_session: Session,
@@ -127,41 +130,41 @@ async def get_tgt_coverage(
 
     repo_ctxt = RepoTestContext(repo_config)
     run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
-    
+
     base_cov = await run_test(run_args)
     tm_models = get_tms_by_names(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
-    test_modules = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
+    total_tms = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
+    unbased_tms = [tm for tm in total_tms if not tm.chunks]
+    print("Len unbased ")
 
     # zip tm_model because we need to update it later in the code
-    for tm_model, tm in zip(tm_models, test_modules):
+    for tm_model, tm in zip(tm_models, unbased_tms):
         # generate src to test mappings
-        tm, targets = await get_tm_target_coverage(
-            repo_ctxt, tm, base_cov, run_args
-        )
+        tm, targets = await get_tm_target_coverage(repo_ctxt, tm, base_cov, run_args)
 
         # store chunks and their nodes
         target_chunks = []
-        for c in targets:
+        for tgt in targets:
             func_scope = (
-                create_node(
+                create_or_update_node(
                     db_session=db_session,
-                    node=c.func_scope,
+                    node=tgt.func_scope,
                     repo_id=repo_config.id,
-                    filepath=c.filepath,
+                    filepath=str(tgt.filepath),
                 )
-                if c.func_scope
+                if tgt.func_scope
                 else None
             )
             class_scope = (
-                create_node(
+                create_or_update_node(
                     db_session=db_session,
-                    node=c.class_scope,
+                    node=tgt.class_scope,
                     repo_id=repo_config.id,
-                    filepath=c.filepath,
+                    filepath=str(tgt.filepath),
                 )
-                if c.class_scope
+                if tgt.class_scope
                 else None
             )
 
@@ -169,7 +172,7 @@ async def get_tgt_coverage(
                 create_target_code(
                     db_session=db_session,
                     tm_model=tm_model,
-                    chunk=c,
+                    chunk=tgt,
                     func_scope=func_scope,
                     class_scope=class_scope,
                 )

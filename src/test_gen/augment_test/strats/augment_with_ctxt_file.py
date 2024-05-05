@@ -36,6 +36,7 @@ class AugmentClassWithCtxtStrat(AugmentTestStrategy):
             raise CtxtWindowExceeded("Test code too large to fit in prompt")
 
         for fp in self.test_module.targeted_files():
+            print("Inserting file context: ", fp)
             file = self.src_repo.get_file(fp)
             code_fit = prompt.insert_line("file_contents", file.to_code())
             if not code_fit:

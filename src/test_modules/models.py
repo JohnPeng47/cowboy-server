@@ -44,23 +44,19 @@ class TargetCodeModel(Base):
 
     test_module_id = Column(Integer, ForeignKey("test_modules.id", ondelete="CASCADE"))
 
-    def serialize(self):
-        return TargetCode(
-            range=self.range,
-            lines=self.lines,
-            filepath=str(self.filepath),
-            func_scope=self.func_scope,
-            class_scope=self.class_scope,
-        )
+    def serialize(self, src_repo: SourceRepo):
+        print("Serializing code ..")
 
-    @classmethod
-    def deserialize(cls, model: TargetCode):
-        return cls(
-            range=model.range,
-            lines=model.lines,
-            filepath=Path(model.filepath),
-            func_scope=model.func_scope,
-            class_scope=model.class_scope,
+        return TargetCode(
+            range=(self.start, self.end),
+            lines=self.lines,
+            filepath=Path(self.filepath),
+            func_scope=(
+                self.func_scope.to_astnode(src_repo) if self.func_scope else None
+            ),
+            class_scope=(
+                self.class_scope.to_astnode(src_repo) if self.class_scope else None
+            ),
         )
 
 
@@ -85,15 +81,16 @@ class TestModuleModel(Base):
         cascade="all, delete-orphan",
     )
 
-    def serialize(self, source_repo: SourceRepo) -> TestModule:
+    def serialize(self, src_repo: SourceRepo) -> TestModule:
         """
         Convert model back to TestModule
         """
 
         return TestModule(
-            test_file=source_repo.get_file(Path(self.testfilepath)),
+            test_file=src_repo.get_file(Path(self.testfilepath)),
             commit_sha=self.commit_sha,
-            nodes=[NodeModel.to_astnode(n, source_repo) for n in self.nodes],
+            nodes=[NodeModel.to_astnode(n, src_repo) for n in self.nodes],
+            chunks=[c.serialize(src_repo) for c in self.target_chunks],
         )
 
 
