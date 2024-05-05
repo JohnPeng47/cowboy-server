@@ -43,30 +43,35 @@ def delete(*, db_session, curr_user: CowboyUser, repo_name: int) -> RepoConfig:
     return None
 
 
+# CONSIDER: do we want to isolate create TM from create repo
 def create(
     *, db_session, curr_user: CowboyUser, repo_in: RepoConfigCreate
 ) -> RepoConfig:
     """Creates a new repo."""
 
-    repo_conf = RepoConfig(
-        **repo_in.dict(),
-        user_id=curr_user.id,
-    )
+    try:
+        repo_conf = RepoConfig(
+            **repo_in.dict(),
+            user_id=curr_user.id,
+        )
 
-    forked_url, source_folder = create_repo(repo_conf)
+        forked_url, source_folder = create_repo(repo_conf)
+        repo_conf.forked_url = forked_url
+        repo_conf.source_folder = source_folder
 
-    repo_conf.forked_url = forked_url
-    repo_conf.source_folder = source_folder
+        db_session.add(repo_conf)
+        db_session.flush()
 
-    db_session.add(repo_conf)
-    db_session.commit()
+        repo_ctxt = RepoTestContext(repo_conf)
+        create_all_tms(db_session=db_session, repo_conf=repo_conf, repo_ctxt=repo_ctxt)
 
-    # create test modules
-    repo_ctxt = RepoTestContext(repo_conf)
-    logger.info(f"Creating tms with source repo: ", repo_ctxt.src_repo)
-    create_all_tms(db_session=db_session, repo_conf=repo_conf, repo_ctxt=repo_ctxt)
+        db_session.commit()
+        return repo_conf
 
-    return repo_conf
+    except Exception as e:
+        db_session.rollback()
+        logger.error(f"Failed to create repo configuration: {e}")
+        raise
 
 
 def update(

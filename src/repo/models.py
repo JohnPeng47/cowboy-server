@@ -1,4 +1,4 @@
-from typing import List, Any, Optional, Dict
+from typing import List, Any, Dict
 
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey
 from sqlalchemy.orm import relationship
@@ -75,7 +75,6 @@ class RepoConfigBase(CowboyBase):
     repo_name: str
     url: str
     forked_url: str
-    # cloned_folders: List[str]
     source_folder: str
     python_conf: Dict[str, Any]
 
