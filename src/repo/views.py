@@ -43,7 +43,7 @@ def create_repo(
         db_session=db_session, repo_in=repo_in, curr_user=current_user
     )
     # need as_dict to convert cloned_folders to list
-    return repo_config.as_dict()
+    return repo_config.to_dict()
 
 
 @repo_router.delete("/repo/delete/{repo_name}", response_model=HTTPSuccess)
@@ -52,7 +52,6 @@ def delete_repo(
     db_session: Session = Depends(get_db),
     current_user: CowboyUser = Depends(get_current_user),
 ):
-    print("hgoepgjgeejogpeg")
     deleted = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
 
     if not deleted:
@@ -90,7 +89,7 @@ def get_repo(
             model=RepoConfigGet,
         )
 
-    return repo
+    return repo.to_dict()
 
 
 @repo_router.get("/repo/list", response_model=RepoConfigList)

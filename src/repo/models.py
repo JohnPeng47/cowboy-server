@@ -20,6 +20,7 @@ class RepoConfig(Base):
     url = Column(String)
     forked_url = Column(String)
     source_folder = Column(String)
+    cloned_folders = Column(String)
 
     # keep this argument fluid, may change
     python_conf = Column(JSON)
@@ -39,6 +40,7 @@ class RepoConfig(Base):
         url,
         forked_url,
         source_folder,
+        cloned_folders,
         python_conf,
         user_id,
     ):
@@ -46,15 +48,17 @@ class RepoConfig(Base):
         self.url = url
         self.forked_url = forked_url
         self.source_folder = source_folder
+        self.cloned_folders = ",".join(cloned_folders)
         self.python_conf = python_conf
         self.user_id = user_id
 
-    def as_dict(self):
+    def to_dict(self):
         return {
             "repo_name": self.repo_name,
             "url": self.url,
             "forked_url": self.forked_url,
             "source_folder": self.source_folder,
+            "cloned_folders": self.cloned_folders.split(","),
             "python_conf": self.python_conf,
             "user_id": self.user_id,
         }
@@ -76,6 +80,7 @@ class RepoConfigBase(CowboyBase):
     url: str
     forked_url: str
     source_folder: str
+    cloned_folders: List[str]
     python_conf: Dict[str, Any]
 
 

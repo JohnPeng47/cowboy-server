@@ -1,6 +1,7 @@
 # from .models import TestModule
-# Long term tasks represent tasks that we potentially want to offload to celery
-from src.longterm_tasks import get_tm_target_coverage
+# # Long term tasks represent tasks that we potentially want to offload to celery
+
+from src.longterm_tasks.get_baseline_parallel import get_tm_target_coverage
 
 from src.task_queue.core import TaskQueue
 from src.repo.models import RepoConfig
@@ -38,6 +39,10 @@ def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
         repo_id=repo_id,
     )
 
+    # need to commit before so node has access to tm_model.id
+    db_session.add(tm_model)
+    db_session.commit()
+
     for node in tm.nodes:
         create_node(
             db_session=db_session,
@@ -46,10 +51,6 @@ def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
             filepath=tm_model.testfilepath,
             test_module_id=tm_model.id,
         )
-
-    # need to commit before so node has access to tm_model.id
-    db_session.add(tm_model)
-    db_session.commit()
 
     return tm_model
 
@@ -135,7 +136,12 @@ async def get_tgt_coverage(
     tm_models = get_tms_by_names(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
+
+    for tm in tm_models:
+        print("TM: ", tm.name)
+
     total_tms = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
+    # TODO: currently we only baseline once..
     unbased_tms = [tm for tm in total_tms if not tm.chunks]
 
     # zip tm_model because we need to update it later in the code

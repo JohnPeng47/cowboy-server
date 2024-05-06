@@ -88,14 +88,6 @@ class RepoTestContext:
         self,
         repo_conf: RepoConfig,
     ):
-        # experiment id for tracking different runs
-        self.exp_id = generate_id()[:8]
-
         self.repo_path = Path(repo_conf.source_folder)
         self.git_repo = GitRepo(self.repo_path)
         self.src_repo = SourceRepo(self.repo_path)
-
-        # self.run_config.interp = r"C:\Users\jpeng\Documents\business\auto_test\src\config\fastapi-users\fastapi-users-test\Scripts\python.exe"
-        # self.runner = PytestDiffRunner(
-        #     self.run_config, cache_db=cache_db, cloned_dirs=cloned_dirs
-        # )
