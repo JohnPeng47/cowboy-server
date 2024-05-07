@@ -15,9 +15,7 @@ def get(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
 
     return (
         db_session.query(RepoConfig)
-        .filter(
-            RepoConfig.repo_name == repo_name and RepoConfig.user_id == curr_user.id
-        )
+        .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
         .one_or_none()
     )
 
@@ -27,9 +25,7 @@ def delete(*, db_session, curr_user: CowboyUser, repo_name: int) -> RepoConfig:
 
     repo = (
         db_session.query(RepoConfig)
-        .filter(
-            RepoConfig.repo_name == repo_name and RepoConfig.user_id == curr_user.id
-        )
+        .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
         .one_or_none()
     )
 
@@ -81,9 +77,7 @@ def update(
 
     repo = (
         db_session.query(RepoConfig)
-        .filter(
-            RepoConfig.repo_name == repo_name and RepoConfig.user_id == curr_user.id
-        )
+        .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
         .one_or_none()
     )
 

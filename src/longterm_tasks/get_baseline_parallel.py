@@ -55,7 +55,7 @@ async def get_tm_target_coverage(
     total_cov_diff = module_diff.total_cov.covered
     if total_cov_diff > 0:
         # part 2:
-        # holds the coverage diff of individual tests after they have 
+        # holds the coverage diff of individual tests after they have
         # been selectively turned off
         chg_cov = []
         coroutines = []

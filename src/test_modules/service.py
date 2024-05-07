@@ -1,6 +1,5 @@
 # from .models import TestModule
 # # Long term tasks represent tasks that we potentially want to offload to celery
-
 from src.longterm_tasks.get_baseline_parallel import get_tm_target_coverage
 
 from src.task_queue.core import TaskQueue
@@ -110,6 +109,9 @@ def update_tm(*, db_session: Session, tm_model: TestModuleModel):
     """
     Updates an existing TM
     """
+
+    print("Updating TM with chunks: ", tm_model.target_chunks)
+
     db_session.merge(tm_model)
     db_session.commit()
 
@@ -137,11 +139,9 @@ async def get_tgt_coverage(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
 
-    for tm in tm_models:
-        print("TM: ", tm.name)
-
     total_tms = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
     # TODO: currently we only baseline once..
+    print([tm.chunks for tm in total_tms])
     unbased_tms = [tm for tm in total_tms if not tm.chunks]
 
     # zip tm_model because we need to update it later in the code

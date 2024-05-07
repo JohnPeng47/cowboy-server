@@ -13,10 +13,10 @@ def get_node(
     return (
         db_session.query(NodeModel)
         .filter(
-            NodeModel.name == node_name
-            and NodeModel.repo_id == repo_id
-            and NodeModel.node_type == node_type
-            and NodeModel.testfilepath == filepath
+            NodeModel.name == node_name,
+            NodeModel.repo_id == repo_id,
+            NodeModel.node_type == node_type,
+            NodeModel.testfilepath == filepath,
         )
         .one_or_none()
     )
@@ -60,7 +60,7 @@ def create_or_update_node(
         db_session=db_session,
         node_name=node.name,
         repo_id=repo_id,
-        node_type=node.node_type,
+        node_type=node.node_type.value,
         filepath=filepath,
     )
 
