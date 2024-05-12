@@ -18,7 +18,6 @@ class RepoConfig(Base):
     id = Column(Integer, primary_key=True)
     repo_name = Column(String)
     url = Column(String)
-    forked_url = Column(String)
     source_folder = Column(String)
     cloned_folders = Column(String)
 
@@ -33,12 +32,14 @@ class RepoConfig(Base):
     nodes = relationship(
         "NodeModel", backref="repo_config", cascade="all, delete-orphan"
     )
+    # base_cov = relationship(
+    #     "TestCoverageModel", backref="repo_config", cascade="all, delete-orphan"
+    # )
 
     def __init__(
         self,
         repo_name,
         url,
-        forked_url,
         source_folder,
         cloned_folders,
         python_conf,
@@ -46,7 +47,6 @@ class RepoConfig(Base):
     ):
         self.repo_name = repo_name
         self.url = url
-        self.forked_url = forked_url
         self.source_folder = source_folder
         self.cloned_folders = ",".join(cloned_folders)
         self.python_conf = python_conf
@@ -56,7 +56,6 @@ class RepoConfig(Base):
         return {
             "repo_name": self.repo_name,
             "url": self.url,
-            "forked_url": self.forked_url,
             "source_folder": self.source_folder,
             "cloned_folders": self.cloned_folders.split(","),
             "python_conf": self.python_conf,
@@ -78,7 +77,6 @@ class PythonConf(CowboyBase):
 class RepoConfigBase(CowboyBase):
     repo_name: str
     url: str
-    forked_url: str
     source_folder: str
     cloned_folders: List[str]
     python_conf: Dict[str, Any]

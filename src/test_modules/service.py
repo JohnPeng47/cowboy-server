@@ -1,10 +1,10 @@
+from cowboy_lib.repo import SourceRepo
+
 # from .models import TestModule
 # # Long term tasks represent tasks that we potentially want to offload to celery
 from src.longterm_tasks.get_baseline_parallel import get_tm_target_coverage
-
 from src.task_queue.core import TaskQueue
 from src.repo.models import RepoConfig
-from src.repo_ctxt import RepoTestContext
 from src.auth.models import CowboyUser
 from src.database.core import Session
 from src.runner.service import run_test, RunServiceArgs
@@ -15,15 +15,16 @@ from src.ast.models import NodeModel
 from .models import TestModuleModel, TestModule, TargetCode, TargetCodeModel
 from .iter_tms import iter_test_modules
 
+from pathlib import Path
 from typing import List
 
 
 # TODO: get rid of this
 def create_all_tms(
-    *, db_session: Session, repo_conf: RepoConfig, repo_ctxt: RepoTestContext
+    *, db_session: Session, repo_conf: RepoConfig, src_repo: SourceRepo
 ):
     """Create all test modules for a repo."""
-    test_modules = iter_test_modules(repo_ctxt.src_repo)
+    test_modules = iter_test_modules(src_repo)
 
     for tm in test_modules:
         create_tm(db_session=db_session, repo_id=repo_conf.id, tm=tm)
@@ -131,7 +132,7 @@ async def get_tgt_coverage(
 ):
     """Generates a target coverage for a test module."""
 
-    repo_ctxt = RepoTestContext(repo_config)
+    src_repo = SourceRepo(Path(repo_config.source_folder))
     run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
 
     base_cov = await run_test(run_args)
@@ -139,7 +140,7 @@ async def get_tgt_coverage(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
 
-    total_tms = [tm_model.serialize(repo_ctxt.src_repo) for tm_model in tm_models]
+    total_tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
     # TODO: currently we only baseline once..
     print([tm.chunks for tm in total_tms])
     unbased_tms = [tm for tm in total_tms if not tm.chunks]
@@ -147,7 +148,7 @@ async def get_tgt_coverage(
     # zip tm_model because we need to update it later in the code
     for tm_model, tm in zip(tm_models, unbased_tms):
         # generate src to test mappings
-        tm, targets = await get_tm_target_coverage(repo_ctxt, tm, base_cov, run_args)
+        tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
 
         # store chunks and their nodes
         target_chunks = []

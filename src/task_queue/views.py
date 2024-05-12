@@ -27,6 +27,7 @@ def get(
     task_queue: TaskQueue = Depends(get_queue),
     curr_user: CowboyUser = Depends(get_current_user),
 ):
+    print(curr_user)
     tasks = dequeue_task(task_queue=task_queue, user_id=curr_user.id)
     return tasks
 

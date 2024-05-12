@@ -8,7 +8,8 @@ COWBOY_JWT_EXP = config("DISPATCH_JWT_EXP", cast=int, default=308790000)  # Seco
 
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 
-SQLALCHEMY_DATABASE_URI = "postgresql://cowboyuser@127.0.0.1:5432/cowboytest"
+DB_PASS = config("DB_PASS")
+SQLALCHEMY_DATABASE_URI = f"postgresql://cowboyuser2:{DB_PASS}@127.0.0.1:5432/cowboytest2"
 SQLALCHEMY_ENGINE_POOL_SIZE = 50
 
 ALEMBIC_INI_PATH = "."

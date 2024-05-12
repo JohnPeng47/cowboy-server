@@ -24,7 +24,7 @@ class TestInCoverageException(Exception):
 
 
 async def get_tm_target_coverage(
-    repo_ctxt: RepoTestContext,
+    src_repo: SourceRepo,
     tm: TestModule,
     base_cov: CoverageResult,
     run_args: RunServiceArgs,
@@ -38,7 +38,7 @@ async def get_tm_target_coverage(
     The diff measures how well we are able to supplant the coverage of the deleted methods
     """
 
-    if testfiles_in_coverage(base_cov.coverage, repo_ctxt.src_repo):
+    if testfiles_in_coverage(base_cov.coverage, src_repo):
         raise TestInCoverageException
 
     # First loop we find the total coverage of each test by itself
@@ -89,8 +89,8 @@ async def get_tm_target_coverage(
         # re-init the chunks according to the aggregated individual test coverages
         tm.set_chunks(
             chg_cov,
-            source_repo=repo_ctxt.src_repo,
-            base_path=repo_ctxt.repo_path,
+            source_repo=src_repo,
+            base_path=src_repo.repo_path,
         )
 
         print(f"Chunks: \n{tm.print_chunks()}")

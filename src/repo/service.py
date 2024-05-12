@@ -1,10 +1,13 @@
+from cowboy_lib.repo import GitRepo, SourceRepo
+
+from src.utils import gen_random_name
 from src.auth.models import CowboyUser
+from src.test_modules.service import create_all_tms
+from src.config import REPOS_ROOT
 
 from .models import RepoConfig, RepoConfigCreate
 
-from src.repo_ctxt import RepoTestContext, create_repo, delete_repo
-from src.test_modules.service import create_all_tms
-
+from pathlib import Path
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -20,7 +23,7 @@ def get(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
     )
 
 
-def delete(*, db_session, curr_user: CowboyUser, repo_name: int) -> RepoConfig:
+def delete(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
     """Deletes a repo based on the given repo name."""
 
     repo = (
@@ -28,12 +31,12 @@ def delete(*, db_session, curr_user: CowboyUser, repo_name: int) -> RepoConfig:
         .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
         .one_or_none()
     )
-
+    
     if repo:
         db_session.delete(repo)
         db_session.commit()
 
-        delete_repo(repo_name)
+        GitRepo.delete_repo(Path(repo.source_folder))
         return repo
 
     return None
@@ -45,27 +48,33 @@ def create(
 ) -> RepoConfig:
     """Creates a new repo."""
 
+    repo_dst = None
     try:
         repo_conf = RepoConfig(
             **repo_in.dict(),
             user_id=curr_user.id,
         )
 
-        forked_url, source_folder = create_repo(repo_conf)
-        repo_conf.forked_url = forked_url
-        repo_conf.source_folder = source_folder
+        repo_dst = Path(REPOS_ROOT) / repo_conf.repo_name / gen_random_name()
+        GitRepo.clone_repo(repo_dst, repo_conf.url)
+
+        src_repo = SourceRepo(repo_dst)
+
+        repo_conf.source_folder = str(repo_dst)
 
         db_session.add(repo_conf)
         db_session.flush()
 
-        repo_ctxt = RepoTestContext(repo_conf)
-        create_all_tms(db_session=db_session, repo_conf=repo_conf, repo_ctxt=repo_ctxt)
+        create_all_tms(db_session=db_session, repo_conf=repo_conf, src_repo=src_repo)
 
         db_session.commit()
         return repo_conf
 
     except Exception as e:
         db_session.rollback()
+        if repo_dst:
+            GitRepo.delete_repo(repo_dst)
+        
         logger.error(f"Failed to create repo configuration: {e}")
         raise
 

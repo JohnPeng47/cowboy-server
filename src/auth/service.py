@@ -110,7 +110,6 @@ def extract_user_email_jwt(request: Request, **kwargs):
         ) from None
     return data["email"]
 
-
 def get_current_user(request: Request) -> CowboyUser:
     user_email = extract_user_email_jwt(request=request)
 
