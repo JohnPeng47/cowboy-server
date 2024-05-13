@@ -31,7 +31,7 @@ def delete(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
         .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
         .one_or_none()
     )
-    
+
     if repo:
         db_session.delete(repo)
         db_session.commit()

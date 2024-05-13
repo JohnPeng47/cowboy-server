@@ -110,9 +110,6 @@ def update_tm(*, db_session: Session, tm_model: TestModuleModel):
     """
     Updates an existing TM
     """
-
-    print("Updating TM with chunks: ", tm_model.target_chunks)
-
     db_session.merge(tm_model)
     db_session.commit()
 
@@ -141,8 +138,6 @@ async def get_tgt_coverage(
     )
 
     total_tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
-    # TODO: currently we only baseline once..
-    print([tm.chunks for tm in total_tms])
     unbased_tms = [tm for tm in total_tms if not tm.chunks]
 
     # zip tm_model because we need to update it later in the code

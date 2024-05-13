@@ -37,16 +37,7 @@ def create_node(
         test_module_id=test_module_id,
         testfilepath=filepath,
     )
-
-    print(
-        "Node Created: ",
-        node.name,
-        node.node_type,
-        node.repo_id,
-        node.testfilepath,
-        node.test_module_id,
-    )
-
+    
     db_session.add(node)
     db_session.commit()
 

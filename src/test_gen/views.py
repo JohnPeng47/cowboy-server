@@ -5,7 +5,7 @@ from src.models import HTTPSuccess
 from src.auth.service import get_current_user
 from src.task_queue.core import get_queue
 
-from .models import AugmentTestRequest
+from .models import AugmentTestRequest, AugmentTestResponse
 from .service import augment_test
 
 test_gen_router = APIRouter()
@@ -18,7 +18,7 @@ async def augment_test_route(
     curr_user=Depends(get_current_user),
     task_queue=Depends(get_queue),
 ):
-    improved_tests, failed_tests, no_improve_tests = await augment_test(
+    merge_url = await augment_test(
         task_queue=task_queue,
         db_session=db_session,
         curr_user=curr_user,
@@ -26,9 +26,4 @@ async def augment_test_route(
         repo_name=request.repo_name,
     )
 
-    print("Results: ", improved_tests, failed_tests, no_improve_tests)
-
-    for improved, cov in improved_tests:
-        print("Improved tests:", improved.name)
-
-    return HTTPSuccess()
+    return AugmentTestResponse(merge_url=merge_url)

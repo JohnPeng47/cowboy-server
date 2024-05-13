@@ -39,22 +39,20 @@ class Composer:
 
     def __init__(
         self,
-        # keep strat/eval init in composer so in future we can dynamically select them
         strat: AugmentStratType,
         evaluator: EvaluatorType,
-        run_args: RunServiceArgs,
         src_repo: SourceRepo,
         test_input: TestCaseInput,
+        run_args: RunServiceArgs,
         # TODO: put this back in once we have Coverage persisted
-        # base_cov: CoverageResult,
+        base_cov: TestCoverage,
         # target_cov: TestCoverage,
         verify: bool = False,
     ):
         self.src_repo = src_repo
         self.test_input = test_input
         self.verify = verify
-        # self.base_cov = base_cov
-
+        self.base_cov = base_cov
         self.run_args = run_args
 
         self.strat: BaseStrategy = AUGMENT_STRATS[strat](self.src_repo, self.test_input)
@@ -187,8 +185,6 @@ class Composer:
         List[Tuple[Function, TestError]],
         List[Function],
     ]:
-        self.base_cov = await run_test(self.run_args)
-
         if isinstance(self.evaluator, AugmentAdditiveEvaluator):
             return await self.gen_test_serial_additive(n_times)
         elif isinstance(self.evaluator, AugmentParallelEvaluator):
