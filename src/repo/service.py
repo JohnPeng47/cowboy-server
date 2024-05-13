@@ -26,17 +26,23 @@ def get(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
 def delete(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
     """Deletes a repo based on the given repo name."""
 
-    repo = (
-        db_session.query(RepoConfig)
-        .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
-        .one_or_none()
-    )
-
+    repo = get(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
     if repo:
         db_session.delete(repo)
         db_session.commit()
 
         GitRepo.delete_repo(Path(repo.source_folder))
+        return repo
+
+    return None
+
+
+def clean(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
+    """Cleans repo branches."""
+
+    repo = get(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
+    if repo:
+        GitRepo.clean_branches(Path(repo.source_folder))
         return repo
 
     return None
@@ -74,7 +80,7 @@ def create(
         db_session.rollback()
         if repo_dst:
             GitRepo.delete_repo(repo_dst)
-        
+
         logger.error(f"Failed to create repo configuration: {e}")
         raise
 
@@ -84,12 +90,7 @@ def update(
 ) -> RepoConfig:
     """Updates a repo."""
 
-    repo = (
-        db_session.query(RepoConfig)
-        .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
-        .one_or_none()
-    )
-
+    repo = get(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
     if not repo:
         return None
 

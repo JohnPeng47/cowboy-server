@@ -2,6 +2,7 @@ from typing import List, Any, Dict
 
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey
 from sqlalchemy.orm import relationship
+from pydantic import Field
 
 from src.models import CowboyBase
 from src.database.core import Base
@@ -20,6 +21,9 @@ class RepoConfig(Base):
     url = Column(String)
     source_folder = Column(String)
     cloned_folders = Column(String)
+    # git remote and git main branch (to merge into)
+    remote = Column(String)
+    main = Column(String)
 
     # keep this argument fluid, may change
     python_conf = Column(JSON)
@@ -44,6 +48,8 @@ class RepoConfig(Base):
         cloned_folders,
         python_conf,
         user_id,
+        remote,
+        main,
     ):
         self.repo_name = repo_name
         self.url = url
@@ -51,6 +57,8 @@ class RepoConfig(Base):
         self.cloned_folders = ",".join(cloned_folders)
         self.python_conf = python_conf
         self.user_id = user_id
+        self.remote = remote
+        self.main = main
 
     def to_dict(self):
         return {
@@ -60,6 +68,8 @@ class RepoConfig(Base):
             "cloned_folders": self.cloned_folders.split(","),
             "python_conf": self.python_conf,
             "user_id": self.user_id,
+            "remote": self.remote,
+            "main": self.main,
         }
 
 
@@ -80,6 +90,8 @@ class RepoConfigBase(CowboyBase):
     source_folder: str
     cloned_folders: List[str]
     python_conf: Dict[str, Any]
+    remote: str = Field(default="origin")
+    main: str = Field(default="main")
 
 
 class RepoConfigGet(RepoConfigBase):

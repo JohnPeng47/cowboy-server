@@ -9,7 +9,7 @@ from pydantic.error_wrappers import ErrorWrapper, ValidationError
 from src.auth.service import get_current_user, CowboyUser
 from src.test_modules.service import create_all_tms
 
-from .service import create_or_update, get, delete, list
+from .service import create_or_update, get, delete, list, clean
 from .models import RepoConfigCreate, RepoConfigList, RepoConfigGet
 
 repo_router = APIRouter()
@@ -55,6 +55,29 @@ def delete_repo(
     deleted = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
 
     if not deleted:
+        raise ValidationError(
+            [
+                ErrorWrapper(
+                    InvalidConfigurationError(
+                        msg="A repo with this name does not exist."
+                    ),
+                    loc="repo_name",
+                )
+            ],
+            model=RepoConfigCreate,
+        )
+    return HTTPSuccess()
+
+
+@repo_router.delete("/repo/clean/{repo_name}", response_model=HTTPSuccess)
+def clean_repo(
+    repo_name: str,
+    db_session: Session = Depends(get_db),
+    current_user: CowboyUser = Depends(get_current_user),
+):
+    cleaned = clean(db_session=db_session, repo_name=repo_name, curr_user=current_user)
+
+    if not cleaned:
         raise ValidationError(
             [
                 ErrorWrapper(
