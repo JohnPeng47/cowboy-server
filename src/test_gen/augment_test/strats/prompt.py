@@ -1,4 +1,4 @@
-from ...types import Prompt, LMModelSpec
+from ..types import Prompt, LMModelSpec
 from typing import List
 
 

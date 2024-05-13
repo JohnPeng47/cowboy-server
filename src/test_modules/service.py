@@ -20,9 +20,7 @@ from typing import List
 
 
 # TODO: get rid of this
-def create_all_tms(
-    *, db_session: Session, repo_conf: RepoConfig, src_repo: SourceRepo
-):
+def create_all_tms(*, db_session: Session, repo_conf: RepoConfig, src_repo: SourceRepo):
     """Create all test modules for a repo."""
     test_modules = iter_test_modules(src_repo)
 
@@ -76,6 +74,17 @@ def create_target_code(
     db_session.commit()
 
     return target_code
+
+
+def get_all_tms(*, db_session: Session, repo_id: str) -> List[TestModuleModel]:
+    """
+    Query all TMs for a repo
+    """
+    return (
+        db_session.query(TestModuleModel)
+        .filter(TestModuleModel.repo_id == repo_id)
+        .all()
+    )
 
 
 def get_tms_by_names(

@@ -1,7 +1,7 @@
 from .augment_base import AugmentTestStrategy
 from .prompt import AugmentTestPromptWithCtxt
-from ...types import CtxtWindowExceeded
-from ...utils import gen_enumerated_code_str, get_current_git_commit
+from ..types import CtxtWindowExceeded
+from ..utils import gen_enumerated_code_str, get_current_git_commit
 
 from typing import TYPE_CHECKING
 

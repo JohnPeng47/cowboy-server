@@ -10,7 +10,7 @@ from typing import Tuple, Optional, List, TYPE_CHECKING
 from src.runner.service import run_test, RunServiceArgs
 
 if TYPE_CHECKING:
-    from src.test_gen.types import StratResult
+    from test_gen.augment_test.types import StratResult
     from cowboy_lib.test_modules import TestModule
     from cowboy_lib.repo.source_repo import SourceRepo
 

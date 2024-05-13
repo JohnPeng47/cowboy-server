@@ -1,4 +1,4 @@
-from ...base_strat import BaseStrategy
+from ..base_strat import BaseStrategy
 
 from dataclasses import dataclass
 from typing import List, TYPE_CHECKING

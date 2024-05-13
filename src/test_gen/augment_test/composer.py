@@ -1,6 +1,6 @@
 from .base_strat import BaseStrategy
 
-from cowboy_lib.llm.invoke_llm import invoke_llm_async
+from src.llm.invoke_llm import invoke_llm_async
 
 from .base_strat import TestCaseInput
 from .types import StratResult
@@ -17,7 +17,7 @@ from src.longterm_tasks.evaluators import EvaluatorType, AUGMENT_EVALS
 from cowboy_lib.repo.source_repo import SourceRepo
 from cowboy_lib.repo.source_file import Function
 from cowboy_lib.coverage import TestCoverage, TestError
-from cowboy_lib.llm.models import OpenAIModel, ModelArguments
+from src.llm.models import OpenAIModel, ModelArguments
 
 from src.runner.service import run_test, RunServiceArgs
 from src.exceptions import CowboyRunTimeException

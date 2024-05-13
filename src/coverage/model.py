@@ -22,7 +22,7 @@ class CoverageModel(Base):
     covered = Column(Integer, nullable=False)
 
     # Relationships can be added here if needed, for example:
-    test_coverage_id = Column(Integer, ForeignKey('test_coverage.id'))
+    test_coverage_id = Column(Integer, ForeignKey("test_coverage.id"))
 
     # TODO: move this into service
     # def __init__(
