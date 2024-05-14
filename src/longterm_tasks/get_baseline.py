@@ -3,7 +3,6 @@ from cowboy_lib.coverage import TestCoverage, CoverageResult
 from cowboy_lib.test_modules.test_module import TestModule, TargetCode
 from cowboy_lib.utils import testfiles_in_coverage
 
-from src.repo_ctxt import RepoTestContext
 from src.task_queue.core import TaskQueue
 
 from src.runner.service import run_test, RunServiceArgs
@@ -22,7 +21,7 @@ class TestInCoverageException(Exception):
 
 
 async def get_tm_target_coverage(
-    repo_ctxt: RepoTestContext,
+    src_repo: SourceRepo,
     tm: TestModule,
     base_cov: CoverageResult,
     run_args: RunServiceArgs,
@@ -36,7 +35,7 @@ async def get_tm_target_coverage(
     The diff measures how well we are able to supplant the coverage of the deleted methods
     """
 
-    if testfiles_in_coverage(base_cov.coverage, repo_ctxt.src_repo):
+    if testfiles_in_coverage(base_cov.coverage, src_repo):
         raise TestInCoverageException
 
     # First loop we find the total coverage of each test by itself
@@ -79,15 +78,14 @@ async def get_tm_target_coverage(
                 )
 
             # dont think we actually need this here .. confirm
-            repo_ctxt.src_repo = SourceRepo(repo_ctxt.src_repo.repo_path)
-            tm.test_file = repo_ctxt.src_repo.get_file(tm.test_file.path)
+            tm.test_file = src_repo.get_file(tm.test_file.path)
             single_covs.extend(single_diff)
 
         # re-init the chunks according to the aggregated individual test coverages
         tm.set_chunks(
             single_covs,
-            source_repo=repo_ctxt.src_repo,
-            base_path=repo_ctxt.repo_path,
+            source_repo=src_repo,
+            base_path=src_repo.repo_path,
         )
 
         print(f"Chunks: \n{tm.print_chunks()}")

@@ -104,7 +104,7 @@ def create_or_update(
     *, db_session, curr_user: CowboyUser, repo_in: RepoConfigCreate
 ) -> RepoConfig:
     """Create or update a repo"""
-
+    print("Creating: ", repo_in)
     repo_conf = get(
         db_session=db_session, curr_user=curr_user, repo_name=repo_in.repo_name
     )

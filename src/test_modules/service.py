@@ -62,12 +62,13 @@ def create_target_code(
 ):
     """Create a target code chunk for a test module."""
     target_code = TargetCodeModel(
-        test_module_id=tm_model.id,
+        lines=chunk.lines,
         start=chunk.range[0],
         end=chunk.range[1],
-        filepath=str(chunk.filepath),
+        filepath=chunk.filepath,
         func_scope=func_scope,
         class_scope=class_scope,
+        test_module_id=tm_model.id,
     )
 
     db_session.add(target_code)
@@ -137,7 +138,6 @@ async def get_tgt_coverage(
     tm_names: List[str]
 ):
     """Generates a target coverage for a test module."""
-
     src_repo = SourceRepo(Path(repo_config.source_folder))
     run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
 
@@ -148,6 +148,8 @@ async def get_tgt_coverage(
 
     total_tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
     unbased_tms = [tm for tm in total_tms if not tm.chunks]
+
+    print(unbased_tms)
 
     # zip tm_model because we need to update it later in the code
     for tm_model, tm in zip(tm_models, unbased_tms):

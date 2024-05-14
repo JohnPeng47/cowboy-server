@@ -41,15 +41,30 @@ class TargetCodeModel(Base):
         uselist=False,
         single_parent=True,
     )
-
     test_module_id = Column(Integer, ForeignKey("test_modules.id", ondelete="CASCADE"))
 
-    def serialize(self, src_repo: SourceRepo):
-        print("Serializing code ..")
+    def __init__(
+        self,
+        start,
+        end,
+        lines,
+        filepath,
+        func_scope,
+        class_scope,
+        test_module_id,
+    ):
+        self.start = start
+        self.end = end
+        self.lines = "\n".join(lines)
+        self.filepath = str(filepath)
+        self.func_scope = func_scope
+        self.class_scope = class_scope
+        self.test_module_id = test_module_id
 
+    def serialize(self, src_repo: SourceRepo):
         return TargetCode(
             range=(self.start, self.end),
-            lines=self.lines,
+            lines=self.lines.split("\n"),
             filepath=Path(self.filepath),
             func_scope=(
                 self.func_scope.to_astnode(src_repo) if self.func_scope else None

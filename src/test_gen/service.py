@@ -35,7 +35,8 @@ async def augment_test(
     """
     repo = get_repo(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
     src_repo = SourceRepo(Path(repo.source_folder))
-    git_repo = GitRepo(Path(repo.source_folder))
+    git_repo = GitRepo(Path(repo.source_folder), remote=repo.remote, main=repo.main)
+
     tm_model = get_tm_by_name(db_session=db_session, repo_id=repo.id, tm_name=tm_name)
     tm = tm_model.serialize(src_repo)
     run_args = RunServiceArgs(
