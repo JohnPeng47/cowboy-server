@@ -7,9 +7,8 @@ from pydantic.error_wrappers import ValidationError
 
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-from starlette.routing import compile_path
 
-from starlette.responses import Response, StreamingResponse, FileResponse
+from starlette.responses import Response, StreamingResponse
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,6 +29,9 @@ from src.test_gen.views import test_gen_router
 from src.exceptions import CowboyRunTimeException
 
 from src.database.core import engine, sessionmaker
+
+import uuid
+
 
 # import logfire
 
@@ -106,76 +108,6 @@ def get_request_id() -> Optional[str]:
 NO_DB_PATHS = ["/task/get"]
 
 
-@app.middleware("http")
-def db_session_middleware(request: Request, call_next):
-    # request_id = str(uuid1())
-
-    # we create a per-request id such that we can ensure that our session is scoped for a particular request.
-    # see: https://github.com/tiangolo/fastapi/issues/726
-    # ctx_token = _request_id_ctx_var.set(request_id)
-    # path_params = get_path_params_from_request(request)
-
-    # # if this call is organization specific set the correct search path
-    # organization_slug = path_params.get("organization", "default")
-    # request.state.organization = organization_slug
-
-    # # Find out more about
-    # schema = f"dispatch_organization_{organization_slug}"
-    # # validate slug exists
-    # schema_names = inspect(engine).get_schema_names()
-    # if schema in schema_names:
-    #     # add correct schema mapping depending on the request
-    #     schema_engine = engine.execution_options(
-    #         schema_translate_map={
-    #             None: schema,
-    #         }
-    #     )
-    # else:
-    #     return JSONResponse(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         content={"detail": [{"msg": f"Unknown database schema name: {schema}"}]},
-    #     )
-
-    try:
-        # can't do this because every request needs access to user auth which reuqires db
-        # if request.url.path in NO_DB_PATHS:
-        #     print("Skipping for path: ", request.url.path)
-        #     return call_next(request)
-
-        # session = scoped_session(sessionmaker(), scopefunc=get_request_id)
-        session = sessionmaker(bind=engine)
-        request.state.db = session()
-        response = call_next(request)
-    except Exception as e:
-        raise e from None
-    finally:
-        db = getattr(request.state, "db", None)
-        if db:
-            db.close()
-
-    # _request_id_ctx_var.reset(ctx_token)
-    return response
-
-
-@app.middleware("http")
-def add_task_queue(request: Request, call_next):
-    request.state.task_queue = TaskQueue()
-    response = call_next(request)
-
-    return response
-
-
-# STATIC_DIR = "build"
-# app.mount("/static", StaticFiles(directory=os.path.join(STATIC_DIR, "static")))
-
-
-# @app.get("/")
-# def read_root():
-#     with open(os.path.join(STATIC_DIR, "index.html"), "r") as f:
-#         content = f.read()
-#         return HTMLResponse(content=content)
-
-
 class ExceptionMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
@@ -223,7 +155,103 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class DBMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # request_id = str(uuid1())
+
+        # we create a per-request id such that we can ensure that our session is scoped for a particular request.
+        # see: https://github.com/tiangolo/fastapi/issues/726
+        # ctx_token = _request_id_ctx_var.set(request_id)
+        # path_params = get_path_params_from_request(request)
+
+        # # if this call is organization specific set the correct search path
+        # organization_slug = path_params.get("organization", "default")
+        # request.state.organization = organization_slug
+
+        # # Find out more about
+        # schema = f"dispatch_organization_{organization_slug}"
+        # # validate slug exists
+        # schema_names = inspect(engine).get_schema_names()
+        # if schema in schema_names:
+        #     # add correct schema mapping depending on the request
+        #     schema_engine = engine.execution_options(
+        #         schema_translate_map={
+        #             None: schema,
+        #         }
+        #     )
+        # else:
+        #     return JSONResponse(
+        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #         content={"detail": [{"msg": f"Unknown database schema name: {schema}"}]},
+        #     )
+
+        try:
+            # can't do this because every request needs access to user auth which reuqires db
+            # if request.url.path in NO_DB_PATHS:
+            #     print("Skipping for path: ", request.url.path)
+            #     return call_next(request)
+
+            # session = scoped_session(sessionmaker(), scopefunc=get_request_id)
+            session = sessionmaker(bind=engine)
+            request.state.db = session()
+            request.state.db.id = str(uuid.uuid4())
+            request.state.hello = "world"
+            response = await call_next(request)
+        except Exception as e:
+            raise e from None
+        finally:
+            db = getattr(request.state, "db", None)
+            if db:
+                db.close()
+
+        # _request_id_ctx_var.reset(ctx_token)
+        return response
+
+
+class AddTaskQueueMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        request.state.task_queue = TaskQueue()
+        response = await call_next(request)
+        return response
+
+
+token_registry = []
+
+
+# TODO: kind of a hack but we need to store auth tokens for users who
+# have authenticated first via
+class AddTaskAuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        print(request.state.hello)
+
+        # close the current db session if token found in registry
+        task_auth_token = request.headers.get("x-task-auth")
+        if task_auth_token in token_registry:
+            print("Closing db: ", request.state.db.id)
+            request.state.db.close()
+
+        response = await call_next(request)
+        return response
+
+
+# STATIC_DIR = "build"
+# app.mount("/static", StaticFiles(directory=os.path.join(STATIC_DIR, "static")))
+
+
+# @app.get("/")
+# def read_root():
+#     with open(os.path.join(STATIC_DIR, "index.html"), "r") as f:
+#         content = f.read()
+#         return HTMLResponse(content=content)
+
+app.add_middleware(AddTaskAuthMiddleware)
 app.add_middleware(ExceptionMiddleware)
+app.add_middleware(DBMiddleware)
+app.add_middleware(AddTaskQueueMiddleware)
 
 app.include_router(auth_router)
 app.include_router(repo_router)

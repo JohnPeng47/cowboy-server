@@ -118,3 +118,13 @@ class TaskQueue:
 
 def get_queue(request: Request):
     return request.state.task_queue
+
+
+def get_token_registry(request: Request):
+    from main import token_registry
+
+    return token_registry
+
+
+def get_token(request: Request):
+    return request.headers.get("x-task-auth", "")

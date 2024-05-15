@@ -30,25 +30,14 @@ class BasePermission(ABC):
 
     """
 
-    org_error_msg = [
-        {"msg": "Organization not found. Please, contact your Dispatch admin."}
-    ]
-    org_error_code = HTTP_404_NOT_FOUND
-
-    user_error_msg = [{"msg": "User not found. Please, contact your Dispatch admin"}]
+    user_error_msg = [{"msg": "User not found"}]
     user_error_code = HTTP_404_NOT_FOUND
-
-    user_role_error_msg = [
-        {
-            "msg": "Your user doesn't have permissions to create, update, or delete this resource. Please, contact your Dispatch admin."
-        }
-    ]
-    user_role_error_code = HTTP_403_FORBIDDEN
 
     role = None
 
-    @abstractmethod
-    def has_required_permissions(self, request: Request) -> bool: ...
+    # Currently not doing authz
+    # @abstractmethod
+    # def has_required_permissions(self, request: Request) -> bool: ...
 
     def __init__(self, request: Request):
         user = get_current_user(request=request)
@@ -57,10 +46,10 @@ class BasePermission(ABC):
                 status_code=self.user_error_code, detail=self.user_error_msg
             )
 
-        if not self.has_required_permissions(request):
-            raise HTTPException(
-                status_code=self.user_role_error_code, detail=self.user_role_error_msg
-            )
+        # if not self.has_required_permissions(request):
+        #     raise HTTPException(
+        #         status_code=self.user_role_error_code, detail=self.user_role_error_msg
+        #     )
 
 
 class PermissionsDependency(object):
