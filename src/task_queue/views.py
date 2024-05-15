@@ -2,7 +2,6 @@ from cowboy_lib.api.runner.shared import Task
 
 from .service import list_tasks, dequeue_task, complete_task
 from .models import CompleteTaskRequest
-from .permissions import TaskGetPermissions
 from .core import TaskQueue, get_queue, get_token_registry, get_token
 
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -10,7 +9,6 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from src.database.core import get_db
 from src.auth.service import get_current_user
 from src.auth.models import CowboyUser
-from src.auth.permissions import PermissionsDependency
 
 from typing import List
 
@@ -26,32 +24,41 @@ def list(
     return tasks
 
 
+# incredibly hacky, basically, to prevent db connections from being used up
+# we exclude db connections for this endpoint, we do the following:
+# 1. First request actually does get a db sess, which we use to auth the user
+# 2. Grab user id and add it into a in-mem token_registry list
+# 3. Return user id as "set-x-task-auth" header
+# 4. When the client puts user id into x-task-auth header
+# 5. Our DBMiddleware will check the header, and if token is in registry, will not
+# add a db session to the request
 @task_queue_router.get("/task/get", response_model=List[Task])
 def get(
     response: Response,
+    # TODO: ideally we probably want to separate the deps that require
+    # db vs. the ones that dont
     task_queue: TaskQueue = Depends(get_queue),
     curr_user: CowboyUser = Depends(get_current_user),
     token_registry: List = Depends(get_token_registry),
     token: str = Depends(get_token),
-    db=Depends(get_db),
-    perms: str = Depends(PermissionsDependency([TaskGetPermissions])),
+    # perms: str = Depends(PermissionsDependency([TaskGetPermissions])),
 ):
-    print("Token", token, "DB: ", db.is_active, db.id)
-
     # at this point we have passed db user auth; test
     # catches if user sets random token
     if token and token not in token_registry:
         raise HTTPException(
-            status_code=401, detail="Token not in registry, cannot proceed"
+            status_code=401,
+            detail="Token not in registry, cannot proceed. \
+            Are you sure you are logged in on the client?",
         )
     # issue token if it does not exist
     elif not token:
-        print("setting token")
-        token = "1234hello"
-        response.headers["set-x-task-auth"] = token
-        token_registry.append(token)
+        response.headers["set-x-task-auth"] = str(curr_user.id)
+        token_registry.append(str(curr_user.id))
 
-    tasks = dequeue_task(task_queue=task_queue, user_id=curr_user.id)
+    tasks = dequeue_task(
+        task_queue=task_queue, user_id=curr_user.id if curr_user else token
+    )
     return tasks
 
 

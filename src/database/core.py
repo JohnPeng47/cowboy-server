@@ -9,13 +9,14 @@ from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import object_session, sessionmaker, Session
 from sqlalchemy.sql.expression import true
+from sqlalchemy.pool import NullPool
 from starlette.requests import Request
 
 import src.config as config
 
 engine = create_engine(
     config.SQLALCHEMY_DATABASE_URI,
-    pool_size=config.SQLALCHEMY_ENGINE_POOL_SIZE,
+    # pool_size=config.SQLALCHEMY_ENGINE_POOL_SIZE,
     # max_overflow=config.DATABASE_ENGINE_MAX_OVERFLOW,
     # pool_pre_ping=config.DATABASE_ENGINE_POOL_PING,
 )
@@ -101,8 +102,15 @@ class CustomBase:
 Base = declarative_base(cls=CustomBase)
 
 
+class DBNotSetException(Exception):
+    pass
+
+
 def get_db(request: Request):
-    return request.state.db
+    try:
+        return request.state.db
+    except AttributeError:
+        raise DBNotSetException("Database not set on request.")
 
 
 # Triggers initial response field validation error

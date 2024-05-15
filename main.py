@@ -191,11 +191,14 @@ class DBMiddleware(BaseHTTPMiddleware):
             #     print("Skipping for path: ", request.url.path)
             #     return call_next(request)
 
-            # session = scoped_session(sessionmaker(), scopefunc=get_request_id)
-            session = sessionmaker(bind=engine)
-            request.state.db = session()
-            request.state.db.id = str(uuid.uuid4())
-            request.state.hello = "world"
+            task_auth_token = request.headers.get("x-task-auth")
+            if not task_auth_token in token_registry:
+
+                # session = scoped_session(sessionmaker(), scopefunc=get_request_id)
+                session = sessionmaker(bind=engine)
+                request.state.db = session()
+                request.state.db.id = str(uuid.uuid4())
+
             response = await call_next(request)
         except Exception as e:
             raise e from None
@@ -226,8 +229,6 @@ class AddTaskAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        print(request.state.hello)
-
         # close the current db session if token found in registry
         task_auth_token = request.headers.get("x-task-auth")
         if task_auth_token in token_registry:
@@ -248,7 +249,7 @@ class AddTaskAuthMiddleware(BaseHTTPMiddleware):
 #         content = f.read()
 #         return HTMLResponse(content=content)
 
-app.add_middleware(AddTaskAuthMiddleware)
+# app.add_middleware(AddTaskAuthMiddleware)
 app.add_middleware(ExceptionMiddleware)
 app.add_middleware(DBMiddleware)
 app.add_middleware(AddTaskQueueMiddleware)
