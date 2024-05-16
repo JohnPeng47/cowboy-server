@@ -34,7 +34,7 @@ class AugmentTestStrategy(BaseStrategy):
         # "cast" TestCaseInput to TestModule
         self.test_module: "TestModule" = self.test_input
 
-        self.test_file = self.src_repo.get_file(
+        self.test_file = self.src_repo.find_file(
             self.test_module.test_file.path,
         )
         # this is weird .. we should just make it an arg on BaseStrategy

@@ -37,7 +37,7 @@ class AugmentClassWithCtxtStrat(AugmentTestStrategy):
 
         for fp in self.test_module.targeted_files():
             print("Inserting file context: ", fp)
-            file = self.src_repo.get_file(fp)
+            file = self.src_repo.find_file(fp)
             code_fit = prompt.insert_line("file_contents", file.to_code())
             if not code_fit:
                 logger.warn(f"File {fp} too large to fit in prompt")

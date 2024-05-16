@@ -35,7 +35,6 @@ class BasePermission(ABC):
 
     role = None
 
-    # Currently not doing authz
     # @abstractmethod
     # def has_required_permissions(self, request: Request) -> bool: ...
 

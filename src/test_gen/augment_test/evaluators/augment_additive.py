@@ -82,7 +82,7 @@ class AugmentAdditiveEvaluator(Evaluator):
                         continue
 
                     # TODO: make sure that this works for filename TMs as well
-                    og_testfile = self.src_repo.get_file(tm.path).clone()
+                    og_testfile = self.src_repo.find_file(tm.path).clone()
                     og_testfile.append(
                         func.to_code(), class_name=func.scope.name if func.scope else ""
                     )

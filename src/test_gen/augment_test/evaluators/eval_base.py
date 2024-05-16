@@ -70,7 +70,7 @@ class Evaluator(ABC):
         Get newly generated functions
         """
         new_testfile = TestFile(lines=new_testfile.split("\n"), path=str(test_fp))
-        old_testfile: TestFile = self.src_repo.get_file(test_fp)
+        old_testfile: TestFile = self.src_repo.find_file(test_fp)
         new_funcs = old_testfile.new_test_funcs(new_testfile)
 
         return new_funcs

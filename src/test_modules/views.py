@@ -8,7 +8,7 @@ from src.repo.service import get as get_repoconf
 
 from .models import GetTargetCovRequest
 
-from src.tasks.get_tgt_coverage import get_tgt_coverage
+from src.tasks.create_tgt_coverage import create_tgt_coverage
 
 import asyncio
 
@@ -40,7 +40,7 @@ async def get_tm_target_coverage(
 
     # NOTE: don't need to await here because we dont need to return the result right away
     asyncio.create_task(
-        get_tgt_coverage(
+        create_tgt_coverage(
             db_session=db_session,
             task_queue=task_queue,
             curr_user=current_user,

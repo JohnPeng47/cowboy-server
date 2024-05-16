@@ -9,6 +9,7 @@ from src.repo.models import RepoConfig
 from src.auth.models import CowboyUser
 from src.database.core import Session
 from src.test_modules.models import TestModuleModel
+from src.target_code.models import TargetCodeModel
 
 from src.runner.service import run_test, RunServiceArgs
 from src.ast.service import create_node, create_or_update_node
@@ -74,7 +75,7 @@ def create_tgt_code_models(
 # have not been changed ... but need to be aware of repo changes and how this affects
 # nodes
 # should probably rename this, way too inncuous for important function
-async def get_tgt_coverage(
+async def create_tgt_coverage(
     *,
     db_session: Session,
     task_queue: TaskQueue,
@@ -108,9 +109,9 @@ async def get_tgt_coverage(
         tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
 
         # store chunks and their nodes
-        target_code_models = create_tgt_code_models(
+        tgt_code_chunks = create_tgt_code_models(
             targets, db_session, repo_config.id, tm_model
         )
 
-        tm_model.target_chunks = target_code_models
+        tm_model.target_chunks = tgt_code_chunks
         update_tm(db_session=db_session, tm_model=tm_model)

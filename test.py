@@ -3,7 +3,7 @@
 # sys.path.append("/home/ubuntu/cowboy-server-good")
 
 from cowboy_lib.repo import SourceRepo
-from src.test_modules.service import get_tm_by_name
+from src.test_modules.service import get_tm_by_name, get_all_tms
 
 from src.database.core import engine
 
@@ -16,7 +16,18 @@ src_repo = SourceRepo(Path(repo_path))
 Session = sessionmaker(bind=engine)
 db_session = Session()
 
-tm_model = get_tm_by_name(db_session=db_session, repo_id=17, tm_name="TestWoodpecker")
-tm = tm_model.serialize(src_repo)
 
-print(tm.print_chunks())
+# tm_model = get_tm_by_name(db_session=db_session, repo_id=17, tm_name="TestWoodpecker")
+# tm = tm_model.serialize(src_repo)
+
+tm_models = get_all_tms(db_session=db_session, repo_id=17)
+for tm in tm_models:
+    if tm.name not in [
+        "TestWoodpecker",
+        "TestCodeBuild",
+        "TestCircleCI",
+        "TestDroneCI",
+    ]:
+        continue
+
+    print(tm.name, tm.agg_score(src_repo))

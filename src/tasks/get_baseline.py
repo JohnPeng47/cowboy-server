@@ -78,7 +78,7 @@ async def get_tm_target_coverage(
                 )
 
             # dont think we actually need this here .. confirm
-            tm.test_file = src_repo.get_file(tm.test_file.path)
+            tm.test_file = src_repo.find_file(tm.test_file.path)
             single_covs.extend(single_diff)
 
         # re-init the chunks according to the aggregated individual test coverages

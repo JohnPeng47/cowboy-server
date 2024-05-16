@@ -61,10 +61,13 @@ class TargetCodeModel(Base):
         self.test_module_id = test_module_id
         self.coverage_id = coverage_id
 
+    def get_lines(self) -> List[str]:
+        return self.lines.split("\n")
+
     def serialize(self, src_repo: SourceRepo):
         return TargetCode(
             range=(self.start, self.end),
-            lines=self.lines.split("\n"),
+            lines=self.get_lines(),
             filepath=Path(self.filepath),
             func_scope=(
                 self.func_scope.to_astnode(src_repo) if self.func_scope else None
