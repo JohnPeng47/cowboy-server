@@ -21,37 +21,37 @@ from pathlib import Path
 from typing import List
 
 
-def get_coverage_stats(tm: TestModule, cov_list: List[CoverageModel]):
-    """
-    Calculate coverage stats for
-    """
-    for cov in cov_list:
-        # this is
-        total_covered = cov.covered
-        tgt_covered = 0
-        missing = cov.misses
+# def get_coverage_stats(tm: TestModule, cov_list: List[CoverageModel]):
+#     """
+#     Calculate coverage stats for
+#     """
+#     for cov in cov_list:
+#         # this is
+#         total_covered = cov.covered
+#         tgt_covered = 0
+#         missing = cov.misses
 
-        for chunk in tm.chunks:
-            if Path(chunk.filepath) == cov.filename:
-                tgt_covered += len(chunk.lines)
+#         for chunk in tm.chunks:
+#             if Path(chunk.filepath) == cov.filename:
+#                 tgt_covered += len(chunk.lines)
 
-        score = tgt_covered + missing / total_covered if total_covered else 0
-        if score > 1:
-            # yeah ...
-            wtf += 1
+#         score = tgt_covered + missing / total_covered if total_covered else 0
+#         if score > 1:
+#             # yeah ...
+#             wtf += 1
 
-        recommended.append(
-            {
-                "filename": cov.filename,
-                "covered_pytest": covered,
-                "missing": missing,
-                "covered_baseline": actual,
-                # this actually gives us a perfectly normalized score, since
-                # actual < covered
-                "score": score,
-                "nodes": nodes,
-            }
-        )
+#         recommended.append(
+#             {
+#                 "filename": cov.filename,
+#                 "covered_pytest": covered,
+#                 "missing": missing,
+#                 "covered_baseline": actual,
+#                 # this actually gives us a perfectly normalized score, since
+#                 # actual < covered
+#                 "score": score,
+#                 "nodes": nodes,
+#             }
+#         )
 
 
 # TODO: get rid of this
@@ -63,9 +63,7 @@ def create_all_tms(*, db_session: Session, repo_conf: RepoConfig, src_repo: Sour
         create_tm(db_session=db_session, repo_id=repo_conf.id, tm=tm)
 
 
-def create_tm(
-    *, db_session: Session, repo_id: str, tm: TestModule, cov_list: List[CoverageModel]
-):
+def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
     """Create a test module and the nodes"""
 
     tm_model = TestModuleModel(

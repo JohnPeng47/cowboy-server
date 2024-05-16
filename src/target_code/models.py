@@ -73,3 +73,8 @@ class TargetCodeModel(Base):
                 self.class_scope.to_astnode(src_repo) if self.class_scope else None
             ),
         )
+
+
+class TgtCodeDeleteRequest(BaseModel):
+    repo_name: str
+    tm_name: str

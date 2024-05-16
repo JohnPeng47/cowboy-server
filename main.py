@@ -25,6 +25,7 @@ from src.repo.views import repo_router
 from src.test_modules.views import tm_router
 from src.queue.views import task_queue_router
 from src.test_gen.views import test_gen_router
+from src.target_code.views import tgtcode_router
 
 from src.exceptions import CowboyRunTimeException
 
@@ -260,7 +261,7 @@ app.include_router(repo_router)
 app.include_router(tm_router)
 app.include_router(task_queue_router)
 app.include_router(test_gen_router)
-
+app.include_router(tgtcode_router)
 
 # logfire.configure(console=False)
 # logfire.instrument_fastapi(app)

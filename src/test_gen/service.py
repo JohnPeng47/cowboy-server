@@ -8,7 +8,7 @@ from src.auth.models import CowboyUser
 from src.repo.service import get as get_repo
 from src.test_modules.service import get_tm_by_name
 from src.runner.service import RunServiceArgs
-from src.task_queue.core import TaskQueue
+from src.queue.core import TaskQueue
 
 from src.runner.service import run_test
 

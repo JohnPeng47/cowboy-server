@@ -2,8 +2,8 @@ from cowboy_lib.repo.repository import PatchFile
 from cowboy_lib.coverage import CoverageResult
 from cowboy_lib.ast.code import Function
 
-from src.task_queue.service import enqueue_task_and_wait
-from src.task_queue.core import TaskQueue
+from src.queue.service import enqueue_task_and_wait
+from src.queue.core import TaskQueue
 
 from .shared.models import json_to_coverage_result, RunTestTask
 

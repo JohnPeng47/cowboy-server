@@ -15,6 +15,8 @@ def create_target_code(
 ):
     """Create a target code chunk for a test module."""
 
+    print("Creating tgtcode: ", tm_model.id, tm_model.name)
+
     target_code = TargetCodeModel(
         lines=chunk.lines,
         start=chunk.range[0],
@@ -30,3 +32,17 @@ def create_target_code(
     db_session.commit()
 
     return target_code
+
+
+def delete_target_code(db_session: Session, tm_id: int):
+    """Delete all target code for a test module."""
+
+    deleted = (
+        db_session.query(TargetCodeModel)
+        .filter(TargetCodeModel.test_module_id == tm_id)
+        .delete()
+    )
+
+    db_session.commit()
+
+    return deleted
