@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, BackgroundTasks
 
 from src.database.core import Session, get_db
 from src.auth.service import get_current_user, CowboyUser
-
-from src.task_queue.core import TaskQueue, get_queue
+from src.queue.core import TaskQueue, get_queue
 from src.models import HTTPSuccess
 from src.repo.service import get as get_repoconf
 
 from .models import GetTargetCovRequest
-from .service import get_tgt_coverage
+
+from src.tasks.get_tgt_coverage import get_tgt_coverage
 
 import asyncio
 

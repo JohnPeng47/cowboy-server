@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from src.database.core import get_db
 from src.models import HTTPSuccess
 from src.auth.service import get_current_user
-from src.task_queue.core import get_queue
+from src.queue.core import get_queue
 
 from .models import AugmentTestRequest, AugmentTestResponse
 from .service import augment_test

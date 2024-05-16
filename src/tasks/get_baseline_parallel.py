@@ -3,12 +3,14 @@ from cowboy_lib.coverage import TestCoverage, CoverageResult
 from cowboy_lib.test_modules.test_module import TestModule, TargetCode
 from cowboy_lib.utils import testfiles_in_coverage
 
-from src.task_queue.core import TaskQueue
+from src.queue.core import TaskQueue
 
 from src.runner.service import run_test, RunServiceArgs
 
 from logging import getLogger
 from typing import List, Tuple
+
+import asyncio
 
 
 logger = getLogger(__name__)
@@ -52,38 +54,40 @@ async def get_tm_target_coverage(
     total_cov_diff = module_diff.total_cov.covered
     if total_cov_diff > 0:
         # part 2:
-        single_covs = []
+        # holds the coverage diff of individual tests after they have
+        # been selectively turned off
+        chg_cov = []
+        coroutines = []
+
         for test in tm.tests:
             print("Running test ... ", test.name)
-            # tm.test_file.delete(test.name, node_type=test.type)
-            # deleted_file = PatchFile(tm.test_file.path, tm.test_file.to_code())
-            # with PatchFileContext(repo_ctxt.git_repo, deleted_file):
-
-            # exclude_test = get_exclude_path(test, tm.test_file.path)
-            single_cov = await run_test(
+            task = run_test(
                 run_args,
                 exclude_tests=[(test, tm.test_file.path)],
                 include_tests=only_module,
             )
-            print("Test results: ", single_cov.coverage.total_cov.covered)
+            coroutines.append(task)
 
+        cov_res = await asyncio.gather(*[t for t in coroutines])
+
+        for test, cov_res in zip(tm.tests, cov_res):
+            print("Test results: ", cov_res.coverage.total_cov.covered)
             print(
-                f"Module cov: {module_cov.coverage.total_cov.covered}, Single cov: {single_cov.coverage.total_cov.covered}"
+                f"Module cov: {module_cov.coverage.total_cov.covered}, Single cov: {cov_res.coverage.total_cov.covered}"
             )
 
-            single_diff = (module_cov.coverage - single_cov.coverage).cov_list
+            single_diff = (module_cov.coverage - cov_res.coverage).cov_list
             for c in single_diff:
                 logger.info(
                     f"Changed coverage from deleting {test.name}:\n {c.__str__()}"
                 )
 
             # dont think we actually need this here .. confirm
-            tm.test_file = src_repo.get_file(tm.test_file.path)
-            single_covs.extend(single_diff)
+            chg_cov.extend(single_diff)
 
         # re-init the chunks according to the aggregated individual test coverages
         tm.set_chunks(
-            single_covs,
+            chg_cov,
             source_repo=src_repo,
             base_path=src_repo.repo_path,
         )

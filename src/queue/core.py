@@ -127,4 +127,8 @@ def get_token_registry(request: Request):
 
 
 def get_token(request: Request):
-    return request.headers.get("x-task-auth", "")
+    """
+    Returns the user id
+    """
+    NULL_USER_ID = 0
+    return int(request.headers.get("x-task-auth", NULL_USER_ID))

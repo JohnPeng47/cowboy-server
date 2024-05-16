@@ -10,7 +10,9 @@ from src.auth.models import CowboyUser
 from src.repo.models import RepoConfig
 
 from src.ast.models import NodeModel
-from src.test_modules.models import TestModuleModel, TargetCodeModel
+from src.test_modules.models import TestModuleModel
+from src.target_code.models import TargetCodeModel
+from src.coverage.models import CoverageModel
 
 
 # this is the Alembic Config object, which provides

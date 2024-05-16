@@ -9,7 +9,7 @@ from cowboy_lib.api.runner.shared import RunTestTaskServer
 from src.models import CowboyBase
 
 
-from src.task_queue.models import Task
+from src.queue.models import Task
 
 
 class RunTestTask(RunTestTaskServer, CowboyBase):

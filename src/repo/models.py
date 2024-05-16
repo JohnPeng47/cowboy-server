@@ -36,9 +36,9 @@ class RepoConfig(Base):
     nodes = relationship(
         "NodeModel", backref="repo_config", cascade="all, delete-orphan"
     )
-    # base_cov = relationship(
-    #     "TestCoverageModel", backref="repo_config", cascade="all, delete-orphan"
-    # )
+    cov_list = relationship(
+        "CoverageModel", backref="repo_config", cascade="all, delete-orphan"
+    )
 
     def __init__(
         self,

@@ -40,24 +40,24 @@ def get(
     task_queue: TaskQueue = Depends(get_queue),
     curr_user: CowboyUser = Depends(get_current_user),
     token_registry: List = Depends(get_token_registry),
-    token: str = Depends(get_token),
+    user_token: str = Depends(get_token),
     # perms: str = Depends(PermissionsDependency([TaskGetPermissions])),
 ):
     # at this point we have passed db user auth; test
     # catches if user sets random token
-    if token and token not in token_registry:
+    if user_token and user_token not in token_registry:
         raise HTTPException(
             status_code=401,
             detail="Token not in registry, cannot proceed. \
             Are you sure you are logged in on the client?",
         )
     # issue token if it does not exist
-    elif not token:
+    elif not user_token:
         response.headers["set-x-task-auth"] = str(curr_user.id)
-        token_registry.append(str(curr_user.id))
+        token_registry.append(curr_user.id)
 
     tasks = dequeue_task(
-        task_queue=task_queue, user_id=curr_user.id if curr_user else token
+        task_queue=task_queue, user_id=curr_user.id if curr_user else user_token
     )
     return tasks
 

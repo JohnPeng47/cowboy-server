@@ -29,7 +29,6 @@ def register_user(
 ):
     user = get_by_email(db_session=db_session, email=user_in.email)
     if user:
-        # return UserExistsError()
         raise ValidationError(
             [
                 ErrorWrapper(

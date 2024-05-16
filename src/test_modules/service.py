@@ -2,21 +2,56 @@ from cowboy_lib.repo import SourceRepo
 
 # from .models import TestModule
 # # Long term tasks represent tasks that we potentially want to offload to celery
-from src.longterm_tasks.get_baseline_parallel import get_tm_target_coverage
-from src.task_queue.core import TaskQueue
+from src.tasks.get_baseline_parallel import get_tm_target_coverage
+from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.auth.models import CowboyUser
 from src.database.core import Session
+
 from src.runner.service import run_test, RunServiceArgs
 from src.ast.service import create_node, create_or_update_node
+from src.target_code.service import create_target_code
+from src.coverage.service import get_cov_by_filename, create_or_update_cov
+from src.coverage.models import CoverageModel
 
-from src.ast.models import NodeModel
-
-from .models import TestModuleModel, TestModule, TargetCode, TargetCodeModel
+from .models import TestModuleModel, TestModule
 from .iter_tms import iter_test_modules
 
 from pathlib import Path
 from typing import List
+
+
+def get_coverage_stats(tm: TestModule, cov_list: List[CoverageModel]):
+    """
+    Calculate coverage stats for
+    """
+    for cov in cov_list:
+        # this is
+        total_covered = cov.covered
+        tgt_covered = 0
+        missing = cov.misses
+
+        for chunk in tm.chunks:
+            if Path(chunk.filepath) == cov.filename:
+                tgt_covered += len(chunk.lines)
+
+        score = tgt_covered + missing / total_covered if total_covered else 0
+        if score > 1:
+            # yeah ...
+            wtf += 1
+
+        recommended.append(
+            {
+                "filename": cov.filename,
+                "covered_pytest": covered,
+                "missing": missing,
+                "covered_baseline": actual,
+                # this actually gives us a perfectly normalized score, since
+                # actual < covered
+                "score": score,
+                "nodes": nodes,
+            }
+        )
 
 
 # TODO: get rid of this
@@ -28,8 +63,11 @@ def create_all_tms(*, db_session: Session, repo_conf: RepoConfig, src_repo: Sour
         create_tm(db_session=db_session, repo_id=repo_conf.id, tm=tm)
 
 
-def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
+def create_tm(
+    *, db_session: Session, repo_id: str, tm: TestModule, cov_list: List[CoverageModel]
+):
     """Create a test module and the nodes"""
+
     tm_model = TestModuleModel(
         name=tm.name,
         testfilepath=str(tm.test_file.path),
@@ -51,30 +89,6 @@ def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
         )
 
     return tm_model
-
-
-def create_target_code(
-    db_session: Session,
-    tm_model: TestModuleModel,
-    chunk: TargetCode,
-    func_scope: NodeModel = None,
-    class_scope: NodeModel = None,
-):
-    """Create a target code chunk for a test module."""
-    target_code = TargetCodeModel(
-        lines=chunk.lines,
-        start=chunk.range[0],
-        end=chunk.range[1],
-        filepath=chunk.filepath,
-        func_scope=func_scope,
-        class_scope=class_scope,
-        test_module_id=tm_model.id,
-    )
-
-    db_session.add(target_code)
-    db_session.commit()
-
-    return target_code
 
 
 def get_all_tms(*, db_session: Session, repo_id: str) -> List[TestModuleModel]:
@@ -124,71 +138,3 @@ def update_tm(*, db_session: Session, tm_model: TestModuleModel):
     db_session.commit()
 
     return tm_model
-
-
-# TODO: need to add a check here to not rerun baseline for nodes that
-# have not been changed ... but need to be aware of repo changes and how this affects
-# nodes
-async def get_tgt_coverage(
-    *,
-    db_session: Session,
-    task_queue: TaskQueue,
-    curr_user: CowboyUser,
-    repo_config: RepoConfig,
-    tm_names: List[str]
-):
-    """Generates a target coverage for a test module."""
-    src_repo = SourceRepo(Path(repo_config.source_folder))
-    run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
-
-    base_cov = await run_test(run_args)
-    tm_models = get_tms_by_names(
-        db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
-    )
-
-    total_tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
-    unbased_tms = [tm for tm in total_tms if not tm.chunks]
-
-    print(unbased_tms)
-
-    # zip tm_model because we need to update it later in the code
-    for tm_model, tm in zip(tm_models, unbased_tms):
-        # generate src to test mappings
-        tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
-
-        # store chunks and their nodes
-        target_chunks = []
-        for tgt in targets:
-            func_scope = (
-                create_or_update_node(
-                    db_session=db_session,
-                    node=tgt.func_scope,
-                    repo_id=repo_config.id,
-                    filepath=str(tgt.filepath),
-                )
-                if tgt.func_scope
-                else None
-            )
-            class_scope = (
-                create_or_update_node(
-                    db_session=db_session,
-                    node=tgt.class_scope,
-                    repo_id=repo_config.id,
-                    filepath=str(tgt.filepath),
-                )
-                if tgt.class_scope
-                else None
-            )
-
-            target_chunks.append(
-                create_target_code(
-                    db_session=db_session,
-                    tm_model=tm_model,
-                    chunk=tgt,
-                    func_scope=func_scope,
-                    class_scope=class_scope,
-                )
-            )
-
-            tm_model.target_chunks = target_chunks
-            update_tm(db_session=db_session, tm_model=tm_model)

@@ -19,11 +19,11 @@ import uvicorn
 from logging import getLogger
 import yaml
 
-from src.task_queue.core import TaskQueue
+from src.queue.core import TaskQueue
 from src.auth.views import auth_router
 from src.repo.views import repo_router
 from src.test_modules.views import tm_router
-from src.task_queue.views import task_queue_router
+from src.queue.views import task_queue_router
 from src.test_gen.views import test_gen_router
 
 from src.exceptions import CowboyRunTimeException
@@ -192,6 +192,7 @@ class DBMiddleware(BaseHTTPMiddleware):
             #     return call_next(request)
 
             task_auth_token = request.headers.get("x-task-auth")
+            print("TYPE: ", type(task_auth_token))
             if not task_auth_token in token_registry:
 
                 # session = scoped_session(sessionmaker(), scopefunc=get_request_id)

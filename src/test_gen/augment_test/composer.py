@@ -5,14 +5,15 @@ from src.llm.invoke_llm import invoke_llm_async
 from .base_strat import TestCaseInput
 from .types import StratResult
 
-from src.longterm_tasks.evaluators import (
+from .evaluators import (
     Evaluator,
     AugmentAdditiveEvaluator,
     AugmentParallelEvaluator,
+    EvaluatorType,
+    AUGMENT_EVALS,
 )
 
 from src.test_gen.augment_test.strats import AugmentStratType, AUGMENT_STRATS
-from src.longterm_tasks.evaluators import EvaluatorType, AUGMENT_EVALS
 
 from cowboy_lib.repo.source_repo import SourceRepo
 from cowboy_lib.repo.source_file import Function
