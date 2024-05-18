@@ -1,14 +1,12 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 from pathlib import Path
 from typing import List
 
 from cowboy_lib.test_modules.test_module import TestModule
-from cowboy_lib.test_modules.target_code import TargetCode
 from cowboy_lib.repo.source_repo import SourceRepo
 
-from src.coverage.models import CoverageModel
 from src.database.core import Base
 from src.ast.models import NodeModel
 from src.target_code.models import TargetCodeModel
@@ -24,6 +22,9 @@ class TestModuleModel(Base):
     name = Column(String)
     testfilepath = Column(String)
     commit_sha = Column(String)
+    # use this flag to track test_modules that have already gone through
+    # auto-test augmentation
+    auto_gen = Column(Boolean, default=False)
 
     repo_id = Column(Integer, ForeignKey("repo_config.id"))
     nodes = relationship(
@@ -43,7 +44,6 @@ class TestModuleModel(Base):
         """
         Convert model back to TestModule
         """
-
         return TestModule(
             test_file=src_repo.find_file(Path(self.testfilepath)),
             commit_sha=self.commit_sha,

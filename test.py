@@ -21,13 +21,7 @@ db_session = Session()
 # tm = tm_model.serialize(src_repo)
 
 tm_models = get_all_tms(db_session=db_session, repo_id=17)
-for tm in tm_models:
-    if tm.name not in [
-        "TestWoodpecker",
-        "TestCodeBuild",
-        "TestCircleCI",
-        "TestDroneCI",
-    ]:
-        continue
+tm_models = sorted(tm_models, key=lambda tm: tm.agg_score(src_repo), reverse=True)
 
+for tm in tm_models:
     print(tm.name, tm.agg_score(src_repo))

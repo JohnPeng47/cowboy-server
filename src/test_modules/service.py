@@ -1,57 +1,13 @@
 from cowboy_lib.repo import SourceRepo
 
-# from .models import TestModule
-# # Long term tasks represent tasks that we potentially want to offload to celery
-from src.tasks.get_baseline_parallel import get_tm_target_coverage
-from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
-from src.auth.models import CowboyUser
 from src.database.core import Session
-
-from src.runner.service import run_test, RunServiceArgs
-from src.ast.service import create_node, create_or_update_node
-from src.target_code.service import create_target_code
-from src.coverage.service import get_cov_by_filename, create_or_update_cov
-from src.coverage.models import CoverageModel
+from src.ast.service import create_node
 
 from .models import TestModuleModel, TestModule
 from .iter_tms import iter_test_modules
 
-from pathlib import Path
 from typing import List
-
-
-# def get_coverage_stats(tm: TestModule, cov_list: List[CoverageModel]):
-#     """
-#     Calculate coverage stats for
-#     """
-#     for cov in cov_list:
-#         # this is
-#         total_covered = cov.covered
-#         tgt_covered = 0
-#         missing = cov.misses
-
-#         for chunk in tm.chunks:
-#             if Path(chunk.filepath) == cov.filename:
-#                 tgt_covered += len(chunk.lines)
-
-#         score = tgt_covered + missing / total_covered if total_covered else 0
-#         if score > 1:
-#             # yeah ...
-#             wtf += 1
-
-#         recommended.append(
-#             {
-#                 "filename": cov.filename,
-#                 "covered_pytest": covered,
-#                 "missing": missing,
-#                 "covered_baseline": actual,
-#                 # this actually gives us a perfectly normalized score, since
-#                 # actual < covered
-#                 "score": score,
-#                 "nodes": nodes,
-#             }
-#         )
 
 
 # TODO: get rid of this
@@ -89,31 +45,6 @@ def create_tm(*, db_session: Session, repo_id: str, tm: TestModule):
     return tm_model
 
 
-def get_all_tms(*, db_session: Session, repo_id: str) -> List[TestModuleModel]:
-    """
-    Query all TMs for a repo
-    """
-    return (
-        db_session.query(TestModuleModel)
-        .filter(TestModuleModel.repo_id == repo_id)
-        .all()
-    )
-
-
-def get_tms_by_names(
-    *, db_session: Session, repo_id: str, tm_names: List[str]
-) -> List[TestModuleModel]:
-    """
-    Query by name and return all if no names are provided
-    """
-
-    query = db_session.query(TestModuleModel).filter(TestModuleModel.repo_id == repo_id)
-    if tm_names:
-        query = query.filter(TestModuleModel.name.in_(tm_names))
-
-    return query.all()
-
-
 def get_tm_by_name(
     *, db_session: Session, repo_id: str, tm_name: str
 ) -> TestModuleModel:
@@ -136,3 +67,56 @@ def update_tm(*, db_session: Session, tm_model: TestModuleModel):
     db_session.commit()
 
     return tm_model
+
+
+def get_all_tms(*, db_session: Session, repo_id: str) -> List[TestModuleModel]:
+    """
+    Query all TMs for a repo
+    """
+    return (
+        db_session.query(TestModuleModel)
+        .filter(TestModuleModel.repo_id == repo_id)
+        .all()
+    )
+
+
+def get_tms_by_filename(
+    *, db_session: Session, repo_id: str, src_file: str
+) -> List[TestModuleModel]:
+    """
+    Query all TMs for a repo
+    """
+    all_tms = get_all_tms(db_session=db_session, repo_id=repo_id)
+    return [tm for tm in all_tms if src_file in tm.get_covered_files()]
+
+
+def get_all_tms_sorted(
+    *, db_session: Session, repo_id: str, src_repo: SourceRepo, n: int = 2
+) -> List[TestModuleModel]:
+    """
+    Query all TMs for a repo
+    """
+    all_tms = get_all_tms(db_session=db_session, repo_id=repo_id)
+    sorted_tms = sorted(all_tms, key=lambda tm: tm.agg_score(src_repo), reverse=True)
+    select_tms = sorted_tms[:n]
+
+    # update auto_gen flag on TMs
+    for tm in select_tms:
+        tm.auto_gen = True
+        update_tm(db_session=db_session, tm_model=tm)
+
+    return select_tms
+
+
+def get_tms_by_names(
+    *, db_session: Session, repo_id: str, tm_names: List[str]
+) -> List[TestModuleModel]:
+    """
+    Query by name and return all if no names are provided
+    """
+
+    query = db_session.query(TestModuleModel).filter(TestModuleModel.repo_id == repo_id)
+    if tm_names:
+        query = query.filter(TestModuleModel.name.in_(tm_names))
+
+    return query.all()

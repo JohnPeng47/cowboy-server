@@ -48,7 +48,7 @@ class RepoConfig(Base):
         cloned_folders,
         python_conf,
         user_id,
-        remote,
+        remote,  # origin
         main,
     ):
         self.repo_name = repo_name

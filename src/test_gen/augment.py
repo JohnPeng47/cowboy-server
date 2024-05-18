@@ -1,15 +1,13 @@
 from cowboy_lib.repo import SourceRepo, GitRepo
 
 from .augment_test.composer import Composer
+from .models import AugmentTestResult
 
-from src.database.core import Session
 from src.auth.models import CowboyUser
-
-from src.repo.service import get as get_repo
-from src.test_modules.service import get_tm_by_name
 from src.runner.service import RunServiceArgs
 from src.queue.core import TaskQueue
-
+from src.repo.models import RepoConfig
+from src.test_modules.models import TestModuleModel
 from src.runner.service import run_test
 
 from pathlib import Path
@@ -25,19 +23,16 @@ def commit_message(test_names: List[str], cov_plus: int):
 async def augment_test(
     *,
     task_queue: TaskQueue,
-    db_session: Session,
+    repo: RepoConfig,
+    tm_model: TestModuleModel,
     curr_user: CowboyUser,
-    tm_name: str,
     repo_name: str
-):
+) -> List[AugmentTestResult]:
     """
     Generate test cases for the given test module using the specified strategy and evaluator
     """
-    repo = get_repo(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
     src_repo = SourceRepo(Path(repo.source_folder))
     git_repo = GitRepo(Path(repo.source_folder), remote=repo.remote, main=repo.main)
-
-    tm_model = get_tm_by_name(db_session=db_session, repo_id=repo.id, tm_name=tm_name)
     tm = tm_model.serialize(src_repo)
     run_args = RunServiceArgs(
         user_id=curr_user.id, repo_name=repo_name, task_queue=task_queue
@@ -59,21 +54,20 @@ async def augment_test(
 
     # write all improved test to source file and check out merge on repo
     # serialize tm first
+    test_results = []
     test_file = tm.test_file
-    f_names = []
-    f_covs = 0
     for improved, cov in improved_tests:
         try:
-            # class_name = None cuz these are only functions
-            test_file.append(improved.to_code(), class_name=None)
-            f_names.append(improved.name)
-            f_covs += cov
+            test_result = AugmentTestResult(
+                name=improved.name,
+                test_case=improved.to_code(),
+                cov_plus=cov,
+                commit_hash=git_repo.get_curr_commit(),
+                testfile=test_file.path,
+                classname=None,
+            )
+            test_results.append(test_result)
         except Exception as e:
             continue
 
-    print("Final testfile: ", test_file.to_code())
-
-    commit_msg = commit_message(f_names, f_covs)
-    merge_url = git_repo.checkout_and_push(tm.name, commit_msg, [test_file.path])
-
-    return merge_url
+    return test_results

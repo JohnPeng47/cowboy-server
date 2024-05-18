@@ -133,6 +133,7 @@ class Composer:
                 try:
                     prompt = self.strat.build_prompt()
                     print("Prompt: ", prompt)
+
                     llm_res = await invoke_llm_async(
                         prompt,
                         model=self.model,
@@ -141,12 +142,18 @@ class Composer:
 
                     src_file = self.strat.parse_llm_res(llm_res[0])
                 except SyntaxError:
-                    print(f"Retrying ... {retries} left")
+                    print(f"LLM syntax error ... {retries} left")
+                    retries -= 1
+                    continue
+                except ValueError:
+                    print(f"LLM parsing format error ... {retries} left")
                     retries -= 1
                     continue
 
             if not src_file:
-                raise CowboyRunTimeException("LLM generation failed")
+                raise CowboyRunTimeException(
+                    f"LLM generation failed for {self.test_input}"
+                )
 
             test_result = [StratResult(src_file, self.test_input.path)]
 
