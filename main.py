@@ -7,8 +7,9 @@ from pydantic.error_wrappers import ValidationError
 
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-
 from starlette.responses import Response, StreamingResponse
+
+from sqlalchemy.orm import sessionmaker
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,7 +30,7 @@ from src.target_code.views import tgtcode_router
 
 from src.exceptions import CowboyRunTimeException
 
-from src.database.core import engine, sessionmaker
+from src.database.core import engine
 
 import uuid
 
@@ -193,7 +194,6 @@ class DBMiddleware(BaseHTTPMiddleware):
             #     return call_next(request)
 
             task_auth_token = request.headers.get("x-task-auth")
-            print("TYPE: ", type(task_auth_token))
             if not task_auth_token in token_registry:
 
                 # session = scoped_session(sessionmaker(), scopefunc=get_request_id)
@@ -279,7 +279,7 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=3000,
-        reload=True,
+        # reload=True,
         reload_excludes=["./repos"],
         # log_config=config,
     )

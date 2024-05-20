@@ -5,11 +5,14 @@ from .models import AugmentTestResult
 
 from src.auth.models import CowboyUser
 from src.runner.service import RunServiceArgs
+from src.runner.service import run_test
 from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.test_modules.models import TestModuleModel
-from src.runner.service import run_test
 
+from .service import create_test_result
+
+from sqlalchemy.orm import Session
 from pathlib import Path
 from typing import List
 
@@ -22,6 +25,7 @@ def commit_message(test_names: List[str], cov_plus: int):
 
 async def augment_test(
     *,
+    db_session: Session,
     task_queue: TaskQueue,
     repo: RepoConfig,
     tm_model: TestModuleModel,
@@ -57,17 +61,18 @@ async def augment_test(
     test_results = []
     test_file = tm.test_file
     for improved, cov in improved_tests:
-        try:
-            test_result = AugmentTestResult(
-                name=improved.name,
-                test_case=improved.to_code(),
-                cov_plus=cov,
-                commit_hash=git_repo.get_curr_commit(),
-                testfile=test_file.path,
-                classname=None,
-            )
-            test_results.append(test_result)
-        except Exception as e:
-            continue
+        print("Improved test: ", improved.name)
+        test_result = create_test_result(
+            db_session=db_session,
+            repo_id=repo.id,
+            name=improved.name,
+            test_case=improved.to_code(),
+            cov_list=cov.cov_list,
+            tm_id=tm_model.id,
+            commit_hash=git_repo.get_curr_commit(),
+            testfile=str(test_file.path),
+            classname=None,
+        )
+        test_results.append(test_result)
 
     return test_results

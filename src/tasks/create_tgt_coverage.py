@@ -7,7 +7,6 @@ from src.tasks.get_baseline_parallel import get_tm_target_coverage
 from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.auth.models import CowboyUser
-from src.database.core import Session
 from src.test_modules.models import TestModuleModel
 from src.target_code.models import TargetCodeModel
 
@@ -16,6 +15,8 @@ from src.ast.service import create_node, create_or_update_node
 from src.test_modules.service import get_tms_by_names, update_tm
 from src.target_code.service import create_target_code
 from src.coverage.service import get_cov_by_filename, create_or_update_cov
+
+from sqlalchemy.orm import Session
 
 from pathlib import Path
 from typing import List

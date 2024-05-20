@@ -54,7 +54,7 @@ class Evaluator(ABC):
             )
             print(f"Total failed base: {base_cov.total_failed}/{base_cov.total_tests}")
 
-            cov_diff = base_cov.coverage - cov_ptched.coverage
+            cov_diff = cov_ptched.coverage - base_cov.coverage
             print("Patched vs base: ", cov_diff)
 
             test_results.append((cov_ptched, cov_diff, test_file))

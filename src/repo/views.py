@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends
-from src.database.core import Session, get_db
+from src.database.core import get_db
 from src.exceptions import InvalidConfigurationError
 from src.models import HTTPSuccess
-
-from pydantic.error_wrappers import ErrorWrapper, ValidationError
 
 from src.auth.service import get_current_user, CowboyUser
 from src.test_modules.service import create_all_tms
 
 from .service import create_or_update, get, delete, list, clean
 from .models import RepoConfigCreate, RepoConfigList, RepoConfigGet
+
+from sqlalchemy.orm import Session
+from pydantic.error_wrappers import ErrorWrapper, ValidationError
+
 
 repo_router = APIRouter()
 

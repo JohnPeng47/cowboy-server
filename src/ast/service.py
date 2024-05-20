@@ -1,9 +1,9 @@
 from cowboy_lib.ast.code import ASTNode
 from cowboy_lib.test_modules.test_module import TestModule
 
-from src.database.core import Session
 from src.test_modules.models import TestModuleModel
 
+from sqlalchemy.orm import Session
 from .models import NodeModel
 
 
@@ -37,7 +37,7 @@ def create_node(
         test_module_id=test_module_id,
         testfilepath=filepath,
     )
-    
+
     db_session.add(node)
     db_session.commit()
 

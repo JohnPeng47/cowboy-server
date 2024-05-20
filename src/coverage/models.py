@@ -23,6 +23,7 @@ class CoverageModel(Base):
         "TargetCodeModel", back_populates="coverage", cascade="all, delete-orphan"
     )
     repo_id = Column(Integer, ForeignKey("repo_config.id"))
+    test_result_id = Column(Integer, ForeignKey("augment_test_results.id"))
 
     def deserialize(self) -> Coverage:
         return Coverage(

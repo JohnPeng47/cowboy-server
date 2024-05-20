@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 
-from src.database.core import Session, get_db
+from src.database.core import get_db
 from src.auth.service import get_current_user, CowboyUser
 from src.queue.core import TaskQueue, get_queue
 from src.models import HTTPSuccess
 from src.repo.service import get as get_repoconf
+from src.tasks.create_tgt_coverage import create_tgt_coverage
 
 from .models import GetTargetCovRequest
 
-from src.tasks.create_tgt_coverage import create_tgt_coverage
-
+from sqlalchemy.orm import Session
 import asyncio
 
 

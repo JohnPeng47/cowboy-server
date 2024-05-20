@@ -199,6 +199,12 @@ class OpenAIModel(BaseModel):
             "cost_per_input_token": 1e-05,
             "cost_per_output_token": 3e-05,
         },
+        # TODO: update this
+        "gpt4-o": {
+            "max_context": 8_192,
+            "cost_per_input_token": 1e-05,
+            "cost_per_output_token": 3e-05,
+        },
     }
 
     SHORTCUTS = {
@@ -208,6 +214,7 @@ class OpenAIModel(BaseModel):
         "gpt4-legacy": "gpt-4-0613",
         "gpt4-0125": "gpt-4-0125-preview",
         "gpt3-0125": "gpt-3.5-turbo-0125",
+        "gpt4-o": "gpt4-o",
     }
 
     def __init__(self, args: ModelArguments):

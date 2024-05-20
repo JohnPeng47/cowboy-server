@@ -1,8 +1,9 @@
-from src.database.core import Session
 from src.ast.models import NodeModel
 from src.target_code.models import TargetCode, TargetCodeModel
 from src.test_modules.models import TestModuleModel
 from src.coverage.models import CoverageModel
+
+from sqlalchemy.orm import Session
 
 
 def create_target_code(

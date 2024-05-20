@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic.error_wrappers import ErrorWrapper, ValidationError
 
-from src.database.core import Session, get_db
+from src.database.core import get_db
+from sqlalchemy.orm import Session
 
 
 from .models import (

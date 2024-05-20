@@ -13,6 +13,7 @@ from src.ast.models import NodeModel
 from src.test_modules.models import TestModuleModel
 from src.target_code.models import TargetCodeModel
 from src.coverage.models import CoverageModel
+from src.test_gen.models import AugmentTestResult
 
 
 # this is the Alembic Config object, which provides
