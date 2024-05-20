@@ -1,10 +1,5 @@
-from .base_strat import BaseStrategy
-
-from src.llm.invoke_llm import invoke_llm_async
-
-from .base_strat import TestCaseInput
+from .base_strat import BaseStrategy, TestCaseInput
 from .types import StratResult
-
 from .evaluators import (
     Evaluator,
     AugmentAdditiveEvaluator,
@@ -13,20 +8,19 @@ from .evaluators import (
     AUGMENT_EVALS,
 )
 
-from src.test_gen.augment_test.strats import AugmentStratType, AUGMENT_STRATS
-
+from cowboy_lib.llm.invoke_llm import invoke_llm_async
+from cowboy_lib.llm.models import OpenAIModel, ModelArguments
 from cowboy_lib.repo.source_repo import SourceRepo
 from cowboy_lib.repo.source_file import Function
 from cowboy_lib.coverage import TestCoverage, TestError
-from src.llm.models import OpenAIModel, ModelArguments
 
+from src.test_gen.augment_test.strats import AugmentStratType, AUGMENT_STRATS
 from src.runner.service import run_test, RunServiceArgs
 from src.exceptions import CowboyRunTimeException
 
+from src.config import LLM_RETRIES, OPENAI_API_KEY
+
 from typing import Tuple, List
-
-from src.config import LLM_RETRIES
-
 from logging import getLogger
 
 logger = getLogger("test_results")
@@ -62,7 +56,9 @@ class Composer:
         )
 
         model_name = "gpt4"
-        self.model = OpenAIModel(ModelArguments(model_name=model_name))
+        self.model = OpenAIModel(
+            ModelArguments(model_name=model_name, api_key=OPENAI_API_KEY)
+        )
 
     def get_strat_name(self) -> str:
         return self.__class__.__name__
