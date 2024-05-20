@@ -73,8 +73,19 @@ class RepoConfig(Base):
         }
 
 
-# Pydantic models...
-class PythonConf(CowboyBase):
+class LangConf(CowboyBase):
+    """
+    Holds the language/framework specific settings
+    for a repo
+    """
+
+    # currently I expect only an interpreter/compiler path that points
+    # to the runtime for the targeted repo
+    interp: str
+
+
+class PythonConf(LangConf):
+    language: str = "python"
     cov_folders: List[str]
     test_folder: str
     interp: str
@@ -89,7 +100,12 @@ class RepoConfigBase(CowboyBase):
     url: str
     source_folder: str
     cloned_folders: List[str]
-    python_conf: Dict[str, Any]
+
+    # REFACTOR-AST: ideally this would be type
+    # LangConf but not sure how to implement validator
+    # for all the LangConf subclasses
+    python_conf: PythonConf
+
     remote: str = Field(default="origin")
     main: str = Field(default="main")
 
