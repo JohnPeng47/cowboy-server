@@ -157,6 +157,9 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
         return response
 
 
+token_registry = []
+
+
 class DBMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # request_id = str(uuid1())
@@ -193,10 +196,15 @@ class DBMiddleware(BaseHTTPMiddleware):
             #     print("Skipping for path: ", request.url.path)
             #     return call_next(request)
 
+            # this is a very janky implementation to handle the fact that assigning a db session
+            # to every request blows up our db connection pool
             task_auth_token = request.headers.get("x-task-auth")
             if not task_auth_token in token_registry:
-
-                # session = scoped_session(sessionmaker(), scopefunc=get_request_id)
+                print("No token in registry: ", task_auth_token, token_registry)
+                print(
+                    type(task_auth_token),
+                    type(token_registry[0]) if len(token_registry) > 0 else "oigneng",
+                )
                 session = sessionmaker(bind=engine)
                 request.state.db = session()
                 request.state.db.id = str(uuid.uuid4())
@@ -218,25 +226,6 @@ class AddTaskQueueMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         request.state.task_queue = TaskQueue()
-        response = await call_next(request)
-        return response
-
-
-token_registry = []
-
-
-# TODO: kind of a hack but we need to store auth tokens for users who
-# have authenticated first via
-class AddTaskAuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
-        # close the current db session if token found in registry
-        task_auth_token = request.headers.get("x-task-auth")
-        if task_auth_token in token_registry:
-            print("Closing db: ", request.state.db.id)
-            request.state.db.close()
-
         response = await call_next(request)
         return response
 
