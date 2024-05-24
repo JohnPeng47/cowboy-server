@@ -19,6 +19,7 @@ class TaskEvent:
 
     async def wait(self):
         await self.event.wait()
+
         return self.result
 
     def complete(self, result):
@@ -130,5 +131,6 @@ def get_token(request: Request):
     """
     Returns the user id
     """
-    NULL_USER_ID = 0
-    return int(request.headers.get("x-task-auth", NULL_USER_ID))
+    token = request.headers.get("x-task-auth", None)
+    # need this or else we end up converting None to "None" **shakes fist @ python moment"
+    return str(token) if token else None

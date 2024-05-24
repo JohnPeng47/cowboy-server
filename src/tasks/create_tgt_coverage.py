@@ -91,8 +91,11 @@ async def create_tgt_coverage(
     src_repo = SourceRepo(Path(repo_config.source_folder))
     run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
 
+    print("Hello1")
     # replace this with TestCoverage
     base_cov = await run_test(run_args)
+
+    print("Hello2")
     for cov in base_cov.coverage.cov_list:
         create_or_update_cov(
             db_session=db_session, repo_id=repo_config.id, coverage=cov

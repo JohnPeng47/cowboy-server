@@ -1,5 +1,6 @@
-from typing import List
-from datetime import datetime, timedelta
+from src.config import COWBOY_JWT_ALG, COWBOY_JWT_EXP, COWBOY_JWT_SECRET
+from src.database.core import Base
+from src.models import TimeStampMixin, CowboyBase, PrimaryKey
 
 import string
 import secrets
@@ -8,14 +9,9 @@ from jose import jwt
 from typing import Optional
 from pydantic import validator, Field, BaseModel
 from pydantic.networks import EmailStr
-
 from sqlalchemy import DateTime, Column, String, LargeBinary, Integer, Boolean
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql.schema import ForeignKey
-
-from src.config import COWBOY_JWT_ALG, COWBOY_JWT_EXP, COWBOY_JWT_SECRET
-from src.database.core import Base
-from src.models import TimeStampMixin, CowboyBase, PrimaryKey, NameStr
+from typing import List
+from datetime import datetime, timedelta
 
 
 def generate_password():
@@ -89,6 +85,7 @@ class UserLogin(UserBase):
 
 
 class UserRegister(UserLogin):
+    openai_api_key: str
     password: Optional[str] = Field(None, nullable=True)
 
     @validator("password", pre=True, always=True)
@@ -133,7 +130,3 @@ class UserRegisterResponse(CowboyBase):
 # Errors
 class UserExistsError(BaseModel):
     error = "User already exists"
-
-
-# class UserPagination(Pagination):
-#     items: List[UserRead] = []

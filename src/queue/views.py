@@ -53,11 +53,12 @@ def get(
         )
     # issue token if it does not exist
     elif not user_token:
+        print("Setting new token ..")
         response.headers["set-x-task-auth"] = str(curr_user.id)
-        token_registry.append(curr_user.id)
+        token_registry.append(str(curr_user.id))
 
     tasks = dequeue_task(
-        task_queue=task_queue, user_id=curr_user.id if curr_user else user_token
+        task_queue=task_queue, user_id=curr_user.id if curr_user else int(user_token)
     )
     return tasks
 

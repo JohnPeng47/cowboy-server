@@ -5,7 +5,7 @@ from cowboy_lib.ast.code import Function
 from src.queue.service import enqueue_task_and_wait
 from src.queue.core import TaskQueue
 
-from .shared.models import json_to_coverage_result, RunTestTask
+from .models import json_to_coverage_result, RunTestTask
 
 from typing import List, Tuple
 from dataclasses import dataclass
@@ -25,6 +25,7 @@ async def run_test(
     patch_file: PatchFile = None,
 ) -> CoverageResult:
 
+    print("hello3")
     task = RunTestTask(
         repo_name=service_args.repo_name,
         exclude_tests=exclude_tests,
@@ -36,6 +37,7 @@ async def run_test(
         task_queue=service_args.task_queue, user_id=service_args.user_id, task=task
     )
     res = await future.wait()
+    print(res)
 
     cov_res = json_to_coverage_result(res)
     return cov_res

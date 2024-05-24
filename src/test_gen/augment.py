@@ -4,6 +4,7 @@ from .augment_test.composer import Composer
 from .models import AugmentTestResult
 
 from src.auth.models import CowboyUser
+from src.auth.service import retrieve_oai_key
 from src.runner.service import RunServiceArgs
 from src.runner.service import run_test
 from src.queue.core import TaskQueue
@@ -50,6 +51,7 @@ async def augment_test(
         test_input=tm,
         run_args=run_args,
         base_cov=base_cov,
+        api_key=retrieve_oai_key(curr_user.id),
     )
 
     improved_tests, failed_tests, no_improve_tests = await composer.generate_test(

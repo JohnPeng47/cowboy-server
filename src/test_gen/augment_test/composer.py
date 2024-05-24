@@ -15,10 +15,10 @@ from cowboy_lib.repo.source_file import Function
 from cowboy_lib.coverage import TestCoverage, TestError
 
 from src.test_gen.augment_test.strats import AugmentStratType, AUGMENT_STRATS
-from src.runner.service import run_test, RunServiceArgs
+from src.runner.service import RunServiceArgs
 from src.exceptions import CowboyRunTimeException
 
-from src.config import LLM_RETRIES, OPENAI_API_KEY
+from src.config import LLM_RETRIES
 
 from typing import Tuple, List
 from logging import getLogger
@@ -42,6 +42,7 @@ class Composer:
         # TODO: put this back in once we have Coverage persisted
         base_cov: TestCoverage,
         # target_cov: TestCoverage,
+        api_key: str,
         verify: bool = False,
     ):
         self.src_repo = src_repo
@@ -56,9 +57,7 @@ class Composer:
         )
 
         model_name = "gpt4"
-        self.model = OpenAIModel(
-            ModelArguments(model_name=model_name, api_key=OPENAI_API_KEY)
-        )
+        self.model = OpenAIModel(ModelArguments(model_name=model_name, api_key=api_key))
 
     def get_strat_name(self) -> str:
         return self.__class__.__name__

@@ -1,8 +1,7 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, event, ForeignKey
-
+from sqlalchemy import Column, DateTime, event
 from pydantic import BaseModel, Field
-from pydantic.types import conint, constr, SecretStr
+from pydantic.types import SecretStr
 
 from typing import Annotated
 

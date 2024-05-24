@@ -1,6 +1,6 @@
 import logging
 
-from typing import Annotated, Optional
+from typing import Optional
 
 from fastapi import HTTPException
 from fastapi.security.utils import get_authorization_scheme_param
@@ -15,8 +15,8 @@ from src.database.core import DBNotSetException, get_db
 
 log = logging.getLogger(__name__)
 
-
-from .models import CowboyUser, UserRegister, UserUpdate, UserCreate, UserLogin
+from .sm import SecretManager
+from .models import CowboyUser, UserRegister, UserCreate
 
 InvalidCredentialException = HTTPException(
     status_code=HTTP_401_UNAUTHORIZED,
@@ -41,53 +41,17 @@ def create(*, db_session, user_in: UserRegister | UserCreate) -> CowboyUser:
 
     # create the user
     user = CowboyUser(
-        **user_in.dict(exclude={"password"}),
+        **user_in.dict(exclude={"password", "openai_api_key"}),
         password=password,
     )
 
-    # projects = []
-    # if user_in.projects:
-    #     # we reset the default value for all user projects
-    #     for user_project in user.projects:
-    #         user_project.default = False
-
-    #     for user_project in user_in.projects:
-    #         projects.append(
-    #             create_or_update_project_default(
-    #                 db_session=db_session, user=user, user_project_in=user_project
-    #             )
-    #         )
-    # else:
-    #     # get the default project
-    #     default_project = project_service.get_default_or_raise(db_session=db_session)
-    #     projects.append(
-    #         create_or_update_project_default(
-    #             db_session=db_session,
-    #             user=user,
-    #             user_project_in=UserProject(
-    #                 project=ProjectBase(**default_project.dict())
-    #             ),
-    #         )
-    #     )
-    # user.projects = projects
-
     db_session.add(user)
     db_session.commit()
+
+    # create the credentials
+    store_oai_key(user_in.openai_api_key, user.id)
+
     return user
-
-
-#
-# def get_or_create(*, db_session, user_in: UserRegister) -> CowboyUser:
-#     """Gets an existing user or creates a new one."""
-#     user = get_by_email(db_session=db_session, email=user_in.email)
-#     if not user:
-#         try:
-#             user = create(db_session=db_session, user_in=user_in)
-#         except IntegrityError:
-#             db_session.rollback()
-#             log.exception(f"Unable to create user with email address {user_in.email}.")
-
-#     return user
 
 
 def extract_user_email_jwt(request: Request, **kwargs):
@@ -156,3 +120,13 @@ def get_current_user(request: Request) -> CowboyUser:
         )
 
     return user
+
+
+def store_oai_key(api_key, user_id):
+    sm = SecretManager()
+    sm.store_parameter("OAI_KEY_" + str(user_id), api_key)
+
+
+def retrieve_oai_key(user_id):
+    sm = SecretManager()
+    return sm.retrieve_parameter("OAI_KEY_" + str(user_id))

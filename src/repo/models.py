@@ -1,4 +1,4 @@
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Optional
 
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey
 from sqlalchemy.orm import relationship
@@ -6,6 +6,7 @@ from pydantic import Field
 
 from src.models import CowboyBase
 from src.database.core import Base
+from src.config import Language
 
 
 # TODO: remove fields we dont need
@@ -24,6 +25,7 @@ class RepoConfig(Base):
     # git remote and git main branch (to merge into)
     remote = Column(String)
     main = Column(String)
+    language = Column(String)
 
     # keep this argument fluid, may change
     python_conf = Column(JSON)
@@ -50,6 +52,7 @@ class RepoConfig(Base):
         user_id,
         remote,  # origin
         main,
+        language
     ):
         self.repo_name = repo_name
         self.url = url
@@ -59,6 +62,7 @@ class RepoConfig(Base):
         self.user_id = user_id
         self.remote = remote
         self.main = main
+        self.language = language
 
     def to_dict(self):
         return {
@@ -70,6 +74,7 @@ class RepoConfig(Base):
             "user_id": self.user_id,
             "remote": self.remote,
             "main": self.main,
+            "language": self.language,
         }
 
 
@@ -100,6 +105,7 @@ class RepoConfigBase(CowboyBase):
     url: str
     source_folder: str
     cloned_folders: List[str]
+    language: Optional[Language]
 
     # REFACTOR-AST: ideally this would be type
     # LangConf but not sure how to implement validator
