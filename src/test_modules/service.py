@@ -12,7 +12,6 @@ from .iter_tms import iter_test_modules
 from typing import List
 
 
-# TODO: get rid of this
 def create_all_tms(*, db_session: Session, repo_conf: RepoConfig, src_repo: SourceRepo):
     """Create all test modules for a repo."""
     test_modules = iter_test_modules(src_repo)

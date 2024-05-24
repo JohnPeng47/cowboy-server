@@ -6,10 +6,7 @@ from src.test_modules.models import TestModule
 from typing import List
 
 
-# TODO: move this code into a TestModule service
 def iter_test_modules(src_repo: SourceRepo) -> List[TestModule]:
-    from collections import Counter
-
     """
     Generator for TestModules
     TestModules can be either be:

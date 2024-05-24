@@ -17,7 +17,6 @@ from logging import getLogger
 logger = getLogger("test_results")
 
 
-# TODO: change call and process_test_results
 class AugmentAdditiveEvaluator(Evaluator):
     """
     Iteratively evals test results and re-prompts with partially successful

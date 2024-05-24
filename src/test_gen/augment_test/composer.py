@@ -39,9 +39,7 @@ class Composer:
         src_repo: SourceRepo,
         test_input: TestCaseInput,
         run_args: RunServiceArgs,
-        # TODO: put this back in once we have Coverage persisted
         base_cov: TestCoverage,
-        # target_cov: TestCoverage,
         api_key: str,
         verify: bool = False,
     ):

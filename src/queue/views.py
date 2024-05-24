@@ -35,8 +35,6 @@ def list(
 @task_queue_router.get("/task/get", response_model=List[Task])
 def get(
     response: Response,
-    # TODO: ideally we probably want to separate the deps that require
-    # db vs. the ones that dont
     task_queue: TaskQueue = Depends(get_queue),
     curr_user: CowboyUser = Depends(get_current_user),
     token_registry: List = Depends(get_token_registry),

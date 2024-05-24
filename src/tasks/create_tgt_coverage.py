@@ -72,10 +72,6 @@ def create_tgt_code_models(
     return target_chunks
 
 
-# TODO: need to add a check here to not rerun baseline for nodes that
-# have not been changed ... but need to be aware of repo changes and how this affects
-# nodes
-# should probably rename this, way too inncuous for important function
 async def create_tgt_coverage(
     *,
     db_session: Session,
@@ -91,11 +87,8 @@ async def create_tgt_coverage(
     src_repo = SourceRepo(Path(repo_config.source_folder))
     run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
 
-    print("Hello1")
-    # replace this with TestCoverage
     base_cov = await run_test(run_args)
 
-    print("Hello2")
     for cov in base_cov.coverage.cov_list:
         create_or_update_cov(
             db_session=db_session, repo_id=repo_config.id, coverage=cov

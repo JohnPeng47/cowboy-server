@@ -21,7 +21,6 @@ from logging import getLogger
 logger = getLogger("test_results")
 
 
-# TODO: change call and process_test_results
 class AugmentParallelEvaluator(Evaluator):
     """
     Used to evaluate the results of a test strategy

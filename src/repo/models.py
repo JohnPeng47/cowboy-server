@@ -9,7 +9,6 @@ from src.database.core import Base
 from src.config import Language
 
 
-# TODO: remove fields we dont need
 class RepoConfig(Base):
     """
     Stores configuration for a repository
@@ -52,7 +51,7 @@ class RepoConfig(Base):
         user_id,
         remote,  # origin
         main,
-        language
+        language,
     ):
         self.repo_name = repo_name
         self.url = url
