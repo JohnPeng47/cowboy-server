@@ -1,12 +1,14 @@
-from typing import List, Any, Dict, Optional
+from cowboy_lib.coverage import TestCoverage
 
-from sqlalchemy import Column, Integer, String, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, JSON, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from pydantic import Field
 
 from src.models import CowboyBase
 from src.database.core import Base
 from src.config import Language
+
+from typing import List, Any, Dict, Optional
 
 
 class RepoConfig(Base):
@@ -29,6 +31,7 @@ class RepoConfig(Base):
     # keep this argument fluid, may change
     python_conf = Column(JSON)
     user_id = Column(Integer, ForeignKey("cowboy_user.id"))
+    is_experiment = Column(Boolean)
 
     # relations
     test_modules = relationship(
@@ -52,6 +55,7 @@ class RepoConfig(Base):
         remote,  # origin
         main,
         language,
+        is_experiment=False,
     ):
         self.repo_name = repo_name
         self.url = url
@@ -62,6 +66,7 @@ class RepoConfig(Base):
         self.remote = remote
         self.main = main
         self.language = language
+        self.is_experiment = is_experiment
 
     def to_dict(self):
         return {
@@ -74,7 +79,11 @@ class RepoConfig(Base):
             "remote": self.remote,
             "main": self.main,
             "language": self.language,
+            "is_experiment": self.is_experiment,
         }
+
+    def base_cov(self) -> TestCoverage:
+        return TestCoverage([cov.deserialize() for cov in self.cov_list])
 
 
 class LangConf(CowboyBase):
@@ -105,6 +114,7 @@ class RepoConfigBase(CowboyBase):
     source_folder: str
     cloned_folders: List[str]
     language: Optional[Language]
+    is_experiment: Optional[bool]
 
     # REFACTOR-AST: ideally this would be type
     # LangConf but not sure how to implement validator

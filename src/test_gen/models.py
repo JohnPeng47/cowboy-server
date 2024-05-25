@@ -12,6 +12,7 @@ from typing import Optional
 class AugmentTestMode(str, Enum):
     AUTO = "auto"
     FILE = "file"
+    TM = "tm"
 
 
 class Decision(int, Enum):
@@ -22,8 +23,9 @@ class Decision(int, Enum):
 
 class AugmentTestRequest(BaseModel):
     repo_name: str
-    src_file: Optional[str]
     mode: AugmentTestMode
+    src_file: Optional[str]
+    tms: Optional[List[str]]
 
 
 class AugmentTestResponse(CowboyBase):

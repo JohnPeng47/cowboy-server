@@ -14,8 +14,6 @@ from pydantic.error_wrappers import ErrorWrapper, ValidationError
 repo_router = APIRouter()
 
 
-# also create the test_modules here as well
-# and nodes
 @repo_router.post("/repo/create", response_model=RepoConfigCreate)
 def create_repo(
     repo_in: RepoConfigCreate,

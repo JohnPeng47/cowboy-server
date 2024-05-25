@@ -28,6 +28,6 @@ class CoverageModel(Base):
     def deserialize(self) -> Coverage:
         return Coverage(
             filename=self.filename,
-            covered_lines=list(map(int, self.covered_lines.split(","))),
-            missing_lines=list(map(int, self.missing_lines.split(","))),
+            covered_lines=[int(l) for l in self.covered_lines.split(",") if l],
+            missing_lines=[int(l) for l in self.missing_lines.split(",") if l],
         )

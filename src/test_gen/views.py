@@ -4,9 +4,14 @@ from src.auth.service import get_current_user
 from src.auth.models import CowboyUser
 from src.queue.core import get_queue
 
-from src.test_modules.service import get_all_tms_sorted, get_tms_by_filename
-from src.repo.service import get as get_repo
+from src.test_modules.service import (
+    get_all_tms_sorted,
+    get_tms_by_filename,
+    get_tms_by_names,
+)
+from src.repo.service import get_or_raise
 from src.models import HTTPSuccess
+from src.config import AUTO_GRP_SIZE
 
 from .models import AugmentTestRequest, AugmentTestMode, UserDecisionRequest
 from .augment import augment_test
@@ -15,8 +20,8 @@ from .service import save_all, get_test_results, set_test_result_decision
 from sqlalchemy.orm import Session
 from pathlib import Path
 from fastapi import APIRouter, Depends
-import asyncio
 from functools import reduce
+import asyncio
 
 test_gen_router = APIRouter()
 
@@ -31,7 +36,7 @@ async def augment_test_route(
     """
     Augment tests for a test module
     """
-    repo = get_repo(
+    repo = get_or_raise(
         db_session=db_session, curr_user=curr_user, repo_name=request.repo_name
     )
     src_repo = SourceRepo(Path(repo.source_folder))
@@ -39,11 +44,15 @@ async def augment_test_route(
     coroutines = []
     if request.mode == AugmentTestMode.AUTO.value:
         tm_models = get_all_tms_sorted(
-            db_session=db_session, src_repo=src_repo, repo_id=repo.id, n=2
+            db_session=db_session, src_repo=src_repo, repo_id=repo.id, n=AUTO_GRP_SIZE
         )
     elif request.mode == AugmentTestMode.FILE.value:
         tm_models = get_tms_by_filename(
             db_session=db_session, repo_id=repo.id, src_file=request.src_file
+        )
+    elif request.mode == AugmentTestMode.TM.value:
+        tm_models = get_tms_by_names(
+            db_session=db_session, repo_id=repo.id, tm_names=request.tms
         )
 
     for tm_model in tm_models:
@@ -53,7 +62,6 @@ async def augment_test_route(
             repo=repo,
             tm_model=tm_model,
             curr_user=curr_user,
-            repo_name=request.repo_name,
         )
         coroutines.append(coroutine)
 

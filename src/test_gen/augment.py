@@ -31,7 +31,6 @@ async def augment_test(
     repo: RepoConfig,
     tm_model: TestModuleModel,
     curr_user: CowboyUser,
-    repo_name: str
 ) -> List[AugmentTestResult]:
     """
     Generate test cases for the given test module using the specified strategy and evaluator
@@ -40,7 +39,7 @@ async def augment_test(
     git_repo = GitRepo(Path(repo.source_folder), remote=repo.remote, main=repo.main)
     tm = tm_model.serialize(src_repo)
     run_args = RunServiceArgs(
-        user_id=curr_user.id, repo_name=repo_name, task_queue=task_queue
+        user_id=curr_user.id, repo_name=repo.repo_name, task_queue=task_queue
     )
 
     base_cov = await run_test(run_args)

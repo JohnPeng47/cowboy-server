@@ -22,6 +22,7 @@ class TestModuleModel(Base):
     name = Column(String)
     testfilepath = Column(String)
     commit_sha = Column(String)
+    experiment_id = Column(String, nullable=True)
     # use this flag to track test_modules that have already gone through
     # auto-test augmentation
     auto_gen = Column(Boolean, default=False)

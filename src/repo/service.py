@@ -9,16 +9,54 @@ from .models import RepoConfig, RepoConfigCreate
 
 from pathlib import Path
 from logging import getLogger
+from fastapi import HTTPException
+
 
 logger = getLogger(__name__)
 
 
 def get(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
     """Returns a repo based on the given repo name."""
+    return (
+        db_session.query(RepoConfig)
+        .filter(
+            RepoConfig.repo_name == repo_name,
+            RepoConfig.user_id == curr_user.id,
+            RepoConfig.is_experiment == False,
+        )
+        .one_or_none()
+    )
+
+
+def get_or_raise(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
+    """Returns a repo based on the given repo name."""
+    repo = (
+        db_session.query(RepoConfig)
+        .filter(
+            RepoConfig.repo_name == repo_name,
+            RepoConfig.user_id == curr_user.id,
+            RepoConfig.is_experiment == False,
+        )
+        .one_or_none()
+    )
+    # TODO: consider raising pydantic Validation error here instead
+    # seems to be what dispatch does
+    if not repo:
+        raise HTTPException(status_code=400, detail=f"Repo {repo_name} not found")
+
+    return repo
+
+
+def get_experiment(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
+    """Returns a repo based on the given repo name."""
 
     return (
         db_session.query(RepoConfig)
-        .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
+        .filter(
+            RepoConfig.repo_name == repo_name,
+            RepoConfig.user_id == curr_user.id,
+            RepoConfig.is_experiment == True,
+        )
         .one_or_none()
     )
 

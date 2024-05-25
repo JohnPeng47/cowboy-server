@@ -19,12 +19,14 @@ SQLALCHEMY_ENGINE_POOL_SIZE = 50
 ALEMBIC_INI_PATH = "."
 ALEMBIC_CORE_REVISION_PATH = "alembic"
 
+# LLM settings
+LLM_RETRIES = 3
+AUTO_GRP_SIZE = 7
+
+
 REPOS_ROOT = "repos"
 
 AWS_REGION = "us-east-2"
-
-# LLM
-LLM_RETRIES = 3
 
 
 class Language(str, Enum):

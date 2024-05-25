@@ -4,6 +4,8 @@ from cowboy_lib.test_modules import TargetCode
 # from .models import TestModule
 # # Long term tasks represent tasks that we potentially want to offload to celery
 from src.tasks.get_baseline_parallel import get_tm_target_coverage
+
+# from src.tasks.get_baseline import get_tm_target_coverage
 from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.auth.models import CowboyUser
@@ -15,6 +17,7 @@ from src.ast.service import create_node, create_or_update_node
 from src.test_modules.service import get_tms_by_names, update_tm
 from src.target_code.service import create_target_code
 from src.coverage.service import get_cov_by_filename, create_or_update_cov
+from src.utils import async_timed
 
 from sqlalchemy.orm import Session
 
@@ -72,6 +75,7 @@ def create_tgt_code_models(
     return target_chunks
 
 
+@async_timed
 async def create_tgt_coverage(
     *,
     db_session: Session,
@@ -98,10 +102,12 @@ async def create_tgt_coverage(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
     total_tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
-    unbased_tms = [tm for tm in total_tms if not tm.chunks]
+    unbaselined_tms = [tm for tm in total_tms if not tm.chunks]
 
     # zip tm_model because we need to update it later in the code
-    for tm_model, tm in zip(tm_models, unbased_tms):
+    # TODO: we should combine TMModel and TM into single object instead of serializing
+    # and deserializing it
+    for tm_model, tm in zip(tm_models, unbaselined_tms):
         # generate src to test mappings
         tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
 

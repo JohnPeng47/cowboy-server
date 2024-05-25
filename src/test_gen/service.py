@@ -41,8 +41,6 @@ def create_test_result(
             test_result_id=tr_model.id,
         )
 
-    print("CREATING TR: ", tr_model)
-
     db_session.add(tr_model)
     db_session.commit()
 

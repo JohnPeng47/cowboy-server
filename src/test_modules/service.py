@@ -60,6 +60,22 @@ def get_tm_by_name(
     return query.one_or_none()
 
 
+def get_tms_by_names(
+    *, db_session: Session, repo_id: str, tm_names: List[str]
+) -> List[TestModuleModel]:
+    """
+    Query by name and return all if no names are provided
+    """
+    if tm_names == []:
+        return get_all_tms(db_session=db_session, repo_id=repo_id)
+
+    query = db_session.query(TestModuleModel).filter(TestModuleModel.repo_id == repo_id)
+    if tm_names:
+        query = query.filter(TestModuleModel.name.in_(tm_names))
+
+    return query.all()
+
+
 def update_tm(*, db_session: Session, tm_model: TestModuleModel):
     """
     Updates an existing TM
@@ -107,17 +123,3 @@ def get_all_tms_sorted(
         update_tm(db_session=db_session, tm_model=tm)
 
     return select_tms
-
-
-def get_tms_by_names(
-    *, db_session: Session, repo_id: str, tm_names: List[str]
-) -> List[TestModuleModel]:
-    """
-    Query by name and return all if no names are provided
-    """
-
-    query = db_session.query(TestModuleModel).filter(TestModuleModel.repo_id == repo_id)
-    if tm_names:
-        query = query.filter(TestModuleModel.name.in_(tm_names))
-
-    return query.all()
