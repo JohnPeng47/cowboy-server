@@ -17,14 +17,12 @@ from cowboy_lib.coverage import TestCoverage, TestError
 from src.test_gen.augment_test.strats import AugmentStratType, AUGMENT_STRATS
 from src.runner.service import RunServiceArgs
 from src.exceptions import CowboyRunTimeException
+from src.logger import testgen_logger
+
 
 from src.config import LLM_RETRIES
 
 from typing import Tuple, List
-from logging import getLogger
-
-logger = getLogger("test_results")
-longterm_logger = getLogger("longterm")
 
 
 class Composer:
@@ -64,7 +62,7 @@ class Composer:
         self, tests: List[Tuple[Function, TestCoverage]]
     ) -> List[Tuple[Function, TestCoverage]]:
         no_overlap = []
-        overlap_cov = self.base_cov.coverage
+        overlap_cov = self.base_cov
         for test, cov in tests:
             new_cov = overlap_cov + cov
             if new_cov.total_cov.covered > overlap_cov.total_cov.covered:
@@ -85,6 +83,8 @@ class Composer:
         no_improve_tests = []
 
         prompt = self.strat.build_prompt()
+        print(f"Prompt: {prompt}")
+
         model_res = await invoke_llm_async(prompt, self.model, n_times)
 
         llm_results = [self.strat.parse_llm_res(res) for res in model_res]
@@ -108,8 +108,6 @@ class Composer:
         List[Tuple[Function, TestError]],
         List[Function],
     ]:
-        print("RUnning additive serial")
-
         if not isinstance(self.evaluator, AugmentAdditiveEvaluator):
             raise Exception(
                 f"Expected AugmentAdditiveEvaluator, got {self.evaluator.__class__}"
@@ -118,28 +116,25 @@ class Composer:
         improved_tests = []
         failed_tests = []
         no_improve_tests = []
+        prompt = self.strat.build_prompt()
 
         for _ in range(n_times):
             retries = LLM_RETRIES
             src_file = None
             while retries > 0 and not src_file:
                 try:
-                    prompt = self.strat.build_prompt()
-                    print("Prompt: ", prompt)
-
                     llm_res = await invoke_llm_async(
                         prompt,
                         model=self.model,
                         n_times=1,
                     )
-
                     src_file = self.strat.parse_llm_res(llm_res[0])
                 except SyntaxError:
-                    print(f"LLM syntax error ... {retries} left")
+                    testgen_logger.info(f"LLM syntax error ... {retries} left")
                     retries -= 1
                     continue
                 except ValueError:
-                    print(f"LLM parsing format error ... {retries} left")
+                    testgen_logger.info(f"LLM parsing format error ... {retries} left")
                     retries -= 1
                     continue
 
@@ -176,8 +171,6 @@ class Composer:
 
             failed_tests.extend(failed)
             no_improve_tests.extend(no_improve)
-
-            logger.debug(f"Generated code with source file: \n{src_file}")
 
         return improved_tests, failed_tests, no_improve_tests
 

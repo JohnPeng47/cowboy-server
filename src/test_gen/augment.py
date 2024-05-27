@@ -42,7 +42,7 @@ async def augment_test(
         user_id=curr_user.id, repo_name=repo.repo_name, task_queue=task_queue
     )
 
-    base_cov = await run_test(run_args)
+    base_cov = repo.base_cov()
     composer = Composer(
         strat="WITH_CTXT",
         evaluator="ADDITIVE",

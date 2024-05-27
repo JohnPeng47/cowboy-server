@@ -2,19 +2,16 @@ from cowboy_lib.coverage import CoverageResult, TestError, TestCoverage
 from cowboy_lib.repo.repository import PatchFile
 from cowboy_lib.repo.source_file import Function
 
-from .eval_base import Evaluator
-
 from typing import Tuple, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from test_gen.augment_test.types import StratResult
     from cowboy_lib.test_modules import TestModule
 
+from .eval_base import Evaluator
+
 from src.runner.service import run_test
-
-from logging import getLogger
-
-logger = getLogger("test_results")
+from src.logger import testgen_logger
 
 
 class AugmentAdditiveEvaluator(Evaluator):
@@ -27,7 +24,7 @@ class AugmentAdditiveEvaluator(Evaluator):
         self,
         llm_results: List["StratResult"],
         tm: "TestModule",
-        base_cov: CoverageResult,
+        base_cov: TestCoverage,
         n_times: int = 1,
     ) -> Tuple[
         List[Tuple[Function, TestCoverage]],
@@ -54,7 +51,7 @@ class AugmentAdditiveEvaluator(Evaluator):
         self,
         test_results: List[Tuple[CoverageResult, str]],
         tm: "TestModule",
-        del_cov: CoverageResult,
+        base_cov: TestCoverage,
     ) -> Tuple[
         List[Tuple[Function, TestCoverage]],
         List[Tuple[Function, TestError]],
@@ -71,12 +68,14 @@ class AugmentAdditiveEvaluator(Evaluator):
         for cov_res, cov_diff, test_file in test_results:
             if cov_diff:
                 new_funcs = self.get_new_funcs(test_file, tm.path)
+                # iterate each generated function and measure if it has coverage
+                # improvement against the base
                 for func in new_funcs:
-                    print("Generated Func: ", func.name)
-                    print("Code: ", func.to_code())
-
                     test_error = cov_res.get_failed(func.name)
                     if test_error:
+                        testgen_logger.info(f"[FAILED] Generated Func: {func.name}")
+                        testgen_logger.info(f"Code: {func.to_code()}")
+
                         failed_tests.append((func, test_error))
                         continue
 
@@ -91,10 +90,16 @@ class AugmentAdditiveEvaluator(Evaluator):
                         service_args=self.run_args, patch_file=patch_file
                     )
 
-                    indv_improve = indvtest_cov.coverage - del_cov.coverage
+                    indv_improve = indvtest_cov.coverage - base_cov
                     if indv_improve.total_cov.covered > 0:
+                        testgen_logger.info(f"[IMPROVE] Generated Func: {func.name}")
+                        testgen_logger.info(f"Code: {func.to_code()}")
+
                         improved_tests.append((func, indv_improve))
                     else:
+                        testgen_logger.info(f"[NOIMPROVE] Generated Func: {func.name}")
+                        testgen_logger.info(f"Code: {func.to_code()}")
+
                         noimprov_tests.append((func, TestCoverage([])))
 
         return improved_tests, failed_tests, noimprov_tests

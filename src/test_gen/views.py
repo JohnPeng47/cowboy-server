@@ -54,6 +54,10 @@ async def augment_test_route(
         tm_models = get_tms_by_names(
             db_session=db_session, repo_id=repo.id, tm_names=request.tms
         )
+    elif request.mode == AugmentTestMode.ALL.value:
+        tm_models = get_tms_by_names(
+            db_session=db_session, repo_id=repo.id, tm_names=[]
+        )
 
     for tm_model in tm_models:
         coroutine = augment_test(
@@ -80,18 +84,10 @@ def get_results(
     curr_user: CowboyUser = Depends(get_current_user),
     db_session: Session = Depends(get_db),
 ):
-    repo = get_repo(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
+    repo = get_or_raise(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
     return get_test_results(db_session=db_session, repo_id=repo.id)
 
 
 @test_gen_router.post("/test-gen/results/decide")
 def set_decision(request: UserDecisionRequest, db_session=Depends(get_db)):
     set_test_result_decision(db_session=db_session, user_decision=request.user_decision)
-
-
-@test_gen_router.post("/test-gen/results/{repo_name}/clean")
-def clean_results(repo_name: str, db_session=Depends(get_db)):
-    """
-    Removes all test results that have not been
-    """
-    repo = get_repo(db_session=db_session, repo_name=repo_name)

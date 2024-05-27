@@ -2,23 +2,17 @@ from cowboy_lib.coverage import CoverageResult, TestError, TestCoverage
 from cowboy_lib.repo.repository import PatchFile
 from cowboy_lib.repo.source_file import Function, TestFile
 
-from pathlib import Path
-from abc import ABC, abstractmethod
-
-from typing import Tuple, Optional, List, TYPE_CHECKING
-
 from src.runner.service import run_test, RunServiceArgs
+from src.logger import testgen_logger
+from typing import Tuple, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from test_gen.augment_test.types import StratResult
     from cowboy_lib.test_modules import TestModule
     from cowboy_lib.repo.source_repo import SourceRepo
 
-
-from logging import getLogger
-
-logger = getLogger("test_results")
-logger.info(f"Current log level: {logger.getEffectiveLevel()}")
+from pathlib import Path
+from abc import ABC, abstractmethod
 
 
 class Evaluator(ABC):
@@ -29,10 +23,10 @@ class Evaluator(ABC):
     async def gen_test_and_diff_coverage(
         self,
         strat_results: List["StratResult"],
-        base_cov: CoverageResult,
+        base_cov: TestCoverage,
         test_fp: Path,
         n_times: int = 1,
-    ) -> Tuple[List[Tuple[CoverageResult, TestCoverage]], float]:
+    ) -> List[Tuple[CoverageResult, TestCoverage]]:
         """
         Does two runs:
         1. Run to get coverage baseline
@@ -49,14 +43,10 @@ class Evaluator(ABC):
             cov_ptched = await run_test(
                 service_args=self.run_args, patch_file=patch_file
             )
-            print(
-                f"Total failed patched: {cov_ptched.total_failed}/{cov_ptched.total_tests}"
+            cov_diff = cov_ptched.coverage - base_cov
+            testgen_logger.info(
+                f"New coverage from generated tests: {cov_diff.total_cov.covered}"
             )
-            print(f"Total failed base: {base_cov.total_failed}/{base_cov.total_tests}")
-
-            cov_diff = cov_ptched.coverage - base_cov.coverage
-            print("Patched vs base: ", cov_diff)
-
             test_results.append((cov_ptched, cov_diff, test_file))
 
         return test_results

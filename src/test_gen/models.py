@@ -3,7 +3,7 @@ from src.models import CowboyBase
 
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from enum import Enum
 from typing import List
 from typing import Optional
@@ -12,7 +12,8 @@ from typing import Optional
 class AugmentTestMode(str, Enum):
     AUTO = "auto"
     FILE = "file"
-    TM = "tm"
+    TM = "module"
+    ALL = "all"
 
 
 class Decision(int, Enum):
@@ -26,6 +27,18 @@ class AugmentTestRequest(BaseModel):
     mode: AugmentTestMode
     src_file: Optional[str]
     tms: Optional[List[str]]
+
+    @validator("src_file", always=True)
+    def check_src_file(cls, v, values):
+        if values.get("mode") == AugmentTestMode.FILE and not v:
+            raise ValueError("src_file must be specified if mode is FILE")
+        return v
+
+    @validator("tms", always=True)
+    def check_tms(cls, v, values):
+        if values.get("mode") == AugmentTestMode.TM and not v:
+            raise ValueError("tms must be specfied if mode is TM")
+        return v
 
 
 class AugmentTestResponse(CowboyBase):

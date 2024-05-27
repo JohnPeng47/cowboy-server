@@ -2,23 +2,16 @@ from cowboy_lib.coverage import CoverageResult, TestError, TestCoverage
 from cowboy_lib.repo.repository import PatchFile
 from cowboy_lib.repo.source_file import Function
 
-from concurrent.futures import ThreadPoolExecutor
-
-from .eval_base import Evaluator
-
-from src.runner.service import run_test
-
-
 from typing import Tuple, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from test_gen.augment_test.types import StratResult
     from cowboy_lib.test_modules import TestModule
 
+from .eval_base import Evaluator
 
-from logging import getLogger
-
-logger = getLogger("test_results")
+from concurrent.futures import ThreadPoolExecutor
+from src.logger import testgen_logger
 
 
 class AugmentParallelEvaluator(Evaluator):
@@ -76,9 +69,11 @@ class AugmentParallelEvaluator(Evaluator):
                 # 1. create args for each runner thread
                 runner_args = {}
                 for func in new_funcs:
-                    logger.info(f"Generated func: {func.name}")
                     test_error = cov_res.get_failed(func.name)
                     if test_error:
+                        testgen_logger.info(f"[FAILED] Generated Func: {func.name}")
+                        testgen_logger.info(f"Code: {func.to_code()}")
+
                         failed_tests.append((func, test_error))
                         continue
 
@@ -98,7 +93,9 @@ class AugmentParallelEvaluator(Evaluator):
                         (func, executor.submit(self.runner.run_test, **args))
                         for func, args in runner_args.items()
                     ]
-                    logger.info(f"{len(futures)} tests submitted for evaluation")
+                    testgen_logger.info(
+                        f"{len(futures)} tests submitted for evaluation"
+                    )
                     for func, future in futures:
                         results.append((func, future.result()))
 
@@ -108,8 +105,14 @@ class AugmentParallelEvaluator(Evaluator):
 
                     indv_improve = indvtest_cov.coverage - del_cov.coverage
                     if indv_improve.total_cov.covered > 0:
+                        testgen_logger.info(f"[IMPROVE] Generated Func: {func.name}")
+                        testgen_logger.info(f"Code: {func.to_code()}")
+
                         improved_tests.append((func, indv_improve))
                     else:
+                        testgen_logger.info(f"[NOIMPROVE] Generated Func: {func.name}")
+                        testgen_logger.info(f"Code: {func.to_code()}")
+
                         noimprov_tests.append((func, TestCoverage([])))
 
                 # MOVE into post analysis
