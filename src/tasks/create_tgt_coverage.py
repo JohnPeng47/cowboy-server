@@ -75,6 +75,7 @@ def create_tgt_code_models(
     return target_chunks
 
 
+# TODO:
 @async_timed
 async def create_tgt_coverage(
     *,
@@ -82,7 +83,8 @@ async def create_tgt_coverage(
     task_queue: TaskQueue,
     curr_user: CowboyUser,
     repo_config: RepoConfig,
-    tm_names: List[str]
+    tm_names: List[str],
+    overwrite: bool = True
 ):
     """
     Important function that sets up relationships between TestModule, TargetCode and
@@ -98,17 +100,19 @@ async def create_tgt_coverage(
             db_session=db_session, repo_id=repo_config.id, coverage=cov
         )
 
+    # TODO: we should combine TMModel and TM into single object instead of serializing
+    # and deserializing it
     tm_models = get_tms_by_names(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
-    # TODO: we should combine TMModel and TM into single object instead of serializing
-    # and deserializing it
-    unbaselined_tm_models = [tm for tm in tm_models if not tm.target_chunks]
-    unbaselined_tms = [
-        tm_model.serialize(src_repo) for tm_model in unbaselined_tm_models
-    ]
+    tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
 
-    for tm_model, tm in zip(unbaselined_tm_models, unbaselined_tms):
+    if not overwrite:
+        # we only want to baseline TMs that dont already have target code coverage
+        tm_models = [tm for tm in tm_models if not tm.target_chunks]
+        tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
+
+    for tm_model, tm in zip(tm_models, tms):
         # generate src to test mappings
         tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
 
