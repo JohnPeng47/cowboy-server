@@ -31,6 +31,7 @@ async def augment_test(
     repo: RepoConfig,
     tm_model: TestModuleModel,
     curr_user: CowboyUser,
+    session_id: str
 ) -> List[AugmentTestResult]:
     """
     Generate test cases for the given test module using the specified strategy and evaluator
@@ -54,7 +55,7 @@ async def augment_test(
     )
 
     improved_tests, failed_tests, no_improve_tests = await composer.generate_test(
-        n_times=1
+        n_times=3
     )
 
     # write all improved test to source file and check out merge on repo
@@ -62,7 +63,6 @@ async def augment_test(
     test_results = []
     test_file = tm.test_file
     for improved, cov in improved_tests:
-        print("Improved test: ", improved.name)
         test_result = create_test_result(
             db_session=db_session,
             repo_id=repo.id,
@@ -73,6 +73,7 @@ async def augment_test(
             commit_hash=git_repo.get_curr_commit(),
             testfile=str(test_file.path),
             classname=None,
+            session_id=session_id,
         )
         test_results.append(test_result)
 

@@ -3,6 +3,7 @@ from .models import AugmentTestResult, UserDecision
 from src.coverage.service import create_or_update_cov
 
 from typing import List
+from src.utils import generate_id
 
 
 def save_all(*, db_session, test_results: List[AugmentTestResult]):
@@ -47,10 +48,10 @@ def create_test_result(
     return tr_model
 
 
-def get_test_results(*, db_session, repo_id):
+def get_test_results(*, db_session, session_id):
     return (
         db_session.query(AugmentTestResult)
-        .filter(AugmentTestResult.repo_id == repo_id)
+        .filter(AugmentTestResult.session_id == session_id)
         .all()
     )
 
@@ -76,3 +77,7 @@ def set_test_result_decision(*, db_session, user_decision: List[UserDecision]):
     db_session.commit()
 
     return len(user_decision)
+
+
+def get_session_id():
+    return generate_id()

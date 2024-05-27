@@ -10,12 +10,17 @@ from src.test_modules.service import (
     get_tms_by_names,
 )
 from src.repo.service import get_or_raise
-from src.models import HTTPSuccess
 from src.config import AUTO_GRP_SIZE
 
-from .models import AugmentTestRequest, AugmentTestMode, UserDecisionRequest
+from .models import (
+    AugmentTestRequest,
+    AugmentTestResponse,
+    AugmentTestMode,
+    UserDecisionRequest,
+)
 from .augment import augment_test
 from .service import save_all, get_test_results, set_test_result_decision
+from .service import get_session_id
 
 from sqlalchemy.orm import Session
 from pathlib import Path
@@ -26,12 +31,13 @@ import asyncio
 test_gen_router = APIRouter()
 
 
-@test_gen_router.post("/test-gen/augment")
+@test_gen_router.post("/test-gen/augment", response_model=AugmentTestResponse)
 async def augment_test_route(
     request: AugmentTestRequest,
     db_session=Depends(get_db),
     curr_user=Depends(get_current_user),
     task_queue=Depends(get_queue),
+    session_id=Depends(get_session_id),
 ):
     """
     Augment tests for a test module
@@ -66,6 +72,7 @@ async def augment_test_route(
             repo=repo,
             tm_model=tm_model,
             curr_user=curr_user,
+            session_id=session_id,
         )
         coroutines.append(coroutine)
 
@@ -75,17 +82,16 @@ async def augment_test_route(
     # we save here after async ops have finished running
     save_all(db_session=db_session, test_results=test_results)
 
-    return HTTPSuccess()
+    return AugmentTestResponse(session_id=session_id)
 
 
-@test_gen_router.get("/test-gen/results/{repo_name}")
+@test_gen_router.get("/test-gen/results/{session_id}")
 def get_results(
-    repo_name: str,
+    session_id: str,
     curr_user: CowboyUser = Depends(get_current_user),
     db_session: Session = Depends(get_db),
 ):
-    repo = get_or_raise(db_session=db_session, curr_user=curr_user, repo_name=repo_name)
-    return get_test_results(db_session=db_session, repo_id=repo.id)
+    return get_test_results(db_session=db_session, session_id=session_id)
 
 
 @test_gen_router.post("/test-gen/results/decide")

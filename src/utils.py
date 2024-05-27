@@ -5,6 +5,8 @@ import uuid
 import time
 import functools
 
+from src.logger import testgen_logger
+
 
 # nested level get() function
 def resolve_attr(obj, attr, default=None):
@@ -36,7 +38,9 @@ def async_timed(func):
         start_time = time.time()
         result = await func(*args, **kwargs)
         end_time = time.time()
-        print(f"Function {func.__name__} took {end_time - start_time:.4f} seconds")
+        testgen_logger.info(
+            f"[SERIAL] Function {func.__name__} took {end_time - start_time:.4f} seconds"
+        )
         return result
 
     return wrapper

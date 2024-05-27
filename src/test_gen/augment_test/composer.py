@@ -118,6 +118,8 @@ class Composer:
         no_improve_tests = []
         prompt = self.strat.build_prompt()
 
+        print("Prompt: ", prompt)
+
         for _ in range(n_times):
             retries = LLM_RETRIES
             src_file = None

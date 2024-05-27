@@ -42,9 +42,7 @@ class AugmentTestRequest(BaseModel):
 
 
 class AugmentTestResponse(CowboyBase):
-    id: int
-    name: str
-    test_case: str
+    session_id: str
 
 
 class AugmentTestResult(Base):
@@ -58,6 +56,7 @@ class AugmentTestResult(Base):
     # used in TestFile.append() to construct the modified test file
     testfile = Column(String)
     classname = Column(String, nullable=True)
+    session_id = Column(String)
 
     repo_id = Column(Integer, ForeignKey("repo_config.id"))
     test_module_id = Column(Integer, ForeignKey("test_modules.id"))
