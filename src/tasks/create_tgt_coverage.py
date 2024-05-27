@@ -101,15 +101,19 @@ async def create_tgt_coverage(
     tm_models = get_tms_by_names(
         db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
     )
-    total_tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
-    unbaselined_tms = [tm for tm in total_tms if not tm.chunks]
-
-    # zip tm_model because we need to update it later in the code
     # TODO: we should combine TMModel and TM into single object instead of serializing
     # and deserializing it
-    for tm_model, tm in zip(tm_models, unbaselined_tms):
+    unbaselined_tm_models = [tm for tm in tm_models if not tm.target_chunks]
+    unbaselined_tms = [
+        tm_model.serialize(src_repo) for tm_model in unbaselined_tm_models
+    ]
+
+    for tm_model, tm in zip(unbaselined_tm_models, unbaselined_tms):
         # generate src to test mappings
         tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
+
+        for t in targets:
+            print("Target code: ", t.filepath)
 
         # store chunks and their nodes
         tgt_code_chunks = create_tgt_code_models(
