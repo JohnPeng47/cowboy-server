@@ -19,11 +19,7 @@ def get(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
     """Returns a repo based on the given repo name."""
     return (
         db_session.query(RepoConfig)
-        .filter(
-            RepoConfig.repo_name == repo_name,
-            RepoConfig.user_id == curr_user.id,
-            RepoConfig.is_experiment == False,
-        )
+        .filter(RepoConfig.repo_name == repo_name, RepoConfig.user_id == curr_user.id)
         .one_or_none()
     )
 
@@ -35,7 +31,6 @@ def get_or_raise(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoCo
         .filter(
             RepoConfig.repo_name == repo_name,
             RepoConfig.user_id == curr_user.id,
-            RepoConfig.is_experiment == False,
         )
         .one_or_none()
     )

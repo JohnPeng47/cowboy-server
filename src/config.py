@@ -23,6 +23,7 @@ ALEMBIC_CORE_REVISION_PATH = "alembic"
 LLM_RETRIES = 3
 AUTO_GRP_SIZE = 7
 
+LOG_DIR = "log"
 
 REPOS_ROOT = "repos"
 
