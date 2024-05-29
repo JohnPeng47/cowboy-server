@@ -22,6 +22,7 @@ def create_test_result(
     tm_id,
     commit_hash,
     testfile,
+    session_id,
     classname=None
 ):
     tr_model = AugmentTestResult(
@@ -31,6 +32,7 @@ def create_test_result(
         commit_hash=commit_hash,
         testfile=testfile,
         classname=classname,
+        session_id=session_id,
         repo_id=repo_id,
     )
 
@@ -48,7 +50,15 @@ def create_test_result(
     return tr_model
 
 
-def get_test_results(*, db_session, session_id):
+def get_test_result_by_id_or_raise(*, db_session, test_id) -> AugmentTestResult:
+    return (
+        db_session.query(AugmentTestResult)
+        .filter(AugmentTestResult.id == test_id)
+        .one_or_none()
+    )
+
+
+def get_test_results_by_sessionid(*, db_session, session_id) -> AugmentTestResult:
     return (
         db_session.query(AugmentTestResult)
         .filter(AugmentTestResult.session_id == session_id)
@@ -56,27 +66,12 @@ def get_test_results(*, db_session, session_id):
     )
 
 
-def clean_test_results(*, db_session, repo_id):
-    return ()
-
-
-def get_test_result(*, db_session, id):
-    return (
-        db_session.query(AugmentTestResult)
-        .filter(AugmentTestResult.id == id)
-        .one_or_none()
-    )
-
-
-def set_test_result_decision(*, db_session, user_decision: List[UserDecision]):
-    for f in user_decision:
-        id, decision = f.id, f.decision
-        test_result = get_test_result(db_session=db_session, id=id)
-        test_result.set_decision(decision)
+def delete_test_results_by_sessionid(*, db_session, session_id):
+    db_session.query(AugmentTestResult).filter(
+        AugmentTestResult.session_id == session_id
+    ).delete()
 
     db_session.commit()
-
-    return len(user_decision)
 
 
 def get_session_id():

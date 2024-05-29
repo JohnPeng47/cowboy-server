@@ -12,3 +12,4 @@ tiktoken
 openai 
 simple_parsing
 tenacity
+black

@@ -1,4 +1,4 @@
-from cowboy_lib.repo import SourceRepo
+from cowboy_lib.repo import SourceRepo, GitRepo
 from src.database.core import get_db
 from src.auth.service import get_current_user
 from src.auth.models import CowboyUser
@@ -9,7 +9,7 @@ from src.test_modules.service import (
     get_tms_by_filename,
     get_tms_by_names,
 )
-from src.repo.service import get_or_raise
+from src.repo.service import get_or_raise, get_by_id_or_raise
 from src.config import AUTO_GRP_SIZE
 
 from .models import (
@@ -17,10 +17,17 @@ from .models import (
     AugmentTestResponse,
     AugmentTestMode,
     UserDecisionRequest,
+    UserDecisionResponse,
+    TestResultResponse,
 )
 from .augment import augment_test
-from .service import save_all, get_test_results, set_test_result_decision
+from .service import (
+    save_all,
+    get_test_results_by_sessionid,
+    get_test_result_by_id_or_raise,
+)
 from .service import get_session_id
+from .utils import gen_commit_msg
 
 from sqlalchemy.orm import Session
 from pathlib import Path
@@ -88,12 +95,60 @@ async def augment_test_route(
 @test_gen_router.get("/test-gen/results/{session_id}")
 def get_results(
     session_id: str,
-    curr_user: CowboyUser = Depends(get_current_user),
     db_session: Session = Depends(get_db),
 ):
-    return get_test_results(db_session=db_session, session_id=session_id)
+    trs = get_test_results_by_sessionid(db_session=db_session, session_id=session_id)
+    return [
+        TestResultResponse(
+            id=tr.id,
+            name=tr.name,
+            test_case=tr.test_case,
+            test_file=tr.testfile,
+            cov_improved=tr.coverage_improve(),
+            decided=tr.decide,
+        )
+        for tr in trs
+    ]
 
 
-@test_gen_router.post("/test-gen/results/decide")
-def set_decision(request: UserDecisionRequest, db_session=Depends(get_db)):
-    set_test_result_decision(db_session=db_session, user_decision=request.user_decision)
+@test_gen_router.post("/test-gen/results/decide/{sesssion_id}")
+def set_decision(
+    request: UserDecisionRequest,
+    curr_user=Depends(get_current_user),
+    db_session=Depends(get_db),
+):
+    """
+    Takes the result of the selected tests and appends all of the selected
+    tests to TestModule (testfile/test class). Then check out a new branch against
+    the remote repo with the changed files
+    """
+
+    repo_id = get_test_result_by_id_or_raise(
+        db_session=db_session, test_id=request.user_decision[0].id
+    ).repo_id
+    repo = get_by_id_or_raise(
+        db_session=db_session, curr_user=curr_user, repo_id=repo_id
+    )
+    src_repo = SourceRepo(Path(repo.source_folder))
+    git_repo = GitRepo(Path(repo.source_folder))
+
+    # NOTE: LintExceptions at this step should not happen because they would have occurred
+    # earlier during the Evaluation phase
+    changed_files = set()
+    accepted_results = []
+    for decision in request.user_decision:
+        tr = get_test_result_by_id_or_raise(db_session=db_session, test_id=decision.id)
+        test_file = src_repo.find_file(tr.testfile)
+        if decision.decision:
+            test_file.append(tr.test_case, class_name=tr.classname)
+            src_repo.write_file(test_file.path)
+            changed_files.add(str(test_file.path))
+            accepted_results.append(tr)
+
+    msg = gen_commit_msg(accepted_results)
+    compare_url = git_repo.checkout_and_push(
+        "cowboy-augmented-tests", msg, list(changed_files)
+    )
+    print(compare_url)
+
+    return UserDecisionResponse(compare_url=compare_url)

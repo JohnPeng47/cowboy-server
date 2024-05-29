@@ -13,11 +13,11 @@ from sqlalchemy.orm import sessionmaker
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 
 import uvicorn
 from logging import getLogger
+from src.logger import configure_uvicorn_logger
 import yaml
 
 from src.queue.core import TaskQueue
@@ -60,23 +60,13 @@ exception_handlers = {404: not_found}
 
 app = FastAPI(exception_handlers=exception_handlers, openapi_url="/docs/openapi.json")
 
-# local testing
-origins = [
-    "http://localhost:3000",  # Allow requests from your local frontend
-    "http://localhost:5900",
-    "http://localhost:10559",
-    "http://18.221.129.100:8000",
-    "http://172.31.32.87:8000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # def get_path_params_from_request(request: Request) -> str:
 #     path_params = {}
@@ -231,17 +221,6 @@ class AddTaskQueueMiddleware(BaseHTTPMiddleware):
         return response
 
 
-# STATIC_DIR = "build"
-# app.mount("/static", StaticFiles(directory=os.path.join(STATIC_DIR, "static")))
-
-
-# @app.get("/")
-# def read_root():
-#     with open(os.path.join(STATIC_DIR, "index.html"), "r") as f:
-#         content = f.read()
-#         return HTMLResponse(content=content)
-
-# app.add_middleware(AddTaskAuthMiddleware)
 app.add_middleware(ExceptionMiddleware)
 app.add_middleware(DBMiddleware)
 app.add_middleware(AddTaskQueueMiddleware)
@@ -261,7 +240,7 @@ if __name__ == "__main__":
     uvicorn_version = uvicorn.__version__
 
     # doesnt work ??
-    # disable_uvicorn_logging()
+    configure_uvicorn_logger()
 
     with open("uvicorn.yaml", "r") as f:
         config = yaml.safe_load(f)
@@ -270,7 +249,7 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=3000,
-        reload=True,
+        # reload=True,
         reload_excludes=["./repos"],
         # log_config=config,
     )

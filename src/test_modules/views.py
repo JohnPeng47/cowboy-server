@@ -31,12 +31,14 @@ async def get_tm_target_coverage(
     )
     # When ran like this, task execution does not continue execuing the await block
     # inside get_tgt_coverage after a task has been updated by the client
-    # background_tasks.add_task(
-    #     get_tgt_coverage,
-    #     task_queue=task_queue,
-    #     curr_user=current_user,
-    #     repo_config=repo_conf,
-    #     tm_names=request.test_modules,
+    # asyncio.create_task(
+    #   create_tgt_coverage(
+    #       get_tgt_coverage,
+    #       task_queue=task_queue,
+    #       curr_user=current_user,
+    #       repo_config=repo_conf,
+    #       tm_names=request.test_modules,
+    #   )
     # )
 
     # NOTE: don't need to await here because we dont need to return the result right away
@@ -45,14 +47,12 @@ async def get_tm_target_coverage(
     # endpoints
 
     try:
-        asyncio.create_task(
-            create_tgt_coverage(
-                db_session=db_session,
-                task_queue=task_queue,
-                curr_user=current_user,
-                repo_config=repo_conf,
-                tm_names=request.test_modules,
-            )
+        await create_tgt_coverage(
+            db_session=db_session,
+            task_queue=task_queue,
+            curr_user=current_user,
+            repo_config=repo_conf,
+            tm_names=request.test_modules,
         )
 
         return HTTPSuccess()

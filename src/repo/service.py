@@ -42,6 +42,21 @@ def get_or_raise(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoCo
     return repo
 
 
+def get_by_id_or_raise(
+    *, db_session, curr_user: CowboyUser, repo_id: int
+) -> RepoConfig:
+    """Returns a repo based on the given repo id."""
+    repo = (
+        db_session.query(RepoConfig)
+        .filter(RepoConfig.id == repo_id, RepoConfig.user_id == curr_user.id)
+        .one_or_none()
+    )
+    if not repo:
+        raise HTTPException(status_code=400, detail=f"Repo {repo_id} not found")
+
+    return repo
+
+
 def get_experiment(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
     """Returns a repo based on the given repo name."""
 

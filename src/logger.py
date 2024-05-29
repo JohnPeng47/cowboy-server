@@ -56,3 +56,9 @@ def set_log_level(level=logging.INFO):
         logger.setLevel(level)
         for handler in logger.handlers:
             handler.setLevel(level)
+
+
+def configure_uvicorn_logger():
+    uvicorn_error_logger = logging.getLogger("uvicorn.error")
+    uvicorn_error_logger.addHandler(get_file_handler())
+    uvicorn_error_logger.addHandler(get_console_handler())

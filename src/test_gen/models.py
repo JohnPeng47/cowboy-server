@@ -3,7 +3,7 @@ from src.models import CowboyBase
 
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 from enum import Enum
 from typing import List
 from typing import Optional
@@ -65,6 +65,18 @@ class AugmentTestResult(Base):
     def set_decision(self, decision: Decision):
         self.decision = decision.value
 
+    def coverage_improve(self):
+        return sum([cov.covered for cov in self.cov_list])
+
+
+class TestResultResponse(BaseModel):
+    id: str
+    name: str
+    test_case: str
+    test_file: str
+    cov_improved: int
+    decided: int
+
 
 class UserDecision(BaseModel):
     id: int
@@ -73,3 +85,13 @@ class UserDecision(BaseModel):
 
 class UserDecisionRequest(BaseModel):
     user_decision: List[UserDecision]
+
+    @root_validator
+    def check_user_decision(cls, values):
+        if not values.get("user_decision"):
+            raise ValueError("user_decision must not be empty")
+        return values
+
+
+class UserDecisionResponse(BaseModel):
+    compare_url: str

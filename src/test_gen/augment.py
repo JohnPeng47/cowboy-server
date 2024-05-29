@@ -55,7 +55,7 @@ async def augment_test(
     )
 
     improved_tests, failed_tests, no_improve_tests = await composer.generate_test(
-        n_times=3
+        n_times=1
     )
 
     # write all improved test to source file and check out merge on repo
@@ -72,8 +72,8 @@ async def augment_test(
             tm_id=tm_model.id,
             commit_hash=git_repo.get_curr_commit(),
             testfile=str(test_file.path),
-            classname=None,
             session_id=session_id,
+            classname=None,
         )
         test_results.append(test_result)
 
