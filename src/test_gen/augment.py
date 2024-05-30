@@ -3,6 +3,7 @@ from cowboy_lib.repo import SourceRepo, GitRepo
 from .augment_test.composer import Composer
 from .models import AugmentTestResult
 
+from src.stats.service import update_repo_stats
 from src.auth.models import CowboyUser
 from src.auth.service import retrieve_oai_key
 from src.runner.service import RunServiceArgs
@@ -76,5 +77,11 @@ async def augment_test(
             classname=None,
         )
         test_results.append(test_result)
+
+    # update repo stats
+    with update_repo_stats(db_session=db_session, repo=repo) as repo_stats:
+        repo_stats.total_tests += (
+            len(improved_tests) + len(failed_tests) + len(no_improve_tests)
+        )
 
     return test_results

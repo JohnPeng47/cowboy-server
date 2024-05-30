@@ -43,6 +43,7 @@ class RepoConfig(Base):
     cov_list = relationship(
         "CoverageModel", backref="repo_config", cascade="all, delete-orphan"
     )
+    stats = relationship("RepoStats", uselist=False, cascade="all, delete-orphan")
 
     def __init__(
         self,

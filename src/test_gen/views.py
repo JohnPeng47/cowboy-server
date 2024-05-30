@@ -1,8 +1,8 @@
 from cowboy_lib.repo import SourceRepo, GitRepo
 from src.database.core import get_db
 from src.auth.service import get_current_user
-from src.auth.models import CowboyUser
 from src.queue.core import get_queue
+from src.stats.service import update_repo_stats
 
 from src.test_modules.service import (
     get_all_tms_sorted,
@@ -112,7 +112,7 @@ def get_results(
 
 
 @test_gen_router.post("/test-gen/results/decide/{sesssion_id}")
-def set_decision(
+def accept_user_decision(
     request: UserDecisionRequest,
     curr_user=Depends(get_current_user),
     db_session=Depends(get_db),
@@ -144,6 +144,11 @@ def set_decision(
             src_repo.write_file(test_file.path)
             changed_files.add(str(test_file.path))
             accepted_results.append(tr)
+
+    # update stats
+    with update_repo_stats(db_session=db_session, repo=repo) as repo_stats:
+        repo_stats.accepted_tests += len(accepted_results)
+        repo_stats.rejected_tests += len(request.user_decision) - len(accepted_results)
 
     msg = gen_commit_msg(accepted_results)
     compare_url = git_repo.checkout_and_push(
