@@ -10,7 +10,6 @@ from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.auth.models import CowboyUser
 from src.test_modules.models import TestModuleModel
-from src.target_code.models import TargetCodeModel
 
 from src.runner.service import run_test, RunServiceArgs
 from src.ast.service import create_node, create_or_update_node

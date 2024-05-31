@@ -42,6 +42,11 @@ def get_or_raise(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoCo
     return repo
 
 
+def get_all(*, db_session) -> list[RepoConfig]:
+    """Returns all repos."""
+    return db_session.query(RepoConfig).all()
+
+
 def get_by_id_or_raise(
     *, db_session, curr_user: CowboyUser, repo_id: int
 ) -> RepoConfig:

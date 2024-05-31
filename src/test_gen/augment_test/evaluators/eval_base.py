@@ -44,6 +44,7 @@ class Evaluator(ABC):
                 service_args=self.run_args, patch_file=patch_file
             )
             cov_diff = cov_ptched.coverage - base_cov
+            # TODO: this covered number is off check
             testgen_logger.info(
                 f"New coverage from generated tests: {cov_diff.total_cov.covered}"
             )

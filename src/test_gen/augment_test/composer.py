@@ -11,7 +11,7 @@ from .evaluators import (
 from cowboy_lib.llm.invoke_llm import invoke_llm_async
 from cowboy_lib.llm.models import OpenAIModel, ModelArguments
 from cowboy_lib.repo.source_repo import SourceRepo
-from cowboy_lib.repo.source_file import Function
+from cowboy_lib.repo.source_file import Function, LintException
 from cowboy_lib.coverage import TestCoverage, TestError
 
 from src.test_gen.augment_test.strats import AugmentStratType, AUGMENT_STRATS
@@ -131,12 +131,8 @@ class Composer:
                         n_times=1,
                     )
                     src_file = self.strat.parse_llm_res(llm_res[0])
-                except SyntaxError:
+                except (SyntaxError, ValueError, LintException):
                     testgen_logger.info(f"LLM syntax error ... {retries} left")
-                    retries -= 1
-                    continue
-                except ValueError:
-                    testgen_logger.info(f"LLM parsing format error ... {retries} left")
                     retries -= 1
                     continue
 

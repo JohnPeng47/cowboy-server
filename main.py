@@ -19,6 +19,7 @@ import uvicorn
 from logging import getLogger
 from src.logger import configure_uvicorn_logger
 import yaml
+import threading
 
 from src.queue.core import TaskQueue
 from src.auth.views import auth_router
@@ -28,10 +29,9 @@ from src.queue.views import task_queue_router
 from src.test_gen.views import test_gen_router
 from src.target_code.views import tgtcode_router
 from src.experiments.views import exp_router
-
 from src.exceptions import CowboyRunTimeException
-
 from src.database.core import engine
+from src.threads import check_for_changed_files
 
 import uuid
 
@@ -232,6 +232,13 @@ app.include_router(task_queue_router)
 app.include_router(test_gen_router)
 app.include_router(tgtcode_router)
 app.include_router(exp_router)
+
+# starts threads to check for repo updates
+Session = sessionmaker(bind=engine)
+db_session = Session()
+threading.Thread(
+    target=check_for_changed_files, args=(db_session,), daemon=True
+).start()
 
 # logfire.configure(console=False)
 # logfire.instrument_fastapi(app)

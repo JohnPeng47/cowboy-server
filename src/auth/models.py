@@ -10,6 +10,7 @@ from typing import Optional
 from pydantic import validator, Field, BaseModel
 from pydantic.networks import EmailStr
 from sqlalchemy import DateTime, Column, String, LargeBinary, Integer, Boolean
+from sqlalchemy.orm import relationship
 from typing import List
 from datetime import datetime, timedelta
 
@@ -44,7 +45,9 @@ class CowboyUser(Base, TimeStampMixin):
     last_mfa_time = Column(DateTime, nullable=True)
     experimental_features = Column(Boolean, default=False)
 
-    # repos = relationship("Repo", backref="cowboy_user")
+    repos = relationship(
+        "RepoConfig", backref="cowboy_user", cascade="all, delete-orphan"
+    )
 
     # search_vector = Column(
     #     TSVectorType("email", regconfig="pg_catalog.simple", weights={"email": "A"})

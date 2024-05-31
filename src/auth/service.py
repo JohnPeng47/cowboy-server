@@ -55,19 +55,18 @@ def create(*, db_session, user_in: UserRegister | UserCreate) -> CowboyUser:
 
 
 def extract_user_email_jwt(request: Request, **kwargs):
-    authorization: str = request.headers.get("Authorization")
-    scheme, param = get_authorization_scheme_param(authorization)
-    if not authorization or scheme.lower() != "bearer":
-        log.exception(
-            f"Malformed authorization header. Scheme: {scheme} Param: {param} Authorization: {authorization}"
-        )
-        return
-
-    token = authorization.split()[1]
-
     try:
+        authorization: str = request.headers.get("Authorization")
+        scheme, param = get_authorization_scheme_param(authorization)
+        if not authorization or scheme.lower() != "bearer":
+            log.exception(
+                f"Malformed authorization header. Scheme: {scheme} Param: {param} Authorization: {authorization}"
+            )
+            return
+
+        token = authorization.split()[1]
         data = jwt.decode(token, COWBOY_JWT_SECRET)
-    except (JWKError, JWTError):
+    except (JWKError, JWTError, IndexError, KeyError):
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED,
             detail=[{"msg": "Could not validate credentials"}],
@@ -92,7 +91,6 @@ def extract_user_email_jwt(request: Request, **kwargs):
 
 def get_current_user(request: Request) -> CowboyUser:
     user_email = extract_user_email_jwt(request=request)
-    print(user_email)
 
     if not user_email:
         log.exception(f"Failed to extract user email")
