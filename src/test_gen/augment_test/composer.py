@@ -81,7 +81,8 @@ class Composer:
         improved_tests = []
         failed_tests = []
         no_improve_tests = []
-
+		
+        # TODO: here is whee we initialize the StartCodeTx
         prompt = self.strat.build_prompt()
         print(f"Prompt: {prompt}")
 
