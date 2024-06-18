@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from pydantic import BaseModel
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from cowboy_lib.test_modules.test_module import TestModule
 from cowboy_lib.repo.source_repo import SourceRepo
@@ -10,6 +9,7 @@ from cowboy_lib.repo.source_repo import SourceRepo
 from src.database.core import Base
 from src.ast.models import NodeModel
 from src.target_code.models import TargetCodeModel
+from src.test_gen.models import TMSelectModeBase
 
 
 class IncompatibleCommit(Exception):
@@ -97,6 +97,6 @@ class TestModuleModel(Base):
         return agg_score / len(all_files) if len(all_files) > 0 else 0
 
 
-class GetTargetCovRequest(BaseModel):
+class BuildMappingRequest(TMSelectModeBase):
     repo_name: str
-    test_modules: List[str]
+    overwrite: Optional[bool] = False

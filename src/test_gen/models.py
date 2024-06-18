@@ -9,7 +9,11 @@ from typing import List
 from typing import Optional
 
 
-class AugmentTestMode(str, Enum):
+class TMSelectMode(str, Enum):
+    """
+    Used to select the TestModules to be augmented
+    """
+
     AUTO = "auto"
     FILE = "file"
     TM = "module"
@@ -22,23 +26,26 @@ class Decision(int, Enum):
     UNDECIDED = -1
 
 
-class AugmentTestRequest(BaseModel):
-    repo_name: str
-    mode: AugmentTestMode
-    src_file: Optional[str]
+class TMSelectModeBase(BaseModel):
+    mode: TMSelectMode
+    files: Optional[List[str]]
     tms: Optional[List[str]]
 
-    @validator("src_file", always=True)
-    def check_src_file(cls, v, values):
-        if values.get("mode") == AugmentTestMode.FILE and not v:
-            raise ValueError("src_file must be specified if mode is FILE")
+    @validator("files", always=True)
+    def check_files(cls, v, values):
+        if values.get("mode") == TMSelectMode.FILE and not v:
+            raise ValueError("files must be specified if mode is FILE")
         return v
 
     @validator("tms", always=True)
     def check_tms(cls, v, values):
-        if values.get("mode") == AugmentTestMode.TM and not v:
+        if values.get("mode") == TMSelectMode.TM and not v:
             raise ValueError("tms must be specfied if mode is TM")
         return v
+
+
+class AugmentTestRequest(TMSelectModeBase):
+    repo_name: str
 
 
 class AugmentTestResponse(CowboyBase):
@@ -59,8 +66,9 @@ class AugmentTestResult(Base):
     session_id = Column(String)
 
     repo_id = Column(Integer, ForeignKey("repo_config.id"))
-    test_module_id = Column(Integer, ForeignKey("test_modules.id"))
-    cov_list = relationship("CoverageModel")
+    # TODO: not tested yet
+    test_module_id = Column(Integer, ForeignKey("test_modules.id", ondelete="CASCADE"))
+    cov_list = relationship("CoverageModel", cascade="all, delete-orphan")
 
     def set_decision(self, decision: Decision):
         self.decision = decision.value

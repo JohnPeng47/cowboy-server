@@ -107,6 +107,7 @@ def get_tms_by_filename(
     return [tm for tm in all_tms if src_file in tm.get_covered_files()]
 
 
+# TODO: need to figure out when to set this flag to False
 def get_all_tms_sorted(
     *, db_session: Session, repo_id: str, src_repo: SourceRepo, n: int = 2
 ) -> List[TestModuleModel]:

@@ -1,9 +1,16 @@
-from .models import AugmentTestResult, UserDecision
-
+from cowboy_lib.repo import SourceRepo
 from src.coverage.service import create_or_update_cov
+from src.test_modules.service import (
+    get_all_tms_sorted,
+    get_tms_by_filename,
+    get_tms_by_names,
+)
+from src.config import AUTO_GEN_SIZE
 
+from .models import AugmentTestResult, TMSelectModeBase, TMSelectMode
+
+from starlette.requests import Request
 from typing import List
-from src.utils import generate_id
 
 
 def save_all(*, db_session, test_results: List[AugmentTestResult]):
@@ -23,7 +30,7 @@ def create_test_result(
     commit_hash,
     testfile,
     session_id,
-    classname=None
+    classname=None,
 ):
     tr_model = AugmentTestResult(
         name=name,
@@ -74,5 +81,26 @@ def delete_test_results_by_sessionid(*, db_session, session_id):
     db_session.commit()
 
 
-def get_session_id():
-    return generate_id()
+def get_session_id(request: Request):
+    return request.state.session_id
+
+
+def select_tms(*, db_session, repo_id, request: TMSelectModeBase, src_repo: SourceRepo):
+    if request.mode == TMSelectMode.AUTO.value:
+        tm_models = get_all_tms_sorted(
+            db_session=db_session, src_repo=src_repo, repo_id=repo_id, n=AUTO_GEN_SIZE
+        )
+    elif request.mode == TMSelectMode.FILE.value:
+        tm_models = get_tms_by_filename(
+            db_session=db_session, repo_id=repo_id, src_file=request.files
+        )
+    elif request.mode == TMSelectMode.TM.value:
+        tm_models = get_tms_by_names(
+            db_session=db_session, repo_id=repo_id, tm_names=request.tms
+        )
+    elif request.mode == TMSelectMode.ALL.value:
+        tm_models = get_tms_by_names(
+            db_session=db_session, repo_id=repo_id, tm_names=[]
+        )
+
+    return tm_models

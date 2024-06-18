@@ -82,7 +82,7 @@ async def create_tgt_coverage(
     task_queue: TaskQueue,
     curr_user: CowboyUser,
     repo_config: RepoConfig,
-    tm_names: List[str],
+    tm_models: List[TestModuleModel],
     overwrite: bool = True
 ):
     """
@@ -93,19 +93,12 @@ async def create_tgt_coverage(
     run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
 
     base_cov = await run_test(run_args)
-
     for cov in base_cov.coverage.cov_list:
         create_or_update_cov(
             db_session=db_session, repo_id=repo_config.id, coverage=cov
         )
 
-    # TODO: we should combine TMModel and TM into single object instead of serializing
-    # and deserializing it
-    tm_models = get_tms_by_names(
-        db_session=db_session, repo_id=repo_config.id, tm_names=tm_names
-    )
     tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
-
     if not overwrite:
         # we only want to baseline TMs that dont already have target code coverage
         tm_models = [tm for tm in tm_models if not tm.target_chunks]

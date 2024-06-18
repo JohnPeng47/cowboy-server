@@ -3,19 +3,11 @@ from src.database.core import get_db
 from src.auth.service import get_current_user
 from src.queue.core import get_queue
 from src.stats.service import update_repo_stats
-
-from src.test_modules.service import (
-    get_all_tms_sorted,
-    get_tms_by_filename,
-    get_tms_by_names,
-)
 from src.repo.service import get_or_raise, get_by_id_or_raise
-from src.config import AUTO_GRP_SIZE
 
 from .models import (
     AugmentTestRequest,
     AugmentTestResponse,
-    AugmentTestMode,
     UserDecisionRequest,
     UserDecisionResponse,
     TestResultResponse,
@@ -26,25 +18,38 @@ from .service import (
     get_test_results_by_sessionid,
     get_test_result_by_id_or_raise,
 )
-from .service import get_session_id
+from .service import get_session_id, select_tms
 from .utils import gen_commit_msg
 
 from sqlalchemy.orm import Session
 from pathlib import Path
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from functools import reduce
 import asyncio
 
 test_gen_router = APIRouter()
 
 
-@test_gen_router.post("/test-gen/augment", response_model=AugmentTestResponse)
+MODE_AUTO_ERROR_MSG = """
+No test modules found for auto mode. Consider using mode=all instead, if you
+do not want to specify individual test modules or files to augment 
+"""
+
+MODE_FILES_ERROR_MSG = """
+No test files found for files mode. This could be because we dont have the test 
+module mapping generated for {filenames}. Consider first build mapping on these
+files first. If that still doesnt work, it means that we were unable to recover
+the test module to source file mapping for {filenames}
+"""
+
+
+@test_gen_router.post("/test-gen/augment")
 async def augment_test_route(
     request: AugmentTestRequest,
     db_session=Depends(get_db),
+    session_id=Depends(get_session_id),
     curr_user=Depends(get_current_user),
     task_queue=Depends(get_queue),
-    session_id=Depends(get_session_id),
 ):
     """
     Augment tests for a test module
@@ -53,25 +58,19 @@ async def augment_test_route(
         db_session=db_session, curr_user=curr_user, repo_name=request.repo_name
     )
     src_repo = SourceRepo(Path(repo.source_folder))
+    tm_models = select_tms(
+        db_session=db_session, repo_id=repo.id, request=request, src_repo=src_repo
+    )
+    if not tm_models:
+        detail = (
+            MODE_AUTO_ERROR_MSG
+            if request.mode == "auto"
+            else MODE_FILES_ERROR_MSG.format(filenames=request.files)
+        )
+        return HTTPException(status_code=400, detail=detail)
 
+    # TODO: put this into a service
     coroutines = []
-    if request.mode == AugmentTestMode.AUTO.value:
-        tm_models = get_all_tms_sorted(
-            db_session=db_session, src_repo=src_repo, repo_id=repo.id, n=AUTO_GRP_SIZE
-        )
-    elif request.mode == AugmentTestMode.FILE.value:
-        tm_models = get_tms_by_filename(
-            db_session=db_session, repo_id=repo.id, src_file=request.src_file
-        )
-    elif request.mode == AugmentTestMode.TM.value:
-        tm_models = get_tms_by_names(
-            db_session=db_session, repo_id=repo.id, tm_names=request.tms
-        )
-    elif request.mode == AugmentTestMode.ALL.value:
-        tm_models = get_tms_by_names(
-            db_session=db_session, repo_id=repo.id, tm_names=[]
-        )
-
     for tm_model in tm_models:
         coroutine = augment_test(
             db_session=db_session,
