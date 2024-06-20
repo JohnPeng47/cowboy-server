@@ -1,14 +1,10 @@
-from cowboy_lib.api.runner.shared import Task, TaskStatus
+from .models import Task, TaskStatus
 
 from fastapi import Request
-
 from threading import Lock
 from collections import defaultdict
-
-from typing import List
+from typing import List, Dict
 from asyncio import Event
-
-from typing import Dict
 
 
 class TaskEvent:

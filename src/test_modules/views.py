@@ -41,7 +41,7 @@ async def get_tm_target_coverage(
         await create_tgt_coverage(
             db_session=db_session,
             task_queue=task_queue,
-            repo_config=repo,
+            repo=repo,
             tm_models=tm_models,
             overwrite=request.overwrite,
         )

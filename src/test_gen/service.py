@@ -43,13 +43,12 @@ def create_test_result(
         repo_id=repo_id,
     )
 
-    for cov in cov_list:
-        create_or_update_cov(
-            db_session=db_session,
-            repo_id=repo_id,
-            coverage=cov,
-            test_result_id=tr_model.id,
-        )
+    create_or_update_cov(
+        db_session=db_session,
+        repo_id=repo_id,
+        cov_list=cov_list,
+        test_result_id=tr_model.id,
+    )
 
     db_session.add(tr_model)
     db_session.commit()

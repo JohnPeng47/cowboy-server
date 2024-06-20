@@ -1,17 +1,12 @@
-# shared\models contain "IPC" interface between client and server, which for now
-# is just the run_test interface
+from cowboy_lib.repo.repository import PatchFile
 from cowboy_lib.coverage import CoverageResult, TestCoverage
-from cowboy_lib.api.runner.shared import RunTestTaskServer, TaskResult
-from fastapi import HTTPException
 
 from src.models import CowboyBase
-from src.queue.models import Task
+from src.queue.models import TaskResult
 
-from pydantic import BaseModel
-
-
-class RunTestTask(RunTestTaskServer, CowboyBase):
-    pass
+from fastapi import HTTPException
+from pydantic import BaseModel, Field, validator
+from typing import List, Optional, Any, Tuple, Dict
 
 
 class ClientRunnerException(HTTPException):

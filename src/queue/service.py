@@ -1,4 +1,4 @@
-from cowboy_lib.api.runner.shared import Task
+from src.queue.models import Task
 
 from typing import Optional, List, Dict
 
