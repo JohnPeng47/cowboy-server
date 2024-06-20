@@ -39,7 +39,7 @@ async def run_test(
     task = Task(
         repo_name=service_args.repo_name,
         type=TaskType.RUN_TEST,
-        task_args=RunTestTaskArgs(
+        task_args=RunTestTaskArgs.from_data(
             patch_file=patch_file,
             exclude_tests=exclude_tests,
             include_tests=include_tests,
