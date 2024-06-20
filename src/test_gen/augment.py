@@ -7,7 +7,6 @@ from src.stats.service import update_repo_stats
 from src.auth.models import CowboyUser
 from src.auth.service import retrieve_oai_key
 from src.runner.service import RunServiceArgs
-from src.runner.service import run_test
 from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.test_modules.models import TestModuleModel
@@ -44,7 +43,7 @@ async def augment_test(
         user_id=curr_user.id, repo_name=repo.repo_name, task_queue=task_queue
     )
 
-    base_cov = repo.base_cov()
+    base_cov = repo.base_cov
     composer = Composer(
         strat="WITH_CTXT",
         evaluator="ADDITIVE",

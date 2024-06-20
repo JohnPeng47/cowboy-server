@@ -1,4 +1,3 @@
-from cowboy_lib.repo.repository import RepoCommitContext
 from cowboy_lib.repo import SourceRepo, GitRepo
 from cowboy_lib.coverage import TestCoverage, Coverage
 from cowboy_lib.test_modules.test_module import TestModule
@@ -101,7 +100,6 @@ def create_nuked_branch(
                 # CARE: this only modifies TestFile, but not the nodes
                 # TODO: figure out why the double delete here didnt work
                 # tm.test_file.delete(func.name, node_type=NodeType.Function)
-
                 src_repo.write_file(tm.path)
                 total_deleted += 1
             except (NodeNotFound, SameNodeException) as e:

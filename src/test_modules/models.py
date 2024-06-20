@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from pathlib import Path
 from typing import List, Optional
+from pydantic import BaseModel
 
 from cowboy_lib.test_modules.test_module import TestModule
 from cowboy_lib.repo.source_repo import SourceRepo
@@ -100,3 +101,9 @@ class TestModuleModel(Base):
 class BuildMappingRequest(TMSelectModeBase):
     repo_name: str
     overwrite: Optional[bool] = False
+
+
+class TestModuleReponse(BaseModel):
+    filepath: str
+    name: str
+    unit_tests: List[str]

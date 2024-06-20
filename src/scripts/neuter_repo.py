@@ -58,6 +58,9 @@ def neuter_tests(
 
 
 if __name__ == "__main__":
+    """
+    python -m neuter_repo <repo_path>
+    """
     repo = Path(sys.argv[1])
     if not repo.exists():
         print("Repo does not exist")

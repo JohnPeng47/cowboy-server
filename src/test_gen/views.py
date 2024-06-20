@@ -17,6 +17,7 @@ from .service import (
     save_all,
     get_test_results_by_sessionid,
     get_test_result_by_id_or_raise,
+    update_test_result_decision,
 )
 from .service import get_session_id, select_tms
 from .utils import gen_commit_msg
@@ -61,6 +62,7 @@ async def augment_test_route(
     tm_models = select_tms(
         db_session=db_session, repo_id=repo.id, request=request, src_repo=src_repo
     )
+
     if not tm_models:
         detail = (
             MODE_AUTO_ERROR_MSG
@@ -143,6 +145,10 @@ def accept_user_decision(
             src_repo.write_file(test_file.path)
             changed_files.add(str(test_file.path))
             accepted_results.append(tr)
+
+        update_test_result_decision(
+            db_session=db_session, test_id=decision.id, decision=decision.decision
+        )
 
     # update stats
     with update_repo_stats(db_session=db_session, repo=repo) as repo_stats:

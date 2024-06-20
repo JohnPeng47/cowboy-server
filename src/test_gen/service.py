@@ -68,9 +68,17 @@ def get_test_result_by_id_or_raise(*, db_session, test_id) -> AugmentTestResult:
 def get_test_results_by_sessionid(*, db_session, session_id) -> AugmentTestResult:
     return (
         db_session.query(AugmentTestResult)
-        .filter(AugmentTestResult.session_id == session_id)
-        .all()
+        # only return undecided sessions
+        .filter(
+            AugmentTestResult.session_id == session_id, AugmentTestResult.decide == -1
+        ).all()
     )
+
+
+def update_test_result_decision(*, db_session, test_id, decision: int):
+    test_result = get_test_result_by_id_or_raise(db_session=db_session, test_id=test_id)
+    test_result.decide = decision
+    db_session.commit()
 
 
 def delete_test_results_by_sessionid(*, db_session, session_id):

@@ -58,7 +58,6 @@ async def handle_test_files(db_session: Session, repo, test_files: List[str]):
     await create_tgt_coverage(
         db_session=db_session,
         task_queue=get_queue(),
-        curr_user=repo.cowboy_user,
         repo_config=repo,
         tm_names=tm_names,
     )

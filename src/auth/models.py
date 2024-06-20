@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 
 def generate_password():
     """Generates a reasonable password if none is provided."""
+    print("Generatin password!!!")
     alphanumeric = string.ascii_letters + string.digits
     while True:
         password = "".join(secrets.choice(alphanumeric) for i in range(10))

@@ -83,6 +83,7 @@ class RepoConfig(Base):
             "is_experiment": self.is_experiment,
         }
 
+    @property
     def base_cov(self) -> TestCoverage:
         return TestCoverage([cov.deserialize() for cov in self.cov_list])
 

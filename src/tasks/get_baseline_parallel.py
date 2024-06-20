@@ -25,7 +25,7 @@ class TestInCoverageException(Exception):
 async def get_tm_target_coverage(
     src_repo: SourceRepo,
     tm: TestModule,
-    base_cov: CoverageResult,
+    base_cov: TestCoverage,
     run_args: RunServiceArgs,
 ) -> Tuple[TestModule, List[TargetCode]]:
     """
@@ -37,7 +37,7 @@ async def get_tm_target_coverage(
     The diff measures how well we are able to supplant the coverage of the deleted methods
     """
 
-    if testfiles_in_coverage(base_cov.coverage, src_repo):
+    if testfiles_in_coverage(base_cov, src_repo):
         raise TestInCoverageException
 
     # First loop we find the total coverage of each test by itself
@@ -50,7 +50,7 @@ async def get_tm_target_coverage(
         include_tests=only_module,
     )
 
-    module_diff = base_cov.coverage - module_cov.coverage
+    module_diff = base_cov - module_cov.coverage
     total_cov_diff = module_diff.total_cov.covered
     if total_cov_diff > 0:
         # part 2:

@@ -80,8 +80,7 @@ async def create_tgt_coverage(
     *,
     db_session: Session,
     task_queue: TaskQueue,
-    curr_user: CowboyUser,
-    repo_config: RepoConfig,
+    repo: RepoConfig,
     tm_models: List[TestModuleModel],
     overwrite: bool = True
 ):
@@ -89,32 +88,28 @@ async def create_tgt_coverage(
     Important function that sets up relationships between TestModule, TargetCode and
     Coverage
     """
-    src_repo = SourceRepo(Path(repo_config.source_folder))
-    run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
+    src_repo = SourceRepo(Path(repo.source_folder))
+    run_args = RunServiceArgs(repo.user_id, repo.repo_name, task_queue)
+    base_cov = repo.base_cov
 
-    base_cov = await run_test(run_args)
-    for cov in base_cov.coverage.cov_list:
-        create_or_update_cov(
-            db_session=db_session, repo_id=repo_config.id, coverage=cov
-        )
+    for cov in base_cov.cov_list:
+        create_or_update_cov(db_session=db_session, repo_id=repo.id, coverage=cov)
 
-    tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
-    if not overwrite:
-        # we only want to baseline TMs that dont already have target code coverage
-        tm_models = [tm for tm in tm_models if not tm.target_chunks]
-        tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
+    for tm_model in tm_models:
+        print("TM: ", tm_model.name)
+        # only overwrite existing target_chunks if overwrite flag is set
+        if not overwrite and tm_model.target_chunks:
+            print("Skipping")
+            continue
 
-    for tm_model, tm in zip(tm_models, tms):
+        tm = tm_model.serialize(src_repo)
         # generate src to test mappings
         tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
-
         for t in targets:
             print("Target code: ", t.filepath)
 
         # store chunks and their nodes
-        tgt_code_chunks = create_tgt_code_models(
-            targets, db_session, repo_config.id, tm_model
-        )
+        tgt_code_chunks = create_tgt_code_models(targets, db_session, repo.id, tm_model)
 
         tm_model.target_chunks = tgt_code_chunks
         update_tm(db_session=db_session, tm_model=tm_model)
