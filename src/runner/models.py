@@ -2,7 +2,7 @@ from cowboy_lib.repo.repository import PatchFile
 from cowboy_lib.coverage import CoverageResult, TestCoverage
 
 from src.models import CowboyBase
-from src.queue.models import TaskResult
+from cowboy_lib.api.runner.shared import TaskResult
 
 from fastapi import HTTPException
 from pydantic import BaseModel, Field, validator

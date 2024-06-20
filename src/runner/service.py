@@ -5,7 +5,7 @@ from cowboy_lib.api.runner.shared import RunTestTaskArgs, FunctionArg
 
 from src.queue.service import enqueue_task_and_wait
 from src.queue.core import TaskQueue
-from src.queue.models import Task
+from cowboy_lib.api.runner.shared import Task, TaskType
 
 from .models import json_to_coverage_result
 
@@ -38,6 +38,7 @@ async def run_test(
 
     task = Task(
         repo_name=service_args.repo_name,
+        type=TaskType.RUN_TEST,
         task_args=RunTestTaskArgs(
             patch_file=patch_file,
             exclude_tests=exclude_tests,
