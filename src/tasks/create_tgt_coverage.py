@@ -92,8 +92,13 @@ async def create_tgt_coverage(
     run_args = RunServiceArgs(repo.user_id, repo.repo_name, task_queue)
     base_cov = repo.base_cov
 
-    for cov in base_cov.cov_list:
-        create_or_update_cov(db_session=db_session, repo_id=repo.id, coverage=cov)
+    # this is only place we get base_cov for repo
+    if overwrite or not base_cov:
+        cov_res = await run_test(run_args)
+        base_cov = cov_res.coverage
+        create_or_update_cov(
+            db_session=db_session, repo_id=repo.id, cov_list=base_cov.cov_list
+        )
 
     for tm_model in tm_models:
         print("TM: ", tm_model.name)

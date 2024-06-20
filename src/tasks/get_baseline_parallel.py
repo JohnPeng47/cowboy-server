@@ -45,6 +45,7 @@ async def get_tm_target_coverage(
     # coverage with ONLY the current test module turned on
     print("Running initial test ... ", tm.name)
 
+    # TODO: should be storing this as well
     module_cov = await run_test(
         run_args,
         include_tests=only_module,
