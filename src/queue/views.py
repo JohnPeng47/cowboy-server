@@ -24,6 +24,10 @@ def list(
     return tasks
 
 
+# LAUREN 6: This is where the client gets the task from the queue, and as you can see,
+# some jank here
+
+
 # incredibly hacky, basically, to prevent db connections from being used up
 # we exclude db connections for this endpoint, we do the following:
 # 1. First request actually does get a db sess, which we use to auth the user
@@ -61,6 +65,7 @@ def get(
     return tasks
 
 
+# LAUREN 7: Task is completed by the client
 @task_queue_router.post("/task/complete", response_model=CompleteTaskRequest)
 def complete(
     task: CompleteTaskRequest,

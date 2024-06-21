@@ -47,6 +47,8 @@ async def get_tm_target_coverage(
     # endpoints
 
     try:
+        # LAUREN 3: Once test modules have been created, we call this method from the client
+        # to build that mapping from test_file to the target source file
         await create_tgt_coverage(
             db_session=db_session,
             task_queue=task_queue,

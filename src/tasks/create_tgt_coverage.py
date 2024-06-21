@@ -3,7 +3,7 @@ from cowboy_lib.test_modules import TargetCode
 
 # from .models import TestModule
 # # Long term tasks represent tasks that we potentially want to offload to celery
-from src.tasks.get_baseline_parallel import get_tm_target_coverage
+from src.tasks.get_baseline_parallel import build_tm_src_mapping
 
 # from src.tasks.get_baseline import get_tm_target_coverage
 from src.queue.core import TaskQueue
@@ -94,7 +94,6 @@ async def create_tgt_coverage(
     run_args = RunServiceArgs(curr_user.id, repo_config.repo_name, task_queue)
 
     base_cov = await run_test(run_args)
-
     for cov in base_cov.coverage.cov_list:
         create_or_update_cov(
             db_session=db_session, repo_id=repo_config.id, coverage=cov
@@ -113,9 +112,7 @@ async def create_tgt_coverage(
         tms = [tm_model.serialize(src_repo) for tm_model in tm_models]
 
     for tm_model, tm in zip(tm_models, tms):
-        # generate src to test mappings
-        tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
-
+        tm, targets = await build_tm_src_mapping(src_repo, tm, base_cov, run_args)
         for t in targets:
             print("Target code: ", t.filepath)
 

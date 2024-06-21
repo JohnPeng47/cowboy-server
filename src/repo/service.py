@@ -119,6 +119,7 @@ def create(
         db_session.add(repo_conf)
         db_session.flush()
 
+        # LAUREN 2: Create TestModules (containers for unit tests, either a class or a source file)
         create_all_tms(db_session=db_session, repo_conf=repo_conf, src_repo=src_repo)
 
         db_session.commit()

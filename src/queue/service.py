@@ -28,6 +28,7 @@ def complete_task(
 def enqueue_task_and_wait(*, task_queue: TaskQueue, task: Task, user_id: int):
     """Enqueue a task to the specified queue."""
 
+    # LAUREN 5: This is where the task is put to the queue
     f = task_queue.put(user_id, task)
     print(len(task_queue.queue))
     return f
