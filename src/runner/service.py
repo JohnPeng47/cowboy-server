@@ -16,30 +16,20 @@ from dataclasses import dataclass
 @dataclass
 class RunServiceArgs:
     user_id: int
-    repo_name: str
     task_queue: TaskQueue
 
 
 async def run_test(
+    repo_name: str,
     service_args: RunServiceArgs,
     exclude_tests: List[Tuple[Function, str]] = [],
     include_tests: List[str] = [],
     patch_file: PatchFile = None,
 ) -> CoverageResult:
-
-    # NOTE: problem with including this in RunTestTaskArgs is that exclude_tests
-    # will have different signatures before and after validation
-    # input: exclude_tests: List[Tuple[Function, str]] = []
-    # output (validated): exclude_tests: List[Tuple[FunctionArg, str]] = Field(default_factory=list)
-    exclude_tests = [
-        (FunctionArg(name=func.name, is_meth=func.is_meth()), str(path))
-        for func, path in exclude_tests
-    ]
-
     task = Task(
-        repo_name=service_args.repo_name,
         type=TaskType.RUN_TEST,
         task_args=RunTestTaskArgs.from_data(
+            repo_name=repo_name,
             patch_file=patch_file,
             exclude_tests=exclude_tests,
             include_tests=include_tests,
@@ -55,3 +45,15 @@ async def run_test(
 
     cov_res = json_to_coverage_result(res)
     return cov_res
+
+
+async def shutdown_client(
+    service_args: RunServiceArgs,
+) -> CoverageResult:
+    task = Task(type=TaskType.SHUTDOWN)
+
+    future = enqueue_task_and_wait(
+        task_queue=service_args.task_queue, user_id=service_args.user_id, task=task
+    )
+
+    await future.wait()

@@ -2,6 +2,8 @@ from src.database.core import get_db
 from src.exceptions import InvalidConfigurationError
 from src.models import HTTPSuccess
 from src.auth.service import get_current_user, CowboyUser
+from src.runner.service import RunServiceArgs, shutdown_client
+from src.queue.core import get_queue, TaskQueue
 
 from .service import create_or_update, get, delete, list, clean
 from .models import RepoConfigCreate, RepoConfigList, RepoConfigGet
@@ -44,10 +46,11 @@ def create_repo(
 
 
 @repo_router.delete("/repo/delete/{repo_name}", response_model=HTTPSuccess)
-def delete_repo(
+async def delete_repo(
     repo_name: str,
     db_session: Session = Depends(get_db),
     current_user: CowboyUser = Depends(get_current_user),
+    task_queue: TaskQueue = Depends(get_queue),
 ):
     deleted = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
 
@@ -63,6 +66,12 @@ def delete_repo(
             ],
             model=RepoConfigCreate,
         )
+
+    # shutdown client if repo is deleted because local repo.cloned_folders
+    # will no longer be valid
+    args = RunServiceArgs(user_id=current_user.id, task_queue=task_queue)
+    await shutdown_client(args)
+
     return HTTPSuccess()
 
 
