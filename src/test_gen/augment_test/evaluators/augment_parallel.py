@@ -83,7 +83,7 @@ class AugmentParallelEvaluator(Evaluator):
                         func.to_code(), class_name=func.scope.name if func.scope else ""
                     )
 
-                    patch_file = PatchFile(tm.path, og_testfile.to_code())
+                    patch_file = PatchFile(path=tm.path, patch=og_testfile.to_code())
                     runner_args[func] = {"patch_file": patch_file}
 
                 # 2. run tests in parallel

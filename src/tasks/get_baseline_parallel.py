@@ -23,6 +23,7 @@ class TestInCoverageException(Exception):
 
 
 async def get_tm_target_coverage(
+    repo_name: str,
     src_repo: SourceRepo,
     tm: TestModule,
     base_cov: TestCoverage,
@@ -47,6 +48,7 @@ async def get_tm_target_coverage(
 
     # TODO: should be storing this as well
     module_cov = await run_test(
+        repo_name,
         run_args,
         include_tests=only_module,
     )
@@ -63,6 +65,7 @@ async def get_tm_target_coverage(
         for test in tm.tests:
             print("Running test ... ", test.name)
             task = run_test(
+                repo_name,
                 run_args,
                 exclude_tests=[(test, tm.test_file.path)],
                 include_tests=only_module,

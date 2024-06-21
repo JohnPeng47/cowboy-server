@@ -16,7 +16,10 @@ from abc import ABC, abstractmethod
 
 
 class Evaluator(ABC):
-    def __init__(self, src_repo: "SourceRepo", run_args: RunServiceArgs):
+    def __init__(
+        self, repo_name: str, src_repo: "SourceRepo", run_args: RunServiceArgs
+    ):
+        self.repo_name = repo_name
         self.src_repo = src_repo
         self.run_args = run_args
 
@@ -41,7 +44,7 @@ class Evaluator(ABC):
         for i, (test_file, test_funcs) in enumerate(strat_results, start=1):
             patch_file = PatchFile(path=test_fp, patch=test_file)
             cov_ptched = await run_test(
-                service_args=self.run_args, patch_file=patch_file
+                self.repo_name, self.run_args, patch_file=patch_file
             )
             cov_diff = cov_ptched.coverage - base_cov
             # TODO: this covered number is off check

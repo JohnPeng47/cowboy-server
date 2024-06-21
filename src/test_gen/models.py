@@ -67,7 +67,7 @@ class AugmentTestResult(Base):
 
     repo_id = Column(Integer, ForeignKey("repo_config.id"))
     # TODO: not tested yet
-    test_module_id = Column(Integer, ForeignKey("test_modules.id", ondelete="CASCADE"))
+    test_module_id = Column(Integer, ForeignKey("test_modules.id"))
     cov_list = relationship("CoverageModel", cascade="all, delete-orphan")
 
     def set_decision(self, decision: Decision):

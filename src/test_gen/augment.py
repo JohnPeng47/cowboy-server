@@ -39,12 +39,11 @@ async def augment_test(
     src_repo = SourceRepo(Path(repo.source_folder))
     git_repo = GitRepo(Path(repo.source_folder), remote=repo.remote, main=repo.main)
     tm = tm_model.serialize(src_repo)
-    run_args = RunServiceArgs(
-        user_id=curr_user.id, repo_name=repo.repo_name, task_queue=task_queue
-    )
+    run_args = RunServiceArgs(user_id=curr_user.id, task_queue=task_queue)
 
     base_cov = repo.base_cov
     composer = Composer(
+        repo_name=repo.repo_name,
         strat="WITH_CTXT",
         evaluator="ADDITIVE",
         src_repo=src_repo,

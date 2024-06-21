@@ -85,9 +85,13 @@ class AugmentAdditiveEvaluator(Evaluator):
                         func.to_code(), class_name=func.scope.name if func.scope else ""
                     )
 
-                    patch_file = PatchFile(str(tm.path), og_testfile.to_code())
+                    patch_file = PatchFile(
+                        path=str(tm.path), patch=og_testfile.to_code()
+                    )
                     indvtest_cov = await run_test(
-                        service_args=self.run_args, patch_file=patch_file
+                        self.repo_name,
+                        self.run_args,
+                        patch_file=patch_file,
                     )
 
                     indv_improve = indvtest_cov.coverage - base_cov

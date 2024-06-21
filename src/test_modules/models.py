@@ -10,7 +10,7 @@ from cowboy_lib.repo.source_repo import SourceRepo
 from src.database.core import Base
 from src.ast.models import NodeModel
 from src.target_code.models import TargetCodeModel
-from src.test_gen.models import TMSelectModeBase
+from src.test_gen.models import TMSelectModeBase, AugmentTestResult
 
 
 class IncompatibleCommit(Exception):
@@ -39,6 +39,12 @@ class TestModuleModel(Base):
         "TargetCodeModel",
         backref="test_module",
         foreign_keys=[TargetCodeModel.test_module_id],
+        cascade="all, delete-orphan",
+    )
+    test_results = relationship(
+        "AugmentTestResult",
+        backref="test_module",
+        foreign_keys=[AugmentTestResult.test_module_id],
         cascade="all, delete-orphan",
     )
 

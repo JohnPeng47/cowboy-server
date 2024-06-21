@@ -1,9 +1,9 @@
 from cowboy_lib.repo import SourceRepo, GitRepo
 from src.database.core import get_db
 from src.auth.service import get_current_user
-from src.queue.core import get_queue
 from src.stats.service import update_repo_stats
 from src.repo.service import get_or_raise, get_by_id_or_raise
+from src.queue.core import get_queue
 
 from .models import (
     AugmentTestRequest,

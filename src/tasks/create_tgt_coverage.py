@@ -89,12 +89,12 @@ async def create_tgt_coverage(
     Coverage
     """
     src_repo = SourceRepo(Path(repo.source_folder))
-    run_args = RunServiceArgs(repo.user_id, repo.repo_name, task_queue)
+    run_args = RunServiceArgs(repo.user_id, task_queue)
     base_cov = repo.base_cov
 
     # this is only place we get base_cov for repo
     if overwrite or not base_cov:
-        cov_res = await run_test(run_args)
+        cov_res = await run_test(repo.repo_name, run_args)
         base_cov = cov_res.coverage
         create_or_update_cov(
             db_session=db_session, repo_id=repo.id, cov_list=base_cov.cov_list
@@ -109,7 +109,9 @@ async def create_tgt_coverage(
 
         tm = tm_model.serialize(src_repo)
         # generate src to test mappings
-        tm, targets = await get_tm_target_coverage(src_repo, tm, base_cov, run_args)
+        tm, targets = await get_tm_target_coverage(
+            repo.repo_name, src_repo, tm, base_cov, run_args
+        )
         for t in targets:
             print("Target code: ", t.filepath)
 

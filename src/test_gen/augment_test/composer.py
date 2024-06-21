@@ -32,6 +32,7 @@ class Composer:
 
     def __init__(
         self,
+        repo_name: str,
         strat: AugmentStratType,
         evaluator: EvaluatorType,
         src_repo: SourceRepo,
@@ -41,6 +42,7 @@ class Composer:
         api_key: str,
         verify: bool = False,
     ):
+        self.repo_name = repo_name
         self.src_repo = src_repo
         self.test_input = test_input
         self.verify = verify
@@ -49,7 +51,7 @@ class Composer:
 
         self.strat: BaseStrategy = AUGMENT_STRATS[strat](self.src_repo, self.test_input)
         self.evaluator: Evaluator = AUGMENT_EVALS[evaluator](
-            self.src_repo, self.run_args
+            self.repo_name, self.src_repo, self.run_args
         )
 
         model_name = "gpt4"
@@ -81,7 +83,7 @@ class Composer:
         improved_tests = []
         failed_tests = []
         no_improve_tests = []
-		
+
         # TODO: here is whee we initialize the StartCodeTx
         prompt = self.strat.build_prompt()
         print(f"Prompt: {prompt}")
@@ -92,7 +94,10 @@ class Composer:
         test_results = [StratResult(res, self.test_input.path) for res in llm_results]
 
         improved, failed, no_improve = await self.evaluator(
-            test_results, self.test_input, self.base_cov, n_times=n_times
+            test_results,
+            self.test_input,
+            self.base_cov,
+            n_times=n_times,
         )
 
         improved_tests.extend(improved)
@@ -143,14 +148,11 @@ class Composer:
                 )
 
             test_result = [StratResult(src_file, self.test_input.path)]
-
-            # continue here
-            # be careful about the fs state as represented by the test module
-            # and that represented by the source repo
-            # although i think if we limit our modifications to the test_input
-            # we should be fine
             improved, failed, no_improve = await self.evaluator(
-                test_result, self.test_input, self.base_cov, n_times=n_times
+                test_result,
+                self.test_input,
+                self.base_cov,
+                n_times=n_times,
             )
             improved_tests.extend(improved)
             filtered_improved = self.filter_overlap_improvements(improved_tests)
