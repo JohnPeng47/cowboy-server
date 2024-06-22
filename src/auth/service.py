@@ -12,6 +12,8 @@ from starlette.status import HTTP_401_UNAUTHORIZED
 from src.config import COWBOY_JWT_SECRET
 from src.database.core import DBNotSetException, get_db
 
+from .models import generate_token
+
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +46,6 @@ def create(*, db_session, user_in: UserRegister | UserCreate) -> CowboyUser:
         **user_in.dict(exclude={"password", "openai_api_key"}),
         password=password,
     )
-
     db_session.add(user)
     db_session.commit()
 
@@ -52,6 +53,11 @@ def create(*, db_session, user_in: UserRegister | UserCreate) -> CowboyUser:
     store_oai_key(user_in.openai_api_key, user.id)
 
     return user
+
+
+def get_user_token(*, db_session, user_id):
+    user = get(db_session=db_session, user_id=user_id)
+    return generate_token(user.email)
 
 
 def extract_user_email_jwt(request: Request, **kwargs):

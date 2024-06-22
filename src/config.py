@@ -4,6 +4,8 @@ from enum import Enum
 
 config = Config(".env")
 
+API_ENDPOINT = "http://18.223.150.134:3000"
+
 COWBOY_JWT_SECRET = config("DISPATCH_JWT_SECRET", default="")
 COWBOY_JWT_ALG = config("DISPATCH_JWT_ALG", default="HS256")
 COWBOY_JWT_EXP = config("DISPATCH_JWT_EXP", cast=int, default=308790000)  # Seconds

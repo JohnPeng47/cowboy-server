@@ -9,15 +9,32 @@ from jose import jwt
 from typing import Optional
 from pydantic import validator, Field, BaseModel
 from pydantic.networks import EmailStr
-from sqlalchemy import DateTime, Column, String, LargeBinary, Integer, Boolean
+from sqlalchemy import (
+    ForeignKey,
+    DateTime,
+    Column,
+    String,
+    LargeBinary,
+    Integer,
+    Boolean,
+)
 from sqlalchemy.orm import relationship
 from typing import List
 from datetime import datetime, timedelta
 
 
+def generate_token(email):
+    now = datetime.utcnow()
+    exp = (now + timedelta(seconds=COWBOY_JWT_EXP)).timestamp()
+    data = {
+        "exp": exp,
+        "email": email,
+    }
+    return jwt.encode(data, COWBOY_JWT_SECRET, algorithm=COWBOY_JWT_ALG)
+
+
 def generate_password():
     """Generates a reasonable password if none is provided."""
-    print("Generatin password!!!")
     alphanumeric = string.ascii_letters + string.digits
     while True:
         password = "".join(secrets.choice(alphanumeric) for i in range(10))
@@ -45,6 +62,7 @@ class CowboyUser(Base, TimeStampMixin):
     password = Column(LargeBinary, nullable=False)
     last_mfa_time = Column(DateTime, nullable=True)
     experimental_features = Column(Boolean, default=False)
+    admin = Column(Boolean, default=False)
 
     repos = relationship(
         "RepoConfig", backref="cowboy_user", cascade="all, delete-orphan"
@@ -59,13 +77,7 @@ class CowboyUser(Base, TimeStampMixin):
 
     @property
     def token(self):
-        now = datetime.utcnow()
-        exp = (now + timedelta(seconds=COWBOY_JWT_EXP)).timestamp()
-        data = {
-            "exp": exp,
-            "email": self.email,
-        }
-        return jwt.encode(data, COWBOY_JWT_SECRET, algorithm=COWBOY_JWT_ALG)
+        generate_token(self.email)
 
 
 class UserBase(CowboyBase):

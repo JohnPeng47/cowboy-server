@@ -77,3 +77,22 @@ class PermissionsDependency(object):
     def __call__(self, request: Request):
         for permission_class in self.permissions_classes:
             permission_class(request=request)
+
+
+# class InternalClientPermissions(BasePermission):
+#     """
+#     Permissions used by our internal client to get ahold of user JWT tokens
+#     for testing and other purposes
+#     """
+
+#     def __init__(self, request: Request):
+#         user = get_current_user(request=request)
+#         if not user:
+#             raise HTTPException(
+#                 status_code=self.user_error_code, detail=self.user_error_msg
+#             )
+
+#         if not user.is_admin:
+#             raise HTTPException(
+#                 status_code=HTTP_403_FORBIDDEN, detail="User is not an admin"
+#             )

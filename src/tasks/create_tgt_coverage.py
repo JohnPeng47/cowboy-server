@@ -114,7 +114,7 @@ async def create_tgt_coverage(
             repo.repo_name, src_repo, tm, base_cov, run_args
         )
         for t in targets:
-            log.info("Target code: ", str(t.filepath))
+            log.info(f"Target code: {str(t.filepath)}")
 
         # store chunks and their nodes
         tgt_code_chunks = create_tgt_code_models(targets, db_session, repo.id, tm_model)
