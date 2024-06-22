@@ -12,7 +12,7 @@ COWBOY_OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 DB_PASS = config("DB_PASS")
 SQLALCHEMY_DATABASE_URI = (
-    f"postgresql://cowboyuser2:{DB_PASS}@127.0.0.1:5432/cowboytest3"
+    f"postgresql://cowboyuser2:{DB_PASS}@127.0.0.1:5432/cowboytestdb"
 )
 SQLALCHEMY_ENGINE_POOL_SIZE = 50
 

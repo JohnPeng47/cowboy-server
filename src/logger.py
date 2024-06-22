@@ -18,13 +18,13 @@ formatter = logging.Formatter(
 formatter.converter = converter
 
 
-def get_file_handler(log_dir=LOG_DIR):
+def get_file_handler(log_dir=LOG_DIR, file_prefix: str = ""):
     """
     Returns a file handler for logging.
     """
     os.makedirs(log_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d")
-    file_name = f"runner_{timestamp}.log"
+    file_name = f"{file_prefix}_{timestamp}.log"
     file_handler = logging.FileHandler(os.path.join(log_dir, file_name))
     file_handler.setFormatter(formatter)
     return file_handler
@@ -41,11 +41,15 @@ def get_console_handler():
 
 testgen_logger = logging.getLogger("testgen_logger")
 testgen_logger.setLevel(logging.INFO)
-testgen_logger.addHandler(get_file_handler())
+testgen_logger.addHandler(get_file_handler(file_prefix="testgen"))
 testgen_logger.addHandler(get_console_handler())
 
+sync_repo = logging.getLogger("sync_repo")
+sync_repo.setLevel(logging.INFO)
+sync_repo.addHandler(get_file_handler(file_prefix="syncrepo"))
+sync_repo.addHandler(get_console_handler())
 
-loggers = [testgen_logger]
+loggers = [testgen_logger, sync_repo]
 
 
 def set_log_level(level=logging.INFO):

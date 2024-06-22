@@ -31,7 +31,6 @@ from src.target_code.views import tgtcode_router
 from src.experiments.views import exp_router
 from src.exceptions import CowboyRunTimeException
 from src.database.core import engine
-from src.threads import check_for_changed_files
 
 import uuid
 
@@ -182,20 +181,13 @@ class DBMiddleware(BaseHTTPMiddleware):
         #     )
 
         try:
-            # can't do this because every request needs access to user auth which reuqires db
-            # if request.url.path in NO_DB_PATHS:
-            #     print("Skipping for path: ", request.url.path)
-            #     return call_next(request)
-
+            request.state.session_id = str(uuid.uuid4())
             # this is a very janky implementation to handle the fact that assigning a db session
             # to every request blows up our db connection pool
             task_auth_token = request.headers.get("x-task-auth")
             if not task_auth_token in token_registry:
-                print("No token in registry: ", task_auth_token, token_registry)
-                print(
-                    type(task_auth_token),
-                    type(token_registry[0]) if len(token_registry) > 0 else "oigneng",
-                )
+                print("Token not in registry: ", task_auth_token, token_registry)
+
                 session = sessionmaker(bind=engine)
                 request.state.db = session()
                 request.state.db.id = str(uuid.uuid4())
@@ -212,11 +204,14 @@ class DBMiddleware(BaseHTTPMiddleware):
         return response
 
 
+task_queue = TaskQueue()
+
+
 class AddTaskQueueMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        request.state.task_queue = TaskQueue()
+        request.state.task_queue = task_queue
         response = await call_next(request)
         return response
 
@@ -233,24 +228,16 @@ app.include_router(test_gen_router)
 app.include_router(tgtcode_router)
 app.include_router(exp_router)
 
-# starts threads to check for repo updates
-Session = sessionmaker(bind=engine)
-db_session = Session()
-threading.Thread(
-    target=check_for_changed_files, args=(db_session,), daemon=True
-).start()
-
 # logfire.configure(console=False)
 # logfire.instrument_fastapi(app)
 
 if __name__ == "__main__":
-    uvicorn_version = uvicorn.__version__
+    from src.sync_repos import start_sync_thread
 
-    # doesnt work ??
-    configure_uvicorn_logger()
-
-    with open("uvicorn.yaml", "r") as f:
-        config = yaml.safe_load(f)
+    # start the repo sync thread
+    Session = sessionmaker(bind=engine)
+    db_session = Session()
+    start_sync_thread(db_session, task_queue)
 
     uvicorn.run(
         "main:app",

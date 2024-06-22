@@ -36,8 +36,6 @@ async def run_test(
         ),
     )
 
-    print("Task: ", task.json())
-
     future = enqueue_task_and_wait(
         task_queue=service_args.task_queue, user_id=service_args.user_id, task=task
     )

@@ -18,6 +18,8 @@ from src.target_code.service import create_target_code
 from src.coverage.service import get_cov_by_filename, create_or_update_cov
 from src.utils import async_timed
 
+from src.logger import testgen_logger as log
+
 from sqlalchemy.orm import Session
 
 from pathlib import Path
@@ -82,7 +84,7 @@ async def create_tgt_coverage(
     task_queue: TaskQueue,
     repo: RepoConfig,
     tm_models: List[TestModuleModel],
-    overwrite: bool = True
+    overwrite: bool = True,
 ):
     """
     Important function that sets up relationships between TestModule, TargetCode and
@@ -101,19 +103,18 @@ async def create_tgt_coverage(
         )
 
     for tm_model in tm_models:
-        print("TM: ", tm_model.name)
         # only overwrite existing target_chunks if overwrite flag is set
         if not overwrite and tm_model.target_chunks:
-            print("Skipping")
+            log.info(f"Skipping TM {tm_model.name}")
             continue
 
         tm = tm_model.serialize(src_repo)
         # generate src to test mappings
-        tm, targets = await get_tm_target_coverage(
+        targets = await get_tm_target_coverage(
             repo.repo_name, src_repo, tm, base_cov, run_args
         )
         for t in targets:
-            print("Target code: ", t.filepath)
+            log.info("Target code: ", str(t.filepath))
 
         # store chunks and their nodes
         tgt_code_chunks = create_tgt_code_models(targets, db_session, repo.id, tm_model)

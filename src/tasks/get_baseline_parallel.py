@@ -1,5 +1,5 @@
 from cowboy_lib.repo.source_repo import SourceRepo
-from cowboy_lib.coverage import TestCoverage, CoverageResult
+from cowboy_lib.coverage import Coverage, TestCoverage, CoverageResult
 from cowboy_lib.test_modules.test_module import TestModule, TargetCode
 from cowboy_lib.utils import testfiles_in_coverage
 
@@ -9,6 +9,7 @@ from src.runner.service import run_test, RunServiceArgs
 
 from logging import getLogger
 from typing import List, Tuple
+from pathlib import Path
 
 import asyncio
 
@@ -22,13 +23,52 @@ class TestInCoverageException(Exception):
         self.msg = "Test files are included in coverage report"
 
 
+def set_chunks(
+    changed_coverage: List[Coverage],
+    source_repo: "SourceRepo",
+    base_path: Path = None,
+) -> List[TargetCode]:
+    """
+    Gets the missing/covered lines of each of the coverage differences
+    """
+    chunks = []
+    for cov in changed_coverage:
+        if cov.filename == "TOTAL":
+            raise Exception("TOTAL COVERAGE FILE FOUND")
+
+        cov.read_line_contents(base_path)
+        for l_group in cov.get_contiguous_lines():
+            start = l_group[0][0]
+            end = l_group[-1][0]
+            range = (start, end)
+
+            src_file = source_repo.find_file(cov.filename)
+            func, cls = src_file.map_line_to_node(start, end)
+
+            lines = [g[1] for g in l_group]
+
+            print("Setting chunk with filepath: ", str(cov.filename))
+
+            chunk = TargetCode(
+                range=range,
+                lines=lines,
+                # could also just move the logic into TestModuleMixin
+                filepath=str(cov.filename),
+                func_scope=func if func else "",
+                class_scope=cls if cls else "",
+            )
+            chunks.append(chunk)
+
+    return chunks
+
+
 async def get_tm_target_coverage(
     repo_name: str,
     src_repo: SourceRepo,
     tm: TestModule,
     base_cov: TestCoverage,
     run_args: RunServiceArgs,
-) -> Tuple[TestModule, List[TargetCode]]:
+) -> List[TargetCode]:
     """
     Test augmenting existing test classes by deleting random test methods, and then
     having LLM strategy generate them. Coverage is taken:
@@ -90,7 +130,7 @@ async def get_tm_target_coverage(
             chg_cov.extend(single_diff)
 
         # re-init the chunks according to the aggregated individual test coverages
-        tm.set_chunks(
+        chunks = set_chunks(
             chg_cov,
             source_repo=src_repo,
             base_path=src_repo.repo_path,
@@ -100,5 +140,6 @@ async def get_tm_target_coverage(
     # Find out what's the reason for the missed tests
     else:
         logger.info(f"No coverage difference found for {tm.name}")
+        return []
 
-    return tm, tm.chunks
+    return chunks

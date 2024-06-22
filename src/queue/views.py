@@ -36,6 +36,8 @@ def list(
 def get(
     response: Response,
     task_queue: TaskQueue = Depends(get_queue),
+    # don't try to do anything with curr_user because most of the time
+    # we only have user_token to work with
     curr_user: CowboyUser = Depends(get_current_user),
     token_registry: List = Depends(get_token_registry),
     user_token: str = Depends(get_token),

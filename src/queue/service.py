@@ -21,7 +21,6 @@ def complete_task(
     *, task_queue: TaskQueue, user_id: int, task_id: str, result: Dict
 ) -> None:
     """Mark a task as completed."""
-
     task_queue.complete(user_id, task_id, result)
 
 
@@ -29,5 +28,4 @@ def enqueue_task_and_wait(*, task_queue: TaskQueue, task: Task, user_id: int):
     """Enqueue a task to the specified queue."""
 
     f = task_queue.put(user_id, task)
-    print(len(task_queue.queue))
     return f
