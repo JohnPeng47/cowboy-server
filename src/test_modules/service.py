@@ -3,12 +3,10 @@ from cowboy_lib.repo import SourceRepo
 from src.repo.models import RepoConfig
 from src.ast.service import create_node
 
-from sqlalchemy.orm import Session
-
-
-from .models import TestModuleModel, TestModule
 from .iter_tms import iter_test_modules
+from .models import TestModuleModel, TestModule
 
+from sqlalchemy.orm import Session
 from typing import List
 
 

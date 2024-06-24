@@ -235,9 +235,9 @@ if __name__ == "__main__":
     from src.sync_repos import start_sync_thread
 
     # start the repo sync thread
-    Session = sessionmaker(bind=engine)
-    db_session = Session()
-    start_sync_thread(db_session, task_queue)
+    # Session = sessionmaker(bind=engine)
+    # db_session = Session()
+    # start_sync_thread(db_session, task_queue)
 
     uvicorn.run(
         "main:app",
