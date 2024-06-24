@@ -126,10 +126,11 @@ async def create(
         src_repo = SourceRepo(repo_dst)
         repo.source_folder = str(repo_dst)
         db_session.add(repo)
-        db_session.flush()
+        # have to commit here or because run_test depends on existing RepoConfig
+        db_session.commit()
 
         # create test modules
-        create_all_tms(db_session=db_session, repo_conf=repo, src_repo=src_repo)
+        # create_all_tms(db_session=db_session, repo_conf=repo, src_repo=src_repo)
 
         # get base coverage for repo
         service_args = RunServiceArgs(user_id=curr_user.id, task_queue=task_queue)
@@ -143,6 +144,9 @@ async def create(
 
     except Exception as e:
         db_session.rollback()
+        if repo:
+            delete(db_session=db_session, curr_user=curr_user, repo_name=repo.repo_name)
+
         if repo_dst:
             GitRepo.delete_repo(repo_dst)
 
