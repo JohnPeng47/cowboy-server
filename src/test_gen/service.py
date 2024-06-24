@@ -1,5 +1,4 @@
 from cowboy_lib.repo import SourceRepo
-from src.coverage.service import create_or_update_cov
 from src.test_modules.service import (
     get_all_tms_sorted,
     get_tms_by_filename,
@@ -41,13 +40,6 @@ def create_test_result(
         classname=classname,
         session_id=session_id,
         repo_id=repo_id,
-    )
-
-    create_or_update_cov(
-        db_session=db_session,
-        repo_id=repo_id,
-        cov_list=cov_list,
-        test_result_id=tr_model.id,
     )
 
     db_session.add(tr_model)

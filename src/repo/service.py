@@ -4,6 +4,9 @@ from src.utils import gen_random_name
 from src.auth.models import CowboyUser
 from src.test_modules.service import create_all_tms
 from src.config import REPOS_ROOT
+from src.runner.service import run_test, RunServiceArgs
+from src.queue.core import TaskQueue
+from src.coverage.service import upsert_coverage
 
 from .models import RepoConfig, RepoConfigCreate
 
@@ -101,33 +104,42 @@ def clean(*, db_session, curr_user: CowboyUser, repo_name: str) -> RepoConfig:
     return None
 
 
-# CONSIDER: do we want to isolate create TM from create repo
-def create(
-    *, db_session, curr_user: CowboyUser, repo_in: RepoConfigCreate
+async def create(
+    *,
+    db_session,
+    curr_user: CowboyUser,
+    repo_in: RepoConfigCreate,
+    task_queue: TaskQueue,
 ) -> RepoConfig:
     """Creates a new repo."""
 
     repo_dst = None
     try:
-        repo_conf = RepoConfig(
+        repo = RepoConfig(
             **repo_in.dict(),
             user_id=curr_user.id,
         )
 
-        repo_dst = Path(REPOS_ROOT) / repo_conf.repo_name / gen_random_name()
-        GitRepo.clone_repo(repo_dst, repo_conf.url)
+        repo_dst = Path(REPOS_ROOT) / repo.repo_name / gen_random_name()
+        GitRepo.clone_repo(repo_dst, repo.url)
 
         src_repo = SourceRepo(repo_dst)
-
-        repo_conf.source_folder = str(repo_dst)
-
-        db_session.add(repo_conf)
+        repo.source_folder = str(repo_dst)
+        db_session.add(repo)
         db_session.flush()
 
-        create_all_tms(db_session=db_session, repo_conf=repo_conf, src_repo=src_repo)
+        # create test modules
+        create_all_tms(db_session=db_session, repo_conf=repo, src_repo=src_repo)
+
+        # get base coverage for repo
+        service_args = RunServiceArgs(user_id=curr_user.id, task_queue=task_queue)
+        cov_res = await run_test(repo.repo_name, service_args)
+        upsert_coverage(
+            db_session=db_session, repo_id=repo.id, cov_list=cov_res.coverage.cov_list
+        )
 
         db_session.commit()
-        return repo_conf
+        return repo
 
     except Exception as e:
         db_session.rollback()
@@ -153,17 +165,25 @@ def update(
     return repo
 
 
-def create_or_update(
-    *, db_session, curr_user: CowboyUser, repo_in: RepoConfigCreate
+async def create_or_update(
+    *,
+    db_session,
+    curr_user: CowboyUser,
+    repo_in: RepoConfigCreate,
+    task_queue: TaskQueue,
 ) -> RepoConfig:
     """Create or update a repo"""
-    print("Creating: ", repo_in)
     repo_conf = get(
         db_session=db_session, curr_user=curr_user, repo_name=repo_in.repo_name
     )
 
     if not repo_conf:
-        return create(db_session=db_session, curr_user=curr_user, repo_in=repo_in)
+        return await create(
+            db_session=db_session,
+            curr_user=curr_user,
+            repo_in=repo_in,
+            task_queue=task_queue,
+        )
 
     return update(
         db_session=db_session,

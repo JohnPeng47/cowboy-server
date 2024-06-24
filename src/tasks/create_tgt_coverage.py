@@ -15,7 +15,7 @@ from src.runner.service import run_test, RunServiceArgs
 from src.ast.service import create_node, create_or_update_node
 from src.test_modules.service import get_tms_by_names, update_tm
 from src.target_code.service import create_target_code
-from src.coverage.service import get_cov_by_filename, create_or_update_cov
+from src.coverage.service import get_cov_by_filename, upsert_coverage
 from src.utils import async_timed
 
 from src.logger import testgen_logger as log
@@ -94,11 +94,10 @@ async def create_tgt_coverage(
     run_args = RunServiceArgs(repo.user_id, task_queue)
     base_cov = repo.base_cov
 
-    # this is only place we get base_cov for repo
     if overwrite or not base_cov:
         cov_res = await run_test(repo.repo_name, run_args)
         base_cov = cov_res.coverage
-        create_or_update_cov(
+        upsert_coverage(
             db_session=db_session, repo_id=repo.id, cov_list=base_cov.cov_list
         )
 

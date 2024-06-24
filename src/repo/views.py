@@ -17,10 +17,11 @@ repo_router = APIRouter()
 
 
 @repo_router.post("/repo/create", response_model=RepoConfigCreate)
-def create_repo(
+async def create_repo(
     repo_in: RepoConfigCreate,
     db_session: Session = Depends(get_db),
     current_user: CowboyUser = Depends(get_current_user),
+    task_queue: TaskQueue = Depends(get_queue),
 ):
     repo = get(
         db_session=db_session, repo_name=repo_in.repo_name, curr_user=current_user
@@ -38,8 +39,11 @@ def create_repo(
             model=RepoConfigCreate,
         )
 
-    repo_config = create_or_update(
-        db_session=db_session, repo_in=repo_in, curr_user=current_user
+    repo_config = await create_or_update(
+        db_session=db_session,
+        repo_in=repo_in,
+        curr_user=current_user,
+        task_queue=task_queue,
     )
     # need as_dict to convert cloned_folders to list
     return repo_config.to_dict()
