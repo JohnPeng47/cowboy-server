@@ -115,16 +115,12 @@ class RepoConfigBase(CowboyBase):
     url: str
     source_folder: str
     cloned_folders: List[str]
-    language: Optional[Language]
-    is_experiment: Optional[bool]
-
-    # REFACTOR-AST: ideally this would be type
-    # LangConf but not sure how to implement validator
-    # for all the LangConf subclasses
     python_conf: PythonConf
 
-    remote: str = Field(default="origin")
-    main: str = Field(default="main")
+    language: Optional[Language]
+    is_experiment: Optional[bool]
+    main: Optional[str]
+    remote: Optional[str]
 
 
 class RepoConfigGet(RepoConfigBase):
