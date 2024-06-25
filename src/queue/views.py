@@ -10,7 +10,7 @@ from src.database.core import get_db
 from src.auth.service import get_current_user
 from src.auth.models import CowboyUser
 
-from typing import List
+from typing import List, Set
 
 task_queue_router = APIRouter()
 
@@ -39,7 +39,7 @@ def get(
     # don't try to do anything with curr_user because most of the time
     # we only have user_token to work with
     curr_user: CowboyUser = Depends(get_current_user),
-    token_registry: List = Depends(get_token_registry),
+    token_registry: Set[str] = Depends(get_token_registry),
     user_token: str = Depends(get_token),
     # perms: str = Depends(PermissionsDependency([TaskGetPermissions])),
 ):
@@ -55,7 +55,7 @@ def get(
     elif not user_token:
         print("Setting new token ..")
         response.headers["set-x-task-auth"] = str(curr_user.id)
-        token_registry.append(str(curr_user.id))
+        token_registry.add(str(curr_user.id))
 
     tasks = dequeue_task(
         task_queue=task_queue, user_id=curr_user.id if curr_user else int(user_token)

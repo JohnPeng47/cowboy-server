@@ -147,7 +147,7 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
         return response
 
 
-token_registry = []
+token_registry = set()
 
 
 class DBMiddleware(BaseHTTPMiddleware):
