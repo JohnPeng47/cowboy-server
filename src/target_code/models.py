@@ -64,6 +64,13 @@ class TargetCodeModel(Base):
     def get_lines(self) -> List[str]:
         return self.lines.split("\n")
 
+    def to_str(self) -> str:
+        repr = ""
+        repr += f"Chunk: {self.filepath}\n"
+        repr += self.lines
+
+        return repr
+
     def serialize(self, src_repo: SourceRepo):
         return TargetCode(
             range=(self.start, self.end),

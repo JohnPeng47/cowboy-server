@@ -136,7 +136,7 @@ async def check_for_changed_files(
                         if not impacted_tm:
                             # TODO: really bad, because it implies that we are
                             # missing some kind of update to the repo
-                            continue
+                            return
 
                         await api_client.build_mapping(
                             repo.repo_name, "module", [impacted_tm.name]

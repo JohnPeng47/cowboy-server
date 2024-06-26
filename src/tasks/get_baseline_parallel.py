@@ -113,7 +113,6 @@ async def get_tm_target_coverage(
             coroutines.append(task)
 
         cov_res = await asyncio.gather(*[t for t in coroutines])
-
         for test, cov_res in zip(tm.tests, cov_res):
             print("Test results: ", cov_res.coverage.total_cov.covered)
             print(
@@ -136,7 +135,6 @@ async def get_tm_target_coverage(
             base_path=src_repo.repo_path,
         )
 
-        print(f"Chunks: \n{tm.print_chunks()}")
     # Find out what's the reason for the missed tests
     else:
         logger.info(f"No coverage difference found for {tm.name}")

@@ -15,6 +15,7 @@ from src.runner.service import run_test, RunServiceArgs
 from src.ast.service import create_node, create_or_update_node
 from src.test_modules.service import get_tms_by_names, update_tm
 from src.target_code.service import create_target_code
+from src.target_code.models import TargetCodeModel
 from src.coverage.service import get_cov_by_filename, upsert_coverage
 from src.utils import async_timed
 
@@ -31,7 +32,7 @@ def create_tgt_code_models(
     db_session: Session,
     repo_id: int,
     tm_model: TestModuleModel,
-) -> List[TargetCode]:
+) -> List[TargetCodeModel]:
     """
     Create target code models
     """
@@ -112,11 +113,13 @@ async def create_tgt_coverage(
         targets = await get_tm_target_coverage(
             repo.repo_name, src_repo, tm, base_cov, run_args
         )
-        for t in targets:
-            log.info(f"Target code: {str(t.filepath)}")
-
         # store chunks and their nodes
         tgt_code_chunks = create_tgt_code_models(targets, db_session, repo.id, tm_model)
+
+        # TODO: convert this to a Logfire log?
+        print(f"{tm_model.name} Chunks: ")
+        for t in tgt_code_chunks:
+            print(t.to_str())
 
         tm_model.target_chunks = tgt_code_chunks
         update_tm(db_session=db_session, tm_model=tm_model)

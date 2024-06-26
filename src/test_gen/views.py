@@ -136,7 +136,7 @@ def accept_user_decision(
     # NOTE: LintExceptions at this step should not happen because they would have occurred
     # earlier during the Evaluation phase
     changed_files = set()
-    accepted_results = []
+    accepted_trs = []
     for decision in request.user_decision:
         tr = get_test_result_by_id_or_raise(db_session=db_session, test_id=decision.id)
         test_file = src_repo.find_file(tr.testfile)
@@ -144,7 +144,7 @@ def accept_user_decision(
             test_file.append(tr.test_case, class_name=tr.classname)
             src_repo.write_file(test_file.path)
             changed_files.add(str(test_file.path))
-            accepted_results.append(tr)
+            accepted_trs.append(tr)
 
         update_test_result_decision(
             db_session=db_session, test_id=decision.id, decision=decision.decision
@@ -152,13 +152,12 @@ def accept_user_decision(
 
     # update stats
     with update_repo_stats(db_session=db_session, repo=repo) as repo_stats:
-        repo_stats.accepted_tests += len(accepted_results)
-        repo_stats.rejected_tests += len(request.user_decision) - len(accepted_results)
+        repo_stats.accepted_tests += len(accepted_trs)
+        repo_stats.rejected_tests += len(request.user_decision) - len(accepted_trs)
 
-    msg = gen_commit_msg(accepted_results)
+    msg = gen_commit_msg(accepted_trs)
     compare_url = git_repo.checkout_and_push(
         "cowboy-augmented-tests", msg, list(changed_files)
     )
-    print(compare_url)
 
     return UserDecisionResponse(compare_url=compare_url)
