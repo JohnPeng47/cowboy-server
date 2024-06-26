@@ -4,7 +4,7 @@ from fastapi import Request
 from threading import Lock
 from collections import defaultdict
 from typing import List, Dict
-from asyncio import Event
+from asyncio import Event, wait_for
 
 
 class TaskEvent:
@@ -13,8 +13,14 @@ class TaskEvent:
         self.task = task
         self.result = None
 
-    async def wait(self):
-        await self.event.wait()
+    async def wait(self, timeout: float = None):
+        try:
+            if timeout:
+                await wait_for(self.event.wait(), timeout)
+            else:
+                await self.event.wait()
+        except TimeoutError:
+            return None
 
         return self.result
 
