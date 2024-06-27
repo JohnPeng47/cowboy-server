@@ -1,3 +1,5 @@
+from cowboy_lib.repo import GitRepo
+
 from src.database.core import get_db
 from src.exceptions import InvalidConfigurationError
 from src.models import HTTPSuccess
@@ -6,11 +8,17 @@ from src.queue.core import get_queue, TaskQueue
 from src.runner.service import RunServiceArgs, shutdown_client
 
 from .service import create_or_update, get, delete, list, clean
-from .models import RepoConfigCreate, RepoConfigList, RepoConfigGet
+from .models import (
+    RepoConfigCreate,
+    RepoConfigList,
+    RepoConfigGet,
+    RepoConfigRemoteCommit,
+)
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from pydantic.error_wrappers import ErrorWrapper, ValidationError
+from pathlib import Path
 
 
 repo_router = APIRouter()
@@ -132,3 +140,31 @@ def list_repos(
 ):
     repos = list(db_session=db_session, curr_user=current_user)
     return RepoConfigList(repo_list=repos)
+
+
+# TODO: this should return HEAD of repo.source_folder rather than the remote repo
+# once we finish our task refactor
+@repo_router.get(
+    "/repo/remote_commit/{repo_name}", response_model=RepoConfigRemoteCommit
+)
+def remote_commit(
+    repo_name: str,
+    db_session: Session = Depends(get_db),
+    current_user: CowboyUser = Depends(get_current_user),
+):
+    repo = get(db_session=db_session, repo_name=repo_name, curr_user=current_user)
+    if not repo:
+        raise ValidationError(
+            [
+                ErrorWrapper(
+                    InvalidConfigurationError(
+                        msg="A repo with this name does not exist."
+                    ),
+                    loc="repo_name",
+                )
+            ],
+            model=RepoConfigGet,
+        )
+
+    git_repo = GitRepo(Path(repo.source_folder))
+    return RepoConfigRemoteCommit(sha=git_repo.remote_commit)

@@ -135,5 +135,9 @@ class RepoConfigList(CowboyBase):
     repo_list: List[RepoConfigBase]
 
 
+class RepoConfigRemoteCommit(CowboyBase):
+    sha: str
+
+
 # class RepoConfigDelete(BaseModel):
 #     repo_name: str
