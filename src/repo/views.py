@@ -167,4 +167,6 @@ def remote_commit(
         )
 
     git_repo = GitRepo(Path(repo.source_folder))
+
+    # return RepoConfigRemoteCommit(sha=git_repo.local_commit)
     return RepoConfigRemoteCommit(sha=git_repo.remote_commit)
