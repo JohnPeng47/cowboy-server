@@ -7,7 +7,7 @@ from typing import Annotated
 
 PrimaryKey = Annotated[int, Field(gt=0, lt=2147483647)]
 NameStr = Annotated[
-    str, Field(regex=r"^(?!\s*$).+", strip_whitespace=True, min_length=3)
+    str, Field(pattern=r"^(?!\s*$).+", strip_whitespace=True, min_length=3)
 ]
 
 
@@ -30,10 +30,10 @@ class TimeStampMixin(object):
 
 class CowboyBase(BaseModel):
     class Config:
-        orm_mode = True
+        from_attributes = True
         validate_assignment = True
         arbitrary_types_allowed = True
-        anystr_strip_whitespace = True
+        str_strip_whitespace = True
 
         json_encoders = {
             # custom output conversion for datetime

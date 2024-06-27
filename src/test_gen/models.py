@@ -3,7 +3,7 @@ from src.models import CowboyBase
 
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from pydantic import BaseModel, validator, root_validator
+from pydantic import BaseModel, validator, model_validator
 from enum import Enum
 from typing import List
 from typing import Optional
@@ -94,7 +94,7 @@ class UserDecision(BaseModel):
 class UserDecisionRequest(BaseModel):
     user_decision: List[UserDecision]
 
-    @root_validator
+    @model_validator(mode="before")
     def check_user_decision(cls, values):
         if not values.get("user_decision"):
             raise ValueError("user_decision must not be empty")

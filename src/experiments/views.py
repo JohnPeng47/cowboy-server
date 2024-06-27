@@ -9,7 +9,6 @@ from .augment_test import run_experiment
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from pydantic.error_wrappers import ErrorWrapper, ValidationError
 
 
 exp_router = APIRouter()

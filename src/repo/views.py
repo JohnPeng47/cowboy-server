@@ -17,7 +17,6 @@ from .models import (
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from pydantic.error_wrappers import ErrorWrapper, ValidationError
 from pathlib import Path
 
 
@@ -35,16 +34,8 @@ async def create_repo(
         db_session=db_session, repo_name=repo_in.repo_name, curr_user=current_user
     )
     if repo:
-        raise ValidationError(
-            [
-                ErrorWrapper(
-                    InvalidConfigurationError(
-                        msg="A repo with this name already exists."
-                    ),
-                    loc="repo_name",
-                )
-            ],
-            model=RepoConfigCreate,
+        raise InvalidConfigurationError(
+            msg="A repo with this name already exists.", loc="repo_name"
         )
 
     repo_config = await create_or_update(
@@ -65,18 +56,9 @@ async def delete_repo(
     task_queue: TaskQueue = Depends(get_queue),
 ):
     deleted = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
-
     if not deleted:
-        raise ValidationError(
-            [
-                ErrorWrapper(
-                    InvalidConfigurationError(
-                        msg="A repo with this name does not exist."
-                    ),
-                    loc="repo_name",
-                )
-            ],
-            model=RepoConfigCreate,
+        raise InvalidConfigurationError(
+            msg="A repo with this name does not exists.", loc="repo_name"
         )
 
     # need this to shut down the client after a repo is deleted, or else
@@ -96,17 +78,10 @@ def clean_repo(
     cleaned = clean(db_session=db_session, repo_name=repo_name, curr_user=current_user)
 
     if not cleaned:
-        raise ValidationError(
-            [
-                ErrorWrapper(
-                    InvalidConfigurationError(
-                        msg="A repo with this name does not exist."
-                    ),
-                    loc="repo_name",
-                )
-            ],
-            model=RepoConfigCreate,
+        raise InvalidConfigurationError(
+            msg="A repo with this name does not exists.", loc="repo_name"
         )
+
     return HTTPSuccess()
 
 
@@ -118,16 +93,8 @@ def get_repo(
 ):
     repo = get(db_session=db_session, repo_name=repo_name, curr_user=current_user)
     if not repo:
-        raise ValidationError(
-            [
-                ErrorWrapper(
-                    InvalidConfigurationError(
-                        msg="A repo with this name does not exist."
-                    ),
-                    loc="repo_name",
-                )
-            ],
-            model=RepoConfigGet,
+        raise InvalidConfigurationError(
+            msg="A repo with this name does not exists.", loc="repo_name"
         )
 
     return repo.to_dict()
@@ -154,16 +121,8 @@ def remote_commit(
 ):
     repo = get(db_session=db_session, repo_name=repo_name, curr_user=current_user)
     if not repo:
-        raise ValidationError(
-            [
-                ErrorWrapper(
-                    InvalidConfigurationError(
-                        msg="A repo with this name does not exist."
-                    ),
-                    loc="repo_name",
-                )
-            ],
-            model=RepoConfigGet,
+        raise InvalidConfigurationError(
+            msg="A repo with this name does not exists.", loc="repo_name"
         )
 
     git_repo = GitRepo(Path(repo.source_folder))

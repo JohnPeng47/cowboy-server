@@ -10,7 +10,6 @@ from .service import get_current_user, get, get_by_email, create, store_oai_key
 from .models import UserLoginResponse, UserRegister, UpdateOAIKey
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic.error_wrappers import ErrorWrapper, ValidationError
 from sqlalchemy.orm import Session
 
 
@@ -24,16 +23,9 @@ def register_user(
 ):
     user = get_by_email(db_session=db_session, email=user_in.email)
     if user:
-        raise ValidationError(
-            [
-                ErrorWrapper(
-                    InvalidConfigurationError(
-                        msg="A user with this email already exists."
-                    ),
-                    loc="email",
-                )
-            ],
-            model=UserRegister,
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A user with this email already exists.",
         )
 
     user = create(db_session=db_session, user_in=user_in)

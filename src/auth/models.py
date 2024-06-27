@@ -145,8 +145,3 @@ class UserRegisterResponse(CowboyBase):
 
 class UpdateOAIKey(BaseModel):
     openai_api_key: str
-
-
-# Errors
-class UserExistsError(BaseModel):
-    error = "User already exists"

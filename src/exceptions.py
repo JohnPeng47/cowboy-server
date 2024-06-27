@@ -1,7 +1,7 @@
-from pydantic.errors import PydanticValueError
+from pydantic.errors import PydanticUserError
 
 
-class InvalidConfigurationError(PydanticValueError):
+class InvalidConfigurationError(PydanticUserError):
     code = "invalid.configuration"
     msg_template = "{msg}"
 
