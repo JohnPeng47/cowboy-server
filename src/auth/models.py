@@ -77,7 +77,7 @@ class CowboyUser(Base, TimeStampMixin):
 
     @property
     def token(self):
-        generate_token(self.email)
+        return generate_token(self.email)
 
 
 class UserBase(CowboyBase):

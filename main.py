@@ -187,7 +187,6 @@ class DBMiddleware(BaseHTTPMiddleware):
             task_auth_token = request.headers.get("x-task-auth")
             if not task_auth_token in token_registry:
                 print("Token not in registry: ", task_auth_token, token_registry)
-
                 session = sessionmaker(bind=engine)
                 request.state.db = session()
                 request.state.db.id = str(uuid.uuid4())

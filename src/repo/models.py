@@ -117,10 +117,10 @@ class RepoConfigBase(CowboyBase):
     cloned_folders: List[str]
     python_conf: PythonConf
 
-    language: Optional[Language]
-    is_experiment: Optional[bool]
-    main: Optional[str]
-    remote: Optional[str]
+    language: Optional[Language] = Field(default="python")
+    is_experiment: Optional[bool] = Field(default=False)
+    main: Optional[str] = Field(default="main")
+    remote: Optional[str] = Field(default="origin")
 
 
 class RepoConfigGet(RepoConfigBase):

@@ -111,10 +111,8 @@ def list_repos(
 
 # TODO: this should return HEAD of repo.source_folder rather than the remote repo
 # once we finish our task refactor
-@repo_router.get(
-    "/repo/remote_commit/{repo_name}", response_model=RepoConfigRemoteCommit
-)
-def remote_commit(
+@repo_router.get("/repo/get_head/{repo_name}", response_model=RepoConfigRemoteCommit)
+def get_head(
     repo_name: str,
     db_session: Session = Depends(get_db),
     current_user: CowboyUser = Depends(get_current_user),

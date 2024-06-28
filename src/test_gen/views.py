@@ -101,7 +101,7 @@ def get_results(
     trs = get_test_results_by_sessionid(db_session=db_session, session_id=session_id)
     return [
         TestResultResponse(
-            id=tr.id,
+            id=str(tr.id),
             name=tr.name,
             test_case=tr.test_case,
             test_file=tr.testfile,
