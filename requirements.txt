@@ -13,3 +13,4 @@ openai
 simple_parsing
 tenacity
 black
+sentry-sdk[fastapi]
