@@ -1,7 +1,6 @@
 from src.database.core import get_db
 from src.auth.models import CowboyUser
 from src.models import HTTPSuccess
-from src.exceptions import InvalidConfigurationError
 
 from src.runner.service import RunServiceArgs, shutdown_client
 from src.queue.core import get_queue, TaskQueue

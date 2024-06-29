@@ -1,5 +1,4 @@
 from src.database.core import get_db
-from src.exceptions import InvalidConfigurationError
 from src.auth.service import get_current_user, CowboyUser
 from src.repo.service import get_experiment
 from src.test_modules.service import get_tms_by_names

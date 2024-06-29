@@ -29,6 +29,7 @@ from src.queue.views import task_queue_router
 from src.test_gen.views import test_gen_router
 from src.target_code.views import tgtcode_router
 from src.experiments.views import exp_router
+from src.health.views import health_router
 from src.exceptions import CowboyRunTimeException
 from src.database.core import engine
 
@@ -230,6 +231,7 @@ app.include_router(task_queue_router)
 app.include_router(test_gen_router)
 app.include_router(tgtcode_router)
 app.include_router(exp_router)
+app.include_router(health_router)
 
 # logfire.configure(console=False)
 # logfire.instrument_fastapi(app)

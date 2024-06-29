@@ -1,7 +1,6 @@
 from cowboy_lib.repo import GitRepo
 
 from src.database.core import get_db
-from src.exceptions import InvalidConfigurationError
 from src.models import HTTPSuccess
 from src.auth.service import get_current_user, CowboyUser
 from src.queue.core import get_queue, TaskQueue
@@ -15,7 +14,7 @@ from .models import (
     RepoConfigRemoteCommit,
 )
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pathlib import Path
 
@@ -34,8 +33,8 @@ async def create_repo(
         db_session=db_session, repo_name=repo_in.repo_name, curr_user=current_user
     )
     if repo:
-        raise InvalidConfigurationError(
-            msg="A repo with this name already exists.", loc="repo_name"
+        raise HTTPException(
+            status_code=400, detail="A repo with this name already exists."
         )
 
     repo_config = await create_or_update(
@@ -57,8 +56,8 @@ async def delete_repo(
 ):
     deleted = delete(db_session=db_session, repo_name=repo_name, curr_user=current_user)
     if not deleted:
-        raise InvalidConfigurationError(
-            msg="A repo with this name does not exists.", loc="repo_name"
+        raise HTTPException(
+            status_code=400, detail="A repo with this name does not exists."
         )
 
     # need this to shut down the client after a repo is deleted, or else
@@ -78,10 +77,9 @@ def clean_repo(
     cleaned = clean(db_session=db_session, repo_name=repo_name, curr_user=current_user)
 
     if not cleaned:
-        raise InvalidConfigurationError(
-            msg="A repo with this name does not exists.", loc="repo_name"
+        raise HTTPException(
+            status_code=400, detail="A repo with this name does not exists."
         )
-
     return HTTPSuccess()
 
 
@@ -93,10 +91,9 @@ def get_repo(
 ):
     repo = get(db_session=db_session, repo_name=repo_name, curr_user=current_user)
     if not repo:
-        raise InvalidConfigurationError(
-            msg="A repo with this name does not exists.", loc="repo_name"
+        raise HTTPException(
+            status_code=400, detail="A repo with this name does not exists."
         )
-
     return repo.to_dict()
 
 
@@ -119,8 +116,8 @@ def get_head(
 ):
     repo = get(db_session=db_session, repo_name=repo_name, curr_user=current_user)
     if not repo:
-        raise InvalidConfigurationError(
-            msg="A repo with this name does not exists.", loc="repo_name"
+        raise HTTPException(
+            status_code=400, detail="A repo with this name does not exists."
         )
 
     git_repo = GitRepo(Path(repo.source_folder))
