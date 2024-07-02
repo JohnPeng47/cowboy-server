@@ -18,8 +18,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 from logging import getLogger
 from src.logger import configure_uvicorn_logger
-import yaml
-import threading
+from src.auth.service import get_current_user
 
 from src.queue.core import TaskQueue
 from src.auth.views import auth_router
@@ -38,7 +37,7 @@ from src.extensions import init_sentry
 import uuid
 
 
-# import logfire
+import logfire
 
 log = getLogger(__name__)
 
@@ -189,9 +188,8 @@ class DBMiddleware(BaseHTTPMiddleware):
             request.state.session_id = str(uuid.uuid4())
             # this is a very janky implementation to handle the fact that assigning a db session
             # to every request blows up our db connection pool
-            task_auth_token = request.headers.get("x-task-auth")
-            if not task_auth_token in token_registry:
-                print("Token not in registry: ", task_auth_token, token_registry)
+            task_auth_token = request.headers.get("x-task-auth", None)
+            if not task_auth_token or not task_auth_token in token_registry:
                 session = sessionmaker(bind=engine)
                 request.state.db = session()
                 request.state.db.id = str(uuid.uuid4())
@@ -208,6 +206,22 @@ class DBMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class LogfireLogUser(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        try:
+            # we have to skip requests with x-task-auth or else logfire will log an exception for this
+            # request when it tries to acces request.state.db
+            if not request.headers.get("x-task-auth", None):
+                with logfire.span("request"):
+                    user = get_current_user(request)
+                    logfire.info("{user}", user=user.email)
+        except AttributeError as e:
+            pass
+        finally:
+            response = await call_next(request)
+            return response
+
+
 task_queue = TaskQueue()
 
 
@@ -220,6 +234,7 @@ class AddTaskQueueMiddleware(BaseHTTPMiddleware):
         return response
 
 
+app.add_middleware(LogfireLogUser)
 app.add_middleware(ExceptionMiddleware)
 app.add_middleware(DBMiddleware)
 app.add_middleware(AddTaskQueueMiddleware)
@@ -233,8 +248,9 @@ app.include_router(tgtcode_router)
 app.include_router(exp_router)
 app.include_router(health_router)
 
-# logfire.configure(console=False)
-# logfire.instrument_fastapi(app)
+logfire.configure(console=False)
+logfire.instrument_fastapi(app, excluded_urls=["/task/get"])
+
 
 if __name__ == "__main__":
     import argparse
@@ -251,6 +267,8 @@ if __name__ == "__main__":
     # Session = sessionmaker(bind=engine)
     # db_session = Session()
     # start_sync_thread(db_session, task_queue)
+
+    logfire.configure()
 
     uvicorn.run(
         "main:app",

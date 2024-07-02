@@ -10,7 +10,7 @@ from .models import UserLoginResponse, UserRegister, UpdateOAIKey
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
+import logfire
 
 auth_router = APIRouter()
 
@@ -28,6 +28,9 @@ def register_user(
         )
 
     user = create(db_session=db_session, user_in=user_in)
+
+    logfire.info("User registered", user=user.email)
+
     return user
 
 

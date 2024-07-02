@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import datetime
 import pytz
+import logfire
 
 
 def converter(timestamp):
@@ -66,3 +67,9 @@ def configure_uvicorn_logger():
     uvicorn_error_logger = logging.getLogger("uvicorn.error")
     uvicorn_error_logger.addHandler(get_file_handler())
     uvicorn_error_logger.addHandler(get_console_handler())
+
+
+# LOGFIRE METRICS
+# accepted_count = logfire.metric_counter("accepted_tests", unit="1")
+# failed_count = logfire.metric_counter("failed_tests", unit="1")
+# total_count = logfire.metric_counter("total_tests", unit="1")

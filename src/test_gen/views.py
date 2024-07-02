@@ -4,6 +4,9 @@ from src.auth.service import get_current_user
 from src.stats.service import update_repo_stats
 from src.repo.service import get_or_raise, get_by_id_or_raise
 from src.queue.core import get_queue
+import logfire
+
+# from src.logger import accepted_count, failed_count, total_count
 
 from .models import (
     AugmentTestRequest,
@@ -154,6 +157,15 @@ def accept_user_decision(
     with update_repo_stats(db_session=db_session, repo=repo) as repo_stats:
         repo_stats.accepted_tests += len(accepted_trs)
         repo_stats.rejected_tests += len(request.user_decision) - len(accepted_trs)
+
+        # update logfire metrics
+        accepted_count = logfire.metric_counter("accepted_results", unit="1")
+        failed_count = logfire.metric_counter("failed_results", unit="1")
+        total_count = logfire.metric_counter("total_results", unit="1")
+
+        accepted_count.add(len(accepted_trs))
+        failed_count.add(len(request.user_decision) - len(accepted_trs))
+        total_count.add(len(request.user_decision))
 
     msg = gen_commit_msg(accepted_trs)
     compare_url = git_repo.checkout_and_push(
