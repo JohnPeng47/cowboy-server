@@ -4,8 +4,11 @@ from enum import Enum
 
 config = Config(".env")
 
-API_ENDPOINT = "http://18.223.150.134:3000"
+ENV = config("ENV", default="dev")
+PORT = 3000 if ENV == "release" else 3001
+API_ENDPOINT = "http://18.223.150.134:" + PORT
 
+# JWT settings
 COWBOY_JWT_SECRET = config("DISPATCH_JWT_SECRET", default="")
 COWBOY_JWT_ALG = config("DISPATCH_JWT_ALG", default="HS256")
 COWBOY_JWT_EXP = config("DISPATCH_JWT_EXP", cast=int, default=308790000)  # Seconds
@@ -21,15 +24,12 @@ SQLALCHEMY_ENGINE_POOL_SIZE = 50
 ALEMBIC_INI_PATH = "."
 ALEMBIC_CORE_REVISION_PATH = "alembic"
 
-# LLM settings
+# LLM settings and test gen settings
+AUGMENT_ROUNDS = 4 if ENV == "release" else 1
 LLM_RETRIES = 3
-
 AUTO_GEN_SIZE = 7
-
 LOG_DIR = "log"
-
 REPOS_ROOT = "repos"
-
 AWS_REGION = "us-east-2"
 
 

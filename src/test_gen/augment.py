@@ -10,6 +10,7 @@ from src.runner.service import RunServiceArgs
 from src.queue.core import TaskQueue
 from src.repo.models import RepoConfig
 from src.test_modules.models import TestModuleModel
+from src.config import AUGMENT_ROUNDS
 
 from .service import create_test_result
 
@@ -54,7 +55,7 @@ async def augment_test(
     )
 
     improved_tests, failed_tests, no_improve_tests = await composer.generate_test(
-        n_times=1
+        n_times=AUGMENT_ROUNDS
     )
 
     # write all improved test to source file and check out merge on repo

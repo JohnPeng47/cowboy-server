@@ -33,6 +33,7 @@ from src.exceptions import CowboyRunTimeException
 from src.database.core import engine
 
 from src.extensions import init_sentry
+from src.config import PORT
 
 import uuid
 
@@ -256,13 +257,6 @@ if __name__ == "__main__":
     import argparse
     from src.sync_repos import start_sync_thread
 
-    parser = argparse.ArgumentParser(description="Run the FastAPI application.")
-    parser.add_argument(
-        "--port", type=int, default=3000, help="Port to run the server on"
-    )
-
-    args = parser.parse_args()
-
     # start the repo sync thread
     # Session = sessionmaker(bind=engine)
     # db_session = Session()
@@ -273,7 +267,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=args.port,
+        port=PORT,
         # reload=True,
         reload_excludes=["./repos"],
         # log_config=config,
