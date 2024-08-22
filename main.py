@@ -17,17 +17,14 @@ from fastapi.responses import HTMLResponse, JSONResponse
 
 import uvicorn
 from logging import getLogger
-from src.logger import configure_uvicorn_logger
-from src.auth.service import get_current_user
+
+# from src.logger import configure_uvicorn_logger
+# from src.auth.service import get_current_user
 
 from src.queue.core import TaskQueue
 from src.auth.views import auth_router
 from src.repo.views import repo_router
-from src.test_modules.views import tm_router
 from src.queue.views import task_queue_router
-from src.test_gen.views import test_gen_router
-from src.target_code.views import tgtcode_router
-from src.experiments.views import exp_router
 from src.health.views import health_router
 from src.exceptions import CowboyRunTimeException
 from src.database.core import engine
@@ -36,9 +33,6 @@ from src.extensions import init_sentry
 from src.config import PORT
 
 import uuid
-
-
-import logfire
 
 log = getLogger(__name__)
 
@@ -207,20 +201,20 @@ class DBMiddleware(BaseHTTPMiddleware):
         return response
 
 
-class LogfireLogUser(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        try:
-            # we have to skip requests with x-task-auth or else logfire will log an exception for this
-            # request when it tries to acces request.state.db
-            if not request.headers.get("x-task-auth", None):
-                with logfire.span("request"):
-                    user = get_current_user(request)
-                    logfire.info("{user}", user=user.email)
-        except AttributeError as e:
-            pass
-        finally:
-            response = await call_next(request)
-            return response
+# class LogfireLogUser(BaseHTTPMiddleware):
+#     async def dispatch(self, request: Request, call_next):
+#         try:
+#             # we have to skip requests with x-task-auth or else logfire will log an exception for this
+#             # request when it tries to acces request.state.db
+#             if not request.headers.get("x-task-auth", None):
+#                 with logfire.span("request"):
+#                     user = get_current_user(request)
+#                     logfire.info("{user}", user=user.email)
+#         except AttributeError as e:
+#             pass
+#         finally:
+#             response = await call_next(request)
+#             return response
 
 
 task_queue = TaskQueue()
@@ -235,34 +229,29 @@ class AddTaskQueueMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app.add_middleware(LogfireLogUser)
+# app.add_middleware(LogfireLogUser)
 app.add_middleware(ExceptionMiddleware)
 app.add_middleware(DBMiddleware)
 app.add_middleware(AddTaskQueueMiddleware)
 
 app.include_router(auth_router)
 app.include_router(repo_router)
-app.include_router(tm_router)
 app.include_router(task_queue_router)
-app.include_router(test_gen_router)
-app.include_router(tgtcode_router)
-app.include_router(exp_router)
 app.include_router(health_router)
 
-logfire.configure(console=False)
-logfire.instrument_fastapi(app, excluded_urls=["/task/get"])
+# logfire.configure(console=False)
+# logfire.instrument_fastapi(app, excluded_urls=["/task/get"])
 
 
 if __name__ == "__main__":
     import argparse
-    from src.sync_repos import start_sync_thread
 
     # start the repo sync thread
     # Session = sessionmaker(bind=engine)
     # db_session = Session()
     # start_sync_thread(db_session, task_queue)
 
-    logfire.configure()
+    # logfire.configure()
 
     uvicorn.run(
         "main:app",

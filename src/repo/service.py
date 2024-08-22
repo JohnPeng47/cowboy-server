@@ -3,13 +3,9 @@ from cowboy_lib.repo import GitRepo, SourceRepo
 from src.utils import gen_random_name
 from src.auth.models import CowboyUser
 from src.config import REPOS_ROOT
-from src.runner.service import run_test, RunServiceArgs
 from src.queue.core import TaskQueue
-from src.coverage.service import upsert_coverage
-from src.test_modules.service import create_all_tms
 
 from .models import RepoConfig, RepoConfigCreate
-from ..test_modules.iter_tms import iter_test_modules
 
 from pathlib import Path
 from logging import getLogger
@@ -130,19 +126,6 @@ async def create(
         # have to commit here or because run_test depends on existing RepoConfig
         db_session.commit()
 
-        # get base coverage for repo
-        service_args = RunServiceArgs(user_id=curr_user.id, task_queue=task_queue)
-        cov_res = await run_test(repo.repo_name, service_args)
-        upsert_coverage(
-            db_session=db_session,
-            repo_id=repo.id,
-            cov_list=cov_res.coverage.cov_list,
-        )
-
-        # create test modules
-        create_all_tms(db_session=db_session, repo_conf=repo, src_repo=src_repo)
-
-        db_session.commit()
         return repo
 
     except Exception as e:
