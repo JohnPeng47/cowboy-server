@@ -26,6 +26,8 @@ from src.local.apply import (
 )
 from src.utils import confirm_action, red_text
 
+from src.logger import buildtm_logger
+
 
 def parse_list(ctx, param, value):
     if not value:
@@ -148,7 +150,7 @@ async def evaluate(repo_name: str,
               help="Number of test functions to keep per module")
 @click.option("--delete", type=int, default=0,
               help="Number of test functions to delete per module")
-@click.option("--num-tms", type=int, default=5,
+@click.option("--num-tms", type=int, default=None,
               help="Maximum number of test modules to process")
 @click.option("--selected-tms", 
               type=click.STRING, 
@@ -180,20 +182,22 @@ async def setup_eval_repo(repo_name: str,
     click.echo(f"Creating {num_tms}/{len(test_modules)} datasets")
     click.echo(f"Set \"--max-tm\" to change number of datasets to create")
 
+    if not num_tms:
+        num_tms = 1000000 # large number
+
     if selected_tms:
         filtered_tms = [tm for tm in test_modules if tm.name in selected_tms]
     else:
         filtered_tms = test_modules[::skip]
-        filtered_tms = filtered_tms[1:len(filtered_tms)]
     
     handicapped = []
     processed_tms = 0
     for tm in filtered_tms:
-        target_files, chunks = await get_tm_target_files(repo.repo_name, src_repo, tm)
-        tm.target_files = [Path(f) for f in target_files]
-        tm.chunks = chunks
-
         try:
+            target_files, chunks = await get_tm_target_files(repo.repo_name, base_cov, src_repo, tm)
+            tm.target_files = [Path(f) for f in target_files]
+            tm.chunks = chunks
+
             # NEWTODO: not handling cases where there are multiple testfiles mapped to a TestModule
             testfile_fp, newfile_contents, deleted = await handicap_tm(
                 dataset,
@@ -208,16 +212,10 @@ async def setup_eval_repo(repo_name: str,
                 processed_tms += 1
                 if num_tms and processed_tms == num_tms:
                     break
-        except (NoTestsToDelete, NoDiff):
+
+        except (NoTestsToDelete, NoDiff, Exception):
             print(red_text(f"Skipping {tm.name} due to no diff or no tests to delete"))
             continue
-        
-    targetfiles_guess = tm.targeted_files()
-    targetfiles_chunks = tm.targeted_files_from_chunks()
-    
-    print(f"Target Files for {tm.name}")
-    print("from guess: ", targetfiles_guess)
-    print("from chunks: ", targetfiles_chunks)
 
     # NOTE: need to do this here or else subsequent calls to run_testsuite in handicap_tm will reset
     # the repo commit hash
@@ -234,6 +232,7 @@ async def setup_eval_repo(repo_name: str,
     git_repo.index.commit(commit_msg)
 
     print("Commited with message: ", commit_msg)
+
 
 @cli.command()
 @click.argument("repo_name", type=str)

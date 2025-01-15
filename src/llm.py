@@ -32,6 +32,9 @@ SHORT_NAMES = {
     "deepseek" : "deepseek/deepseek-chat"
 }
 
+class LLMException(Exception):
+    pass
+
 class FakeAIMessage(BaseModel):
     content: str
 
@@ -287,5 +290,7 @@ class LMP[T]:
                 if current_retry > max_retries:
                     raise e
                 
-                time.sleep(retry_delay)
-                print(f"Retry attempt {current_retry}/{max_retries} after error: {str(e)}")
+                # Exponential backoff: retry_delay * (2 ^ attempt)
+                current_delay = retry_delay * (2 ** (current_retry - 1))
+                time.sleep(current_delay)
+                print(f"Retry attempt {current_retry}/{max_retries} after error: {str(e)}. Waiting {current_delay}s")

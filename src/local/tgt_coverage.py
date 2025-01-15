@@ -6,7 +6,7 @@ from cowboy_lib.test_modules import TestModule
 
 from src.tasks.create_tgt_coverage import get_tm_target_coverage
 from src.runner.local.run_test import run_test as run_test_local
-from src.llm import LMP, LLMModel
+from src.llm import LMP, LLMModel, LLMException
 
 from pydantic import BaseModel
 
@@ -31,7 +31,7 @@ covered during execution?
 
         for res_f in res.files:
             if not any(res_f == f[0] for f in source_files):            
-                raise Exception(f"File returned from response: {res_f} does not exist in origin arg")
+                raise LLMException(f"File returned from response: {res_f} does not exist in origin arg")
 
 async def get_tm_target_files(repo_name: str,
                               base_cov: TestCoverage,
@@ -59,10 +59,15 @@ async def get_tm_target_files(repo_name: str,
     test_cases = test_module.get_test_code()
     model = LLMModel()
     guess_source = GuessSourceFiles()
-    source_files = guess_source.invoke(model, 
-                        "claude", 
-                        source_files=source_files,
-                        test_cases=test_cases,
-                        use_cache=True).files
+
+    try:
+        source_files = guess_source.invoke(model, 
+                            "claude", 
+                            source_files=source_files,
+                            test_cases=test_cases,
+                            use_cache=True).files
+    except LLMException:
+        source_files = []
+    
     
     return source_files, chunks

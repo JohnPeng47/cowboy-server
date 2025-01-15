@@ -1,0 +1,14 @@
+{
+    "repo_name": "codecovapi-neutered2",
+    "url": "https://github.com/codecov/codecov-api.git",
+    "cloned_folders": [
+        "/home/ubuntu/codecov-api2"
+    ],
+    "source_folder": "/home/ubuntu/codecov-api2",
+    "python_conf": {
+        "cov_folders": ["./"],
+        "interp": "docker-compose exec api python",
+        "test_folder": ".",
+        "pythonpath": ""
+    }
+}

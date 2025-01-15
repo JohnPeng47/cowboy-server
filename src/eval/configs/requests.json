@@ -1,0 +1,12 @@
+{
+    "repo_name": "requests",
+    "url": "https://github.com/psf/requests.git",
+    "cloned_folders": ["/home/ubuntu/cowboy-data/requests"],
+    "source_folder": "/home/ubuntu/cowboy-data/requests",
+    "python_conf": {
+        "cov_folders": ["src"],
+        "interp": "/home/ubuntu/cowboy-data/requests/.venv/bin/python",
+        "test_folder": ".",
+        "pythonpath": ""
+    }
+}

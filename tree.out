@@ -1,0 +1,209 @@
+.
+├── README.md
+├── alembic.ini
+├── cache
+│   └── test_cache.db
+├── coverage.json
+├── cowboy_lib
+│   ├── __init__.py
+│   ├── api
+│   │   ├── __init__.py
+│   │   └── runner
+│   │       ├── __init__.py
+│   │       └── shared.py
+│   ├── ast
+│   │   ├── __init__.py
+│   │   ├── code.py
+│   │   └── python
+│   │       ├── __init__.py
+│   │       └── ast.py
+│   ├── coverage.py
+│   ├── llm
+│   │   ├── __init__.py
+│   │   ├── invoke_llm.py
+│   │   ├── models.py
+│   │   └── utils.py
+│   ├── pytest.ini
+│   ├── repo
+│   │   ├── __init__.py
+│   │   ├── diff.py
+│   │   ├── repository.py
+│   │   ├── runner.py
+│   │   ├── source_file.py
+│   │   └── source_repo.py
+│   ├── test_modules
+│   │   ├── __init__.py
+│   │   ├── target_code.py
+│   │   └── test_module.py
+│   └── utils.py
+├── docs
+│   ├── detailed.txt
+│   └── evaluations.md
+├── eval_models.sh
+├── filenames.txt
+├── install_postgres.sh
+├── logfile.txt
+├── main.py
+├── notebooks
+│   ├── extract_test_conditions.ipynb
+│   └── recommend.ipynb
+├── poetry.lock
+├── pyproject.toml
+├── requirements.txt
+├── src
+│   ├── __init__.py
+│   ├── ast
+│   │   ├── models.py
+│   │   └── service.py
+│   ├── auth
+│   │   ├── models.py
+│   │   ├── permissions.py
+│   │   ├── service.py
+│   │   ├── sm.py
+│   │   └── views.py
+│   ├── aws
+│   │   ├── sm.py
+│   │   └── sqs.py
+│   ├── cli.py
+│   ├── cli_test.py
+│   ├── config.py
+│   ├── coverage
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── stats.py
+│   ├── database
+│   │   ├── core.py
+│   │   └── manage.py
+│   ├── eval
+│   │   ├── configs
+│   │   │   ├── codecovapi-neutered.json
+│   │   │   ├── codecovapi-neutered2.json
+│   │   │   ├── codecovapi-test.json
+│   │   │   ├── codecovcli-neutered.json
+│   │   │   ├── ell-neutered.json
+│   │   │   ├── testrepo.json
+│   │   │   └── textual-neutered.json
+│   │   ├── create_dataset.py
+│   │   ├── eval_dataset.py
+│   │   └── output
+│   │       ├── codecovapi-neutered
+│   │       │   ├── CoverageViewSetTests.yml
+│   │       │   ├── FlagCommandsTest.yml
+│   │       │   ├── GithubEnterpriseWebhookHandlerTests.yml
+│   │       │   ├── OwnerViewSetTests.yml
+│   │       │   ├── PullRequestComparisonTests.yml
+│   │       │   ├── RepoPullList.yml
+│   │       │   ├── SaveTermsAgreementMutationTest.yml
+│   │       │   ├── StripeWebhookHandlerTests.yml
+│   │       │   ├── SuperTokenAuthenticationTests.yml
+│   │       │   ├── TestBitbucketServerWebhookHandler.yml
+│   │       │   ├── TestBitbucketWebhookHandler.yml
+│   │       │   ├── TestGitlabEnterpriseWebhookHandler.yml
+│   │       │   ├── TestGitlabWebhookHandler.yml
+│   │       │   ├── TestOwnerMeasurements.yml
+│   │       │   ├── TestStaticAnalysisSuiteSerializer.yml
+│   │       │   ├── UploadHandlerGithubActionsTokenlessTest.yml
+│   │       │   └── test_github_enterprise.py.yml
+│   │       └── for_codecov.txt
+│   ├── exceptions.py
+│   ├── experiments
+│   │   ├── augment_test.py
+│   │   ├── models.py
+│   │   └── views.py
+│   ├── extensions
+│   │   ├── __init__.py
+│   │   └── sentry.py
+│   ├── health
+│   │   └── views.py
+│   ├── llm.py
+│   ├── llm_cache.db
+│   ├── local
+│   │   ├── apply.py
+│   │   ├── augment_tests.py
+│   │   ├── db.py
+│   │   ├── models.py
+│   │   └── tgt_coverage.py
+│   ├── logger.py
+│   ├── model_cost.py
+│   ├── models.py
+│   ├── queue
+│   │   ├── __init__.py
+│   │   ├── core.py
+│   │   ├── models.py
+│   │   ├── permissions.py
+│   │   ├── service.py
+│   │   └── views.py
+│   ├── repo
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── views.py
+│   ├── runner
+│   │   ├── cache.yaml
+│   │   ├── local
+│   │   │   ├── cache.py
+│   │   │   ├── models.py
+│   │   │   ├── python.py
+│   │   │   └── run_test.py
+│   │   ├── models.py
+│   │   └── service.py
+│   ├── scripts
+│   │   ├── drop_db.py
+│   │   ├── neuter_repo.py
+│   │   └── show_tables.py
+│   ├── stats
+│   │   ├── models.py
+│   │   └── service.py
+│   ├── sync_repos.py
+│   ├── target_code
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── views.py
+│   ├── tasks
+│   │   ├── __init__.py
+│   │   ├── create_tgt_coverage.py
+│   │   ├── fork_repo.py
+│   │   └── get_baseline_parallel.py
+│   ├── test_gen
+│   │   ├── augment.py
+│   │   ├── augment_test
+│   │   │   ├── base_strat.py
+│   │   │   ├── composer.py
+│   │   │   ├── evaluators
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── augment_additive.py
+│   │   │   │   ├── augment_parallel.py
+│   │   │   │   ├── eval_base.py
+│   │   │   │   └── types.py
+│   │   │   ├── service.py
+│   │   │   ├── strats
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── augment_base.py
+│   │   │   │   ├── augment_strat.py
+│   │   │   │   ├── augment_with_ctxt_file.py
+│   │   │   │   ├── augment_with_missing.py
+│   │   │   │   ├── prompt.py
+│   │   │   │   └── types.py
+│   │   │   ├── types.py
+│   │   │   └── utils.py
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   ├── utils.py
+│   │   └── views.py
+│   ├── test_modules
+│   │   ├── iter_tms.py
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── views.py
+│   ├── token_registry.py
+│   └── utils.py
+├── test_expectedcov.py
+├── test_extract_file.py
+├── test_itermod.py
+├── test_litellm.py
+├── test_tm.py
+├── tree.out
+└── uvicorn.yaml
+
+39 directories, 168 files

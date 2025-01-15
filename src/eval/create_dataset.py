@@ -47,10 +47,6 @@ def num_delete(tm: TestModule, to_keep: int = 1, to_delete: int = 1) -> int:
     if to_keep and to_delete:
         raise Exception("Cannot have both values > 0")
     
-    log.info(f"Tests to delete [{tm.name}]: ")
-    for test in tm.tests:
-        log.info(f"{test.name}, {tm.test_file.path}")
-
     # always leave at least one test
     if to_keep:
         num_to_del = max(0, len(tm.tests) - to_keep)
@@ -80,7 +76,6 @@ async def handicap_tm(
     base_path = repo_path
     total_deleted = 0
     num_to_del = num_delete(tm, to_keep=to_keep, to_delete=to_delete)
-    og_contents = tm.test_file.to_code()
 
     log.info(f"Deleting {num_to_del} tests from {tm.name}")
 
@@ -98,19 +93,16 @@ async def handicap_tm(
             exclude_tests=[(func, tm.test_file.path)], 
             use_cache=False
         )
+        # NEWTODO: should only be filtering for coverage here if it belongs to 
+        # targeted files
         test_cov = modcov_before.get_coverage() - modcov_notest.get_coverage()        
         removed_tests.append(RemovedTest(name=func.name, content=func.to_code(), cov=test_cov))
         total_deleted += 1
 
     # write deleted test_file contents to disk and measure coverage diff
     handicap_testfile = tm.test_file.to_code()
-
-    print(f"Deleted {total_deleted} tests from {tm.name}")
     with open(base_path / tm.test_file.path, "w", encoding="utf-8") as f:
         f.write(handicap_testfile)
-
-    log.info(f"OG file content length: {len(og_contents)}")
-    log.info(f"New file content length: {len(handicap_testfile)}")
 
     modcov_after = await run_test_local(repo_name, None, include_tests=tm, use_cache=False)
     cov_diff = modcov_before.get_coverage() - modcov_after.get_coverage()
@@ -118,7 +110,8 @@ async def handicap_tm(
     if cov_diff.total_cov.covered == 0:
         log.info(red_text(f"No coverage after removing {total_deleted} tests"))
     
-        return "", "", 0
+        # so we dont count this one in the outer loop
+        raise Exception("No coverage after removing tests")
     
     else:
         row = TestModuleEvalData(

@@ -10,6 +10,7 @@ from typing import List, Tuple, Callable
 from pathlib import Path
 import asyncio
 from collections import defaultdict
+from itertools import permutations
 
 REPO_STATE_RESET_MSG = """
 Abnormally large coverage difference found, possible that you did not reset the repo state
@@ -81,7 +82,7 @@ async def get_tm_target_coverage(
     Test augmenting existing test classes by deleting random test methods, and then
     having LLM strategy generate them. Coverage is taken:
     1. After the deletion
-    2. After the deletion with newly generated LLM testcases
+    2. After the deletion with newly gensrated LLM testcases
 
     The diff measures how well we are able to supplant the coverage of the deleted methods
     """
@@ -159,3 +160,170 @@ async def get_tm_target_coverage(
         return []
 
     return chunks
+
+async def get_tm_target_coverage_no_permute(
+    repo_name: str,
+    src_repo: SourceRepo,
+    tm: TestModule,
+    base_cov: TestCoverage,
+    run_test: Callable,
+    run_args: RunServiceArgs,
+) -> List[str]:
+    """
+    Test augmenting existing test classes by deleting random test methods, and then
+    having LLM strategy generate them. Coverage is taken:
+    1. After the deletion
+    2. After the deletion with newly gensrated LLM testcases
+
+    The diff measures how well we are able to supplant the coverage of the deleted methods
+    """
+
+    # First loop we find the total coverage of each test by itself
+    only_module = tm
+    log.info(f"Collecting target chunks for {tm.name}")
+
+    # TODO: should be storing this as well
+    module_cov = await run_test(
+        repo_name,
+        run_args,
+        # part1: collect the coverage of a single module only
+        include_tests=only_module,
+        # stream = True,
+        use_cache=False,
+        delete_last=False
+    )
+    # log.info(f"BaseCov: {base_cov}")
+    # log.info(f"ModuleCov: {module_cov.get_coverage()}")
+
+    module_diff = base_cov - module_cov.get_coverage()
+    total_cov_diff = module_diff.total_cov.covered
+    if total_cov_diff > 0:
+        coroutines = []
+        
+        for test in tm.tests:
+            task = run_test(
+                repo_name,
+                run_args,
+                # part 2:
+                # holds the coverage diff of individual tests after they have
+                # been selectively turned off
+                exclude_tests=[(test, tm.test_file.path)],
+                include_tests=only_module,
+                # stream = True,
+                use_cache=False,
+                delete_last=False
+            )
+            coroutines.append(task)
+
+        cov_res = await asyncio.gather(*[t for t in coroutines])
+        target_files = set()
+        for test, test_cov in zip(tm.tests, cov_res): 
+            # log.info(f"Collecting coverage for test: {test.name}")  
+            # log.info(f"ModuleCov: {module_cov.get_coverage()}")
+            # log.info(f"TestCov: {test_cov.get_coverage()}")
+            
+            # part 3: we subtract the module from the 
+            single_diff: TestCoverage = module_cov.get_coverage() - test_cov.get_coverage()
+            if single_diff.total_cov.covered > 0:
+                if single_diff.total_cov.covered > 1000: # BIG DIFF
+                    # log.error("Big diff found")
+                    raise Exception(REPO_STATE_RESET_MSG)
+                
+                for f in [cov.filename for cov in single_diff.cov_list]:
+                    target_files.add(f)
+            else:
+                continue
+
+    # Find out what's the reason for the missed tests
+    else:
+        log.info(f"No coverage difference found for {tm.name}")
+        return []
+
+    return list(target_files)
+
+
+def group_tests(tests, group_num):
+    """Divide tests into chunks of specified size"""
+    overflow = len(tests) % group_num
+    group_size = int(len(tests) / group_num) if not overflow else int(len(tests) / group_num) + 1
+
+    return [tests[i:i + group_size] for i in range(0, len(tests), group_size)]
+
+async def get_tm_target_coverage_permute_2(
+    repo_name: str,
+    src_repo: SourceRepo,
+    tm: TestModule,
+    base_cov: TestCoverage,
+    run_test: Callable,
+    run_args: RunServiceArgs,
+    group_num: int = 2
+) -> List[str]:
+    """
+    Test augmenting existing test classes by deleting random test methods, and then
+    having LLM strategy generate them. Coverage is taken:
+    1. After the deletion
+    2. After the deletion with newly gensrated LLM testcases
+
+    The diff measures how well we are able to supplant the coverage of the deleted methods
+    """
+
+    # First loop we find the total coverage of each test by itself
+    only_module = tm
+    log.info(f"Collecting target chunks for {tm.name}")
+
+    # TODO: should be storing this as well
+    module_cov = await run_test(
+        repo_name,
+        run_args,
+        # part1: collect the coverage of a single module only
+        include_tests=only_module,
+        # stream = True,
+        use_cache=False,
+        delete_last=False
+    )
+    # log.info(f"BaseCov: {base_cov}")
+    # log.info(f"ModuleCov: {module_cov.get_coverage()}")
+
+    module_diff = base_cov - module_cov.get_coverage()
+    total_cov_diff = module_diff.total_cov.covered
+    if total_cov_diff > 0:
+        coroutines = []
+
+        test_groups = group_tests(tm.tests, group_num)
+        for group in test_groups:
+            exclude_tests = [(t, tm.test_file.path) for t in group]
+            task = run_test(
+                repo_name,
+                run_args,
+                # part 2:
+                # holds the coverage diff of individual tests after they have
+                # been selectively turned off
+                exclude_tests=exclude_tests,
+                include_tests=only_module,
+                # stream = True,
+                use_cache=False,
+                delete_last=False
+            )
+            coroutines.append(task)
+
+        cov_res = await asyncio.gather(*[t for t in coroutines])
+        target_files = set()
+
+        for gcov_1, gcov_2 in permutations(cov_res):
+            single_diff: TestCoverage = gcov_1.get_coverage() - gcov_2.get_coverage()
+            if single_diff.total_cov.covered > 0:
+                if single_diff.total_cov.covered > 1000: # BIG DIFF
+                    # log.error("Big diff found")
+                    raise Exception(REPO_STATE_RESET_MSG)
+                
+                for f in [cov.filename for cov in single_diff.cov_list]:
+                    target_files.add(f)
+            else:
+                continue
+
+    # Find out what's the reason for the missed tests
+    else:
+        log.info(f"No coverage difference found for {tm.name}")
+        return []
+
+    return list(target_files)
