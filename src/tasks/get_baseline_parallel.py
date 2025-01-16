@@ -120,7 +120,7 @@ async def get_tm_target_coverage(
                 exclude_tests=[(test, tm.test_file.path)],
                 include_tests=only_module,
                 # stream = True,
-                use_cache=False,
+            use_cache=False,
                 delete_last=False
             )
             coroutines.append(task)
@@ -131,17 +131,19 @@ async def get_tm_target_coverage(
         for test, test_cov in zip(tm.tests, cov_res): 
             # part 3: we subtract the module from the 
             single_diff: TestCoverage = module_cov.get_coverage() - test_cov.get_coverage()
-            test_cov.get_coverage().read_line_coverage(src_repo.repo_path)
+            # test_cov.get_coverage().read_line_coverage(src_repo.repo_path)
 
             if single_diff.total_cov.covered > 0:
+                print("Coverage found for: ", test.name)
                 if single_diff.total_cov.covered > 1000: # BIG DIFF
-                    # log.error("Big diff found")
+                    # log.error("Big diFff found")
                     raise Exception(REPO_STATE_RESET_MSG)
                 
                 test_coverage[test.name] = single_diff.total_cov.covered
                 total_covered += single_diff.total_cov.covered
                 chg_cov.extend(single_diff.cov_list)
             else:
+                print("No Coverage found for: ", test.name)
                 continue
 
         # re-init the chunks according to the aggregated individual test coverages

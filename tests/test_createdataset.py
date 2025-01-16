@@ -12,7 +12,7 @@ async def test_handicap_tm(source_repo: SourceRepo):
 
     TARGET_SRC = "c.py"
 
-    with GitCommitContext(source_repo.repo_path,"8a07116ce22dd53ed83e9a8640c26ecfcc7085ac"):       
+    with GitCommitContext(source_repo.repo_path,"0b5e9e90d83bb15d6e35fa9a42a101dbb8da7a5d"):       
         tm = get_tm("testrepo", "test_c.py")
 
         row, _, _ = await handicap_tm(

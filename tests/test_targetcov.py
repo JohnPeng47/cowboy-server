@@ -10,7 +10,7 @@ from tests.utils import GitCommitContext
 
 @pytest.mark.asyncio 
 async def test_get_tm_target_coverage(source_repo: SourceRepo):
-    with GitCommitContext(source_repo.repo_path, "1e7b6d5b8e99ad2d9a3f9e5ea22213ce477601cb"):
+    with GitCommitContext(source_repo.repo_path, "0b5e9e90d83bb15d6e35fa9a42a101dbb8da7a5d"):
         tm = iter_test_modules(source_repo, lambda tm: tm.name == "test_c.py")[0]
         
         # Get base coverage like in test_runtest.py

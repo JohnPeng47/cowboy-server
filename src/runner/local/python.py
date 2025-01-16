@@ -168,20 +168,20 @@ def get_exclude_path(
     """
     Converts a Function path
     """
-    # excl_name = (
-    #     (func.name.split(".")[0] + "::" + func.name.split(".")[1])
-    #     if func.is_meth()
-    #     else func.name
-    # )
+    excl_name = (
+        (func.name.split(".")[0] + "::" + func.name.split(".")[1])
+        if func.is_meth()
+        else func.name
+    )
 
-    # # need to do this on windows
-    # return str(rel_fp).replace("\\", "/") + "::" + excl_name
+    # need to do this on windows
+    return str(rel_fp).replace("\\", "/") + "::" + excl_name
 
     # fucking pytest syntax is so dumb
-    if func.is_meth():
-        return str(rel_fp).replace("\\","/") + func.name.split(".")[0] + "::" + func.name.split(".")[1]
-    else:
-        return str(rel_fp.name).replace("\\", "/") + "::" + func.name
+    # if func.is_meth():
+    #     return str(rel_fp).replace("\\","/") + func.name.split(".")[0] + "::" + func.name.split(".")[1]
+    # else:
+    #     return str(rel_fp.name).replace("\\", "/") + "::" + func.name
 
 
 class PytestDiffRunner:

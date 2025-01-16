@@ -198,8 +198,14 @@ async def setup_eval_repo(repo_name: str,
             tm.target_files = [Path(f) for f in target_files]
             tm.chunks = chunks
 
-            targeted_srcfiles = set(tm.target_files).intersection(set(tm.targeted_files_from_chunks()))
+            targeted_srcfiles = set(tm.get_targeted_files()).intersection(set(tm.get_targeted_files_from_chunks()))
             targeted_srcfiles = [str(fp) for fp in targeted_srcfiles]
+
+            print(tm.get_targeted_files())
+            print(tm.get_targeted_files_from_chunks())
+            print(targeted_srcfiles)
+
+            continue
 
             # NEWTODO: not handling cases where there are multiple testfiles mapped to a TestModule
             tm_dataset, newfile_contents, deleted = await handicap_tm(

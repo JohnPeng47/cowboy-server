@@ -42,7 +42,7 @@ async def test_module_cov_file_exclude(test_repoconfig: RepoConfig, source_repo:
     test_file = a_tm.test_file.path
 
     with GitCommitContext(source_repo.repo_path, 
-                          "361fa3f50895f3977ce6b81085f18f21761226d5"):
+                          "0b5e9e90d83bb15d6e35fa9a42a101dbb8da7a5d"):
         test_cov = await run_test(
             "testrepo",
             None,
