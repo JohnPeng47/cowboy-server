@@ -1,89 +1,11 @@
 {
+  "chunks": [],
   "target_files": [],
-  "chunks": [
-    {
-      "range": [
-        3,
-        3
-      ],
-      "lines": [
-        "    return a + b"
-      ],
-      "filepath": "src/a.py",
-      "func_scope": null,
-      "class_scope": null
-    },
-    {
-      "range": [
-        7,
-        7
-      ],
-      "lines": [
-        "    return a * b"
-      ],
-      "filepath": "src/a.py",
-      "func_scope": null,
-      "class_scope": null
-    },
-    {
-      "range": [
-        11,
-        13
-      ],
-      "lines": [
-        "    if b == 0:",
-        "        raise ValueError(\"Cannot divide by zero\")",
-        "    return a / b"
-      ],
-      "filepath": "src/a.py",
-      "func_scope": null,
-      "class_scope": null
-    },
-    {
-      "range": [
-        12,
-        12
-      ],
-      "lines": [
-        "        raise ValueError(\"Cannot divide by zero\")"
-      ],
-      "filepath": "src/a.py",
-      "func_scope": {
-        "name": "divide",
-        "range": [
-          8,
-          12
-        ],
-        "lines": [
-          "def divide(a, b):",
-          "    \"\"\"Divide a by b.\"\"\"",
-          "    if b == 0:",
-          "        raise ValueError(\"Cannot divide by zero\")",
-          "    return a / b"
-        ],
-        "decorators": [],
-        "is_test": false,
-        "node_type": "Function",
-        "arguments": [
-          {
-            "name": "a",
-            "type": null
-          },
-          {
-            "name": "b",
-            "type": null
-          }
-        ],
-        "scope": null
-      },
-      "class_scope": null
-    }
-  ],
   "test_file": {
     "path": "tests/test_a.py",
     "lines": [
       "import pytest",
-      "from src.a import hello, multiply, divide",
+      "from a import hello, multiply, divide",
       "",
       "def test_hello():",
       "    assert hello(2, 3) == 5",
@@ -102,84 +24,13 @@
       "",
       "def test_divide_by_zero():",
       "    with pytest.raises(ValueError, match=\"Cannot divide by zero\"):",
-      "        divide(5, 0) "
+      "        divide(5, 0)",
+      "",
+      ""
     ]
   },
-  "commit_sha": "",
-  "nodes": [
-    {
-      "name": "test_hello",
-      "range": [
-        3,
-        6
-      ],
-      "lines": [
-        "def test_hello():",
-        "    assert hello(2, 3) == 5",
-        "    assert hello(-1, 1) == 0",
-        "    assert hello(0, 0) == 0"
-      ],
-      "decorators": [],
-      "is_test": true,
-      "node_type": "Function",
-      "arguments": [],
-      "scope": null
-    },
-    {
-      "name": "test_multiply",
-      "range": [
-        8,
-        11
-      ],
-      "lines": [
-        "def test_multiply():",
-        "    assert multiply(2, 3) == 6",
-        "    assert multiply(-2, 3) == -6",
-        "    assert multiply(0, 5) == 0"
-      ],
-      "decorators": [],
-      "is_test": true,
-      "node_type": "Function",
-      "arguments": [],
-      "scope": null
-    },
-    {
-      "name": "test_divide",
-      "range": [
-        13,
-        16
-      ],
-      "lines": [
-        "def test_divide():",
-        "    assert divide(6, 2) == 3",
-        "    assert divide(5, 2) == 2.5",
-        "    assert divide(-6, 2) == -3"
-      ],
-      "decorators": [],
-      "is_test": true,
-      "node_type": "Function",
-      "arguments": [],
-      "scope": null
-    },
-    {
-      "name": "test_divide_by_zero",
-      "range": [
-        18,
-        20
-      ],
-      "lines": [
-        "def test_divide_by_zero():",
-        "    with pytest.raises(ValueError, match=\"Cannot divide by zero\"):",
-        "        divide(5, 0)"
-      ],
-      "decorators": [],
-      "is_test": true,
-      "node_type": "Function",
-      "arguments": [],
-      "scope": null
-    }
-  ],
-  "cov_diff": null,
+  "is_class": false,
   "name": "test_a.py",
-  "is_class": false
+  "commit_sha": "",
+  "cov_diff": null
 }

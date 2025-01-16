@@ -1,50 +1,11 @@
 {
+  "chunks": [],
   "target_files": [],
-  "chunks": [
-    {
-      "range": [
-        3,
-        3
-      ],
-      "lines": [
-        "    return text[::-1]"
-      ],
-      "filepath": "src/string_utils.py",
-      "func_scope": null,
-      "class_scope": null
-    },
-    {
-      "range": [
-        7,
-        8
-      ],
-      "lines": [
-        "    vowels = \"aeiouAEIOU\"",
-        "    return sum(1 for char in text if char in vowels)"
-      ],
-      "filepath": "src/string_utils.py",
-      "func_scope": null,
-      "class_scope": null
-    },
-    {
-      "range": [
-        12,
-        13
-      ],
-      "lines": [
-        "    cleaned = \"\".join(char.lower() for char in text if char.isalnum())",
-        "    return cleaned == cleaned[::-1] "
-      ],
-      "filepath": "src/string_utils.py",
-      "func_scope": null,
-      "class_scope": null
-    }
-  ],
   "test_file": {
     "path": "tests/test_string_utils.py",
     "lines": [
       "import pytest",
-      "from src.string_utils import reverse_string, count_vowels, is_palindrome",
+      "from string_utils import reverse_string, count_vowels, is_palindrome",
       "",
       "def test_reverse_string():",
       "    assert reverse_string(\"hello\") == \"olleh\"",
@@ -64,66 +25,8 @@
       "    assert is_palindrome(\"a\") == True "
     ]
   },
-  "commit_sha": "",
-  "nodes": [
-    {
-      "name": "test_reverse_string",
-      "range": [
-        3,
-        6
-      ],
-      "lines": [
-        "def test_reverse_string():",
-        "    assert reverse_string(\"hello\") == \"olleh\"",
-        "    assert reverse_string(\"\") == \"\"",
-        "    assert reverse_string(\"a\") == \"a\""
-      ],
-      "decorators": [],
-      "is_test": true,
-      "node_type": "Function",
-      "arguments": [],
-      "scope": null
-    },
-    {
-      "name": "test_count_vowels",
-      "range": [
-        8,
-        12
-      ],
-      "lines": [
-        "def test_count_vowels():",
-        "    assert count_vowels(\"hello\") == 2",
-        "    assert count_vowels(\"AEIOU\") == 5",
-        "    assert count_vowels(\"xyz\") == 0",
-        "    assert count_vowels(\"\") == 0"
-      ],
-      "decorators": [],
-      "is_test": true,
-      "node_type": "Function",
-      "arguments": [],
-      "scope": null
-    },
-    {
-      "name": "test_is_palindrome",
-      "range": [
-        14,
-        18
-      ],
-      "lines": [
-        "def test_is_palindrome():",
-        "    assert is_palindrome(\"A man a plan a canal Panama\")",
-        "    assert is_palindrome(\"race a car\") == False",
-        "    assert is_palindrome(\"\") == True",
-        "    assert is_palindrome(\"a\") == True"
-      ],
-      "decorators": [],
-      "is_test": true,
-      "node_type": "Function",
-      "arguments": [],
-      "scope": null
-    }
-  ],
-  "cov_diff": null,
+  "is_class": false,
   "name": "test_string_utils.py",
-  "is_class": false
+  "commit_sha": "",
+  "cov_diff": null
 }

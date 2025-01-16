@@ -83,6 +83,7 @@ async def handicap_tm(
 
     # we take the module coverage before and after the unit tests have been rmeoved
     # to calcuate the difference in coverage
+    cov_diff = TestCoverage([], isdiff=True)
     removed_tests = []
     modcov_before = await run_test_local(repo_name, None, include_tests=tm, use_cache=False)
     for func in tm.tests[:num_to_del]:
@@ -96,10 +97,11 @@ async def handicap_tm(
             use_cache=False
         )
         test_cov = modcov_before.get_coverage() - modcov_notest.get_coverage()     
-        targeted_cov = TestCoverage([])
+        targeted_cov = TestCoverage([], isdiff=True)
         for cov in test_cov.cov_list:
             if cov.filename in targeted_srcfiles:
                 targeted_cov += cov
+                cov_diff += cov
 
         removed_tests.append(RemovedTest(name=func.name, content=func.to_code(), cov=targeted_cov))
         total_deleted += 1
@@ -108,10 +110,7 @@ async def handicap_tm(
     handicap_testfile = tm.test_file.to_code()
     with open(base_path / tm.test_file.path, "w", encoding="utf-8") as f:
         f.write(handicap_testfile)
-
-    modcov_after = await run_test_local(repo_name, None, include_tests=tm, use_cache=False)
-    cov_diff = modcov_before.get_coverage() - modcov_after.get_coverage()
-
+        
     if cov_diff.total_cov.covered == 0:
         log.info(red_text(f"No coverage after removing {total_deleted} tests"))
     
@@ -127,7 +126,6 @@ async def handicap_tm(
             tags=[tm.name],
             expected=cov_diff
         )
-        row.persist(tm)
 
         # NEWTODO: upload data to braintrust
         # dataset.update(

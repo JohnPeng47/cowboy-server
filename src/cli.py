@@ -15,7 +15,7 @@ from src.test_modules.iter_tms import iter_test_modules
 from src.config import BT_PROJECT, BRAINTRUST_API_KEY
 from src.eval.eval_dataset import eval_dataset, eval_dataset_braintrust
 from src.eval.create_dataset import handicap_tm, NoTestsToDelete, NoDiff
-from src.local.db import get_repo, get_tm
+from src.local.db import get_repo, get_tm, persist_tm
 from src.local.models import TestResults, TestModuleData, read_rows
 from src.local.tgt_coverage import get_tm_target_files
 from src.local.apply import (
@@ -211,6 +211,8 @@ async def setup_eval_repo(repo_name: str,
                 to_keep=keep, 
                 to_delete=delete,
             )
+            persist_tm(tm_dataset)
+
             if tm.test_file.path and newfile_contents and deleted:
                 handicapped.append((tm.test_file.path, newfile_contents, deleted))
                 processed_tms += 1

@@ -3,6 +3,7 @@ from src.repo.models import RepoConfig
 from src.runner.local.run_test import run_test
 from src.test_gen.augment_test.types import StratResult
 from src.local.db import get_tm
+from src.test_modules.iter_tms import iter_test_modules
 
 from cowboy_lib.repo import SourceRepo
 import pytest
@@ -55,7 +56,7 @@ def test_fibonacci_errors():
 async def test_additive_evaluator(test_repoconfig: RepoConfig, source_repo: SourceRepo):
     """Initialize AugmentAdditiveEvaluator with test repo"""
 
-    math_utils_tm = get_tm("testrepo", "test_math_utils.py")    
+    math_utils_tm = iter_test_modules(source_repo, lambda tm: tm.name == "test_math_utils.py")[0]
 
     with GitCommitContext(source_repo.repo_path,"26c8f8e4a7dd0ae1028769f27ccc3faecff085f0"):
         module_cov = await run_test(
