@@ -168,14 +168,20 @@ def get_exclude_path(
     """
     Converts a Function path
     """
-    excl_name = (
-        (func.name.split(".")[0] + "::" + func.name.split(".")[1])
-        if func.is_meth()
-        else func.name
-    )
+    # excl_name = (
+    #     (func.name.split(".")[0] + "::" + func.name.split(".")[1])
+    #     if func.is_meth()
+    #     else func.name
+    # )
 
-    # need to do this on windows
-    return str(rel_fp).replace("\\", "/") + "::" + excl_name
+    # # need to do this on windows
+    # return str(rel_fp).replace("\\", "/") + "::" + excl_name
+
+    # fucking pytest syntax is so dumb
+    if func.is_meth():
+        return str(rel_fp).replace("\\","/") + func.name.split(".")[0] + "::" + func.name.split(".")[1]
+    else:
+        return str(rel_fp.name).replace("\\", "/") + "::" + func.name
 
 
 class PytestDiffRunner:
@@ -259,27 +265,37 @@ class PytestDiffRunner:
 
         self.verify_clone_dirs(repo_paths)
 
-    def _get_exclude_tests_arg_str(
-        self, excluded_tests: List[Tuple[Function, Path]], cloned_path: Path
-    ):
+    def _get_test_args(
+        self,
+        include_tm: TestModule = None,
+        excluded_tests: List[Tuple[Function, Path]] = None,
+        cloned_path: Path = None
+    ) -> Tuple[str, str, str]:
         """
-        Convert the excluded tests into Pytest deselect args
-        """
-        if not excluded_tests:
-            return ""
-
-        # PATCH: just concatenate the path with base folder
-        tranf_paths = []
-        for test, test_fp in excluded_tests:
-            tranf_paths.append(get_exclude_path(test, test_fp))
-
-        return "--deselect=" + " --deselect=".join(tranf_paths)
-
-    def _get_include_tests_arg_str(self, include_tm: TestModule = None) -> Tuple[str, str]:
-        if not include_tm:
-            return "", ""
+        Get pytest test selection arguments for both including and excluding tests
         
-        return "-k " + include_tm.name, include_tm.test_file.path
+        Returns:
+            Tuple of (selected_tests, deselected_tests, test_file)
+        """
+        # Handle excluded tests
+        deselected_tests = ""
+        if excluded_tests:
+            tranf_paths = []
+            for test, test_fp in excluded_tests:
+                tranf_paths.append(get_exclude_path(test, test_fp))
+            deselected_tests = "--deselect=" + " --deselect=".join(tranf_paths)
+
+        # Handle included tests
+        selected_tests = ""
+        test_file = ""
+        if include_tm:
+            # Only add -k flag if not a .py file
+            # This change allows running specific test files without filtering by name
+            if not deselected_tests:
+                selected_tests = "-k " + include_tm.name
+            test_file = include_tm.test_file.path
+
+        return selected_tests, deselected_tests, test_file
     
     def _get_coveragerc(self, base_path: Path) -> str:
         """Returns a .coveragerc file that omits test file patterns along with the original content"""
@@ -405,12 +421,13 @@ class PytestDiffRunner:
             if self.python_path:
                 env["PYTHONPATH"] = self.python_path
 
-            exclude_tests = self._get_exclude_tests_arg_str(
-                args.exclude_tests, git_repo.repo_folder
+            selected_tests, deselected_tests, test_file = self._get_test_args(
+                args.include_tests,
+                args.exclude_tests,
+                git_repo.repo_folder
             )
-            include_tests, test_file = self._get_include_tests_arg_str(args.include_tests)
             cmd_str = self._construct_cmd(
-                git_repo.repo_folder, include_tests, exclude_tests, test_file=test_file, custom_cmd=custom_cmd
+                git_repo.repo_folder, selected_tests, deselected_tests, test_file=test_file, custom_cmd=custom_cmd
             )
             log.info(f"CMD: {cmd_str}")
 

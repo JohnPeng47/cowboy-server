@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Tuple
 from pathlib import Path
 from sqlalchemy.orm import sessionmaker
 from braintrust import Dataset
@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from cowboy_lib.test_modules import TestModule
 from cowboy_lib.ast import NodeType
+from cowboy_lib.coverage import TestCoverage
 
 from src.llm import LLMModel, LMP
 from src.config import TESTCONFIG_ROOT
@@ -59,13 +60,14 @@ def num_delete(tm: TestModule, to_keep: int = 1, to_delete: int = 1) -> int:
 
 async def handicap_tm(
     dataset: Dataset,
+    targeted_srcfiles: List[str],
     repo_name: str,
     tm: TestModule, 
     repo_path: Path, 
     to_keep, 
     to_delete=0,
     ask_confirm=True,
-) -> str:
+) -> Tuple[TestModuleEvalData, str, int]:
     """
     Iterate TestModules and delete tests from each according to to_keep/to_delete. 
     Process up to max_tm test modules. Writes summary of deleted tests to disk
@@ -93,10 +95,13 @@ async def handicap_tm(
             exclude_tests=[(func, tm.test_file.path)], 
             use_cache=False
         )
-        # NEWTODO: should only be filtering for coverage here if it belongs to 
-        # targeted files
-        test_cov = modcov_before.get_coverage() - modcov_notest.get_coverage()        
-        removed_tests.append(RemovedTest(name=func.name, content=func.to_code(), cov=test_cov))
+        test_cov = modcov_before.get_coverage() - modcov_notest.get_coverage()     
+        targeted_cov = TestCoverage([])
+        for cov in test_cov.cov_list:
+            if cov.filename in targeted_srcfiles:
+                targeted_cov += cov
+
+        removed_tests.append(RemovedTest(name=func.name, content=func.to_code(), cov=targeted_cov))
         total_deleted += 1
 
     # write deleted test_file contents to disk and measure coverage diff
@@ -141,5 +146,5 @@ async def handicap_tm(
         log.info(f"Diff coverage: {cov_diff.total_cov.covered}")
         log.info(f"Updating dataset with: {tm.name}")
 
-        return tm.test_file.path, handicap_testfile, total_deleted
+        return row, handicap_testfile, total_deleted
         

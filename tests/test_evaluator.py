@@ -71,7 +71,7 @@ async def test_additive_evaluator(test_repoconfig: RepoConfig, source_repo: Sour
             run_args=None,
             tm=None,
             run_test=run_test,
-            use_cache=True,
+            use_cache=False,
             delete_last=False
         )
         improved, failed, no_improve = await evaluator(

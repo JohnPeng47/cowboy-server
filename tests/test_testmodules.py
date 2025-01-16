@@ -1,13 +1,7 @@
-from src.test_modules.iter_tms import iter_test_modules
 from cowboy_lib.repo.source_file import TestFile
-from cowboy_lib.repo.source_repo import SourceRepo
 from cowboy_lib.test_modules import TestModule
 
 from pathlib import Path
-
-from tests.utils import GitCommitContext
-
-import json
 
 initial_code = [
     "def test_function1():",

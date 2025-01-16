@@ -106,6 +106,8 @@ async def get_tm_target_coverage(
 
     module_diff = base_cov - module_cov.get_coverage()
     total_cov_diff = module_diff.total_cov.covered
+
+    print("Modulecov: ", module_cov.get_coverage())
     if total_cov_diff > 0:
         chg_cov = []
         coroutines = []
@@ -129,12 +131,18 @@ async def get_tm_target_coverage(
         test_coverage = defaultdict(int)
         cov_res = await asyncio.gather(*[t for t in coroutines])
         for test, test_cov in zip(tm.tests, cov_res): 
-            # log.info(f"Collecting coverage for test: {test.name}")  
-            # log.info(f"ModuleCov: {module_cov.get_coverage()}")
-            # log.info(f"TestCov: {test_cov.get_coverage()}")
-            
             # part 3: we subtract the module from the 
+            print("Finding additional cov for: ", test.name)
             single_diff: TestCoverage = module_cov.get_coverage() - test_cov.get_coverage()
+            
+            print("Test cov: ", test_cov.get_coverage())
+            print("Coverage from excluding: ", test.name)
+            test_cov.get_coverage().read_line_coverage(src_repo.repo_path)
+            print(test_cov.get_coverage().print_lines())
+
+            import sys
+            sys.exit()
+
             if single_diff.total_cov.covered > 0:
                 if single_diff.total_cov.covered > 1000: # BIG DIFF
                     # log.error("Big diff found")

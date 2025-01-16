@@ -9,7 +9,7 @@ import pytest
 
 pytestmark = pytest.mark.asyncio
 
-async def test_module_cov_tm_file_no_class(test_repoconfig: RepoConfig, source_repo: SourceRepo):
+async def test_module_cov_tm_file(test_repoconfig: RepoConfig, source_repo: SourceRepo):
     """Test collecting coverage for a single module"""
 
     math_tm = iter_test_modules(source_repo, lambda tm: tm.name == "test_math_utils.py")[0]
@@ -34,31 +34,32 @@ async def test_module_cov_tm_file_no_class(test_repoconfig: RepoConfig, source_r
         assert module_cov.get_coverage().total_cov.misses == 24
         assert module_cov.get_coverage().total_cov.stmts == 50
 
-async def test_module_cov_tm_file_class(test_repoconfig: RepoConfig, source_repo: SourceRepo):
-    """Test collecting coverage for a single module"""
+async def test_module_cov_file_exclude(test_repoconfig: RepoConfig, source_repo: SourceRepo):
+    """Test excluding test file"""
 
-    b_tm = iter_test_modules(source_repo, lambda tm: tm.name == "test_b.py")[0]
+    a_tm = iter_test_modules(source_repo, lambda tm: tm.name == "test_a.py")[0]
+    test_func = a_tm.test_file.find_function("test_hello")
+    test_file = a_tm.test_file.path
 
     with GitCommitContext(source_repo.repo_path, 
-                          "e483b460318bf6bed6585c71cc68895185609109"):
-        module_cov = await run_test(
+                          "361fa3f50895f3977ce6b81085f18f21761226d5"):
+        test_cov = await run_test(
             "testrepo",
             None,
-            include_tests=b_tm,
+            include_tests=a_tm,
+            exclude_tests=[(test_func, test_file)],
             use_cache=False
         )
         
-        math_cov = [
-            cov for cov in module_cov.get_coverage().cov_list 
-            if cov.filename == "b.py"
+        file_cov = [
+            cov for cov in test_cov.get_coverage().cov_list 
+            if cov.filename == "a.py"
         ][0]
-        
-        # assert math_cov.covered == 25
-        
-        # assert module_cov.get_coverage().total_cov.covered == 26    
-        # assert module_cov.get_coverage().total_cov.misses == 24
-        # assert module_cov.get_coverage().total_cov.stmts == 50
 
+        assert file_cov.stmts == 8
+        assert file_cov.covered == 7
+        assert file_cov.misses == 1
+        
 async def test_test_files_excluded_in_coverage():
     FORBIDDEN_FILES = [
         "tests/test_a.py", 
