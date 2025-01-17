@@ -1,4 +1,4 @@
-from cowboy_lib.repo import SourceRepo, GitRepo
+from src.lib.repo import SourceRepo, GitRepo
 from src.database.core import get_db
 from src.auth.service import get_current_user
 from src.stats.service import update_repo_stats

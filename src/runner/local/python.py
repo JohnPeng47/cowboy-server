@@ -1,8 +1,8 @@
-from cowboy_lib.ast import Function, Class, NodeType
-from cowboy_lib.repo.repository import PatchFile, PatchFileContext, GitRepo
-from cowboy_lib.coverage import CoverageResult
-from cowboy_lib.api.runner.shared import RunTestTaskArgs, FunctionArg
-from cowboy_lib.test_modules import TestModule
+from src.lib.ast import Function, Class, NodeType
+from src.lib.repo.repository import PatchFile, PatchFileContext, GitRepo
+from src.lib.coverage import CoverageResult
+from src.lib.api.runner.shared import RunTestTaskArgs, FunctionArg
+from src.lib.test_modules import TestModule
 
 from src.logger import testgen_logger, buildtm_logger, MultiLogger
 

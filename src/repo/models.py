@@ -1,4 +1,4 @@
-from cowboy_lib.coverage import TestCoverage
+from src.lib.coverage import TestCoverage
 
 from sqlalchemy import Column, Integer, String, JSON, ForeignKey, Boolean
 from sqlalchemy.orm import relationship

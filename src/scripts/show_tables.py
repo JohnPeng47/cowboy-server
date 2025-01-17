@@ -1,4 +1,4 @@
-from cowboy_lib.repo.source_repo import SourceRepo
+from src.lib.repo.source_repo import SourceRepo
 from src.test_modules.iter_tms import iter_test_modules
 from src.test_modules.models import TestModuleModel
 from pathlib import Path

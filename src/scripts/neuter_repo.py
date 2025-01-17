@@ -2,9 +2,9 @@ from typing import List, Optional
 from pathlib import Path
 from collections import defaultdict
 
-from cowboy_lib.repo import SourceRepo
-from cowboy_lib.test_modules import TestModule
-from cowboy_lib.ast import NodeType
+from src.lib.repo import SourceRepo
+from src.lib.test_modules import TestModule
+from src.lib.ast import NodeType
 
 from src.test_modules.iter_tms import iter_test_modules
 from src.database.core import engine

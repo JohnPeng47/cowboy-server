@@ -1,6 +1,6 @@
-from cowboy_lib.repo.repository import PatchFile
-from cowboy_lib.coverage import CoverageResult, TestCoverage
-from cowboy_lib.api.runner.shared import TaskResult
+from src.lib.repo.repository import PatchFile
+from src.lib.coverage import CoverageResult, TestCoverage
+from src.lib.api.runner.shared import TaskResult
 
 from fastapi import HTTPException
 from pydantic import BaseModel, Field, validator

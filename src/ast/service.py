@@ -1,5 +1,5 @@
-from cowboy_lib.ast.code import ASTNode
-from cowboy_lib.test_modules.test_module import TestModule
+from src.lib.ast.code import ASTNode
+from src.lib.test_modules.test_module import TestModule
 
 from src.test_modules.models import TestModuleModel
 

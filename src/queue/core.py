@@ -1,4 +1,4 @@
-from cowboy_lib.api.runner.shared import Task, TaskStatus
+from src.lib.api.runner.shared import Task, TaskStatus
 
 from fastapi import Request
 from threading import Lock

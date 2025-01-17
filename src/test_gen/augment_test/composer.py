@@ -7,10 +7,10 @@ from .evaluators import (
     EvaluatorType,
     AUGMENT_EVALS,
 )
-from cowboy_lib.repo.repository import PatchFile
-from cowboy_lib.repo.source_repo import SourceRepo
-from cowboy_lib.repo.source_file import TestFile, Function, LintException
-from cowboy_lib.coverage import TestCoverage, TestError
+from src.lib.repo.repository import PatchFile
+from src.lib.repo.source_repo import SourceRepo
+from src.lib.repo.source_file import TestFile, Function, LintException
+from src.lib.coverage import TestCoverage, TestError
 
 from src.test_gen.augment_test.strats import AugmentStratType, AUGMENT_STRATS
 from src.runner.service import RunServiceArgs

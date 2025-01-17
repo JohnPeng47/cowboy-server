@@ -1,6 +1,6 @@
-from cowboy_lib.repo.source_repo import SourceRepo
+from src.lib.repo.source_repo import SourceRepo
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethoda
 from pathlib import Path
 from dataclasses import dataclass
 

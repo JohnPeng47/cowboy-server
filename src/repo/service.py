@@ -1,5 +1,5 @@
-from cowboy_lib.repo import GitRepo, SourceRepo
-from cowboy_lib.coverage import TestCoverage
+from src.lib.repo import GitRepo, SourceRepo
+from src.lib.coverage import TestCoverage
 
 from src.utils import gen_random_name
 from src.auth.models import CowboyUser

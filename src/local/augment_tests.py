@@ -1,8 +1,8 @@
 from typing import Dict
 from pathlib import Path
 from dataclasses import asdict
-from cowboy_lib.repo import SourceRepo
-from cowboy_lib.coverage import TestCoverage
+from src.lib.repo import SourceRepo
+from src.lib.coverage import TestCoverage
 
 from src.utils import get_repo_head, yaml
 from src.test_gen.augment_test.composer import Composer

@@ -2,7 +2,7 @@ import dotenv
 from typing import Dict, List
 from braintrust import EvalAsync
 
-from cowboy_lib.coverage import TestCoverage
+from src.lib.coverage import TestCoverage
 
 from src.local.augment_tests import extend_tests
 

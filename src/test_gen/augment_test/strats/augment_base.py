@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cowboy_lib.test_modules import TestModule
+    from src.lib.test_modules import TestModule
 
 from logging import getLogger
 

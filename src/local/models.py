@@ -6,8 +6,8 @@ from pathlib import Path
 from src.config import EVAL_DATA_ROOT
 from src.utils import yaml
 from src.test_gen.augment_test.composer import TestAugmentArgs
-from cowboy_lib.test_modules import TestModule
-from cowboy_lib.coverage import TestCoverage
+from src.lib.test_modules import TestModule
+from src.lib.coverage import TestCoverage
 
 from .db import get_tm, get_repo, persist_tm
 

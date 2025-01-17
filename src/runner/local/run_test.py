@@ -1,9 +1,9 @@
-from cowboy_lib.repo.repository import PatchFile
+from src.lib.repo.repository import PatchFile
 # TODO: need to replace definition of RunTestTaskArgs to be compatible with include_tests == TestModule
-# from cowboy_lib.api.runner.shared import RunTestTaskArgs
-from cowboy_lib.coverage import CoverageResult
-from cowboy_lib.ast.code import Function
-from cowboy_lib.test_modules import TestModule
+# from src.lib.api.runner.shared import RunTestTaskArgs
+from src.lib.coverage import CoverageResult
+from src.lib.ast.code import Function
+from src.lib.test_modules import TestModule
 
 from ..models import RunServiceArgs 
 from .python import PytestDiffRunner

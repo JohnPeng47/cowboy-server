@@ -7,8 +7,8 @@ from braintrust import init_dataset
 from functools import wraps
 import git
 
-from cowboy_lib.test_modules import TestModule
-from cowboy_lib.repo import SourceRepo
+from src.lib.test_modules import TestModule
+from src.lib.repo import SourceRepo
 
 from src.runner.local.run_test import run_test
 from src.test_modules.iter_tms import iter_test_modules

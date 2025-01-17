@@ -1,8 +1,8 @@
-from cowboy_lib.repo import SourceRepo, GitRepo
-from cowboy_lib.coverage import TestCoverage, Coverage
-from cowboy_lib.test_modules.test_module import TestModule
-from cowboy_lib.ast.code import NodeType
-from cowboy_lib.repo.source_file import NodeNotFound, SameNodeException
+from src.lib.repo import SourceRepo, GitRepo
+from src.lib.coverage import TestCoverage, Coverage
+from src.lib.test_modules.test_module import TestModule
+from src.lib.ast.code import NodeType
+from src.lib.repo.source_file import NodeNotFound, SameNodeException
 
 from src.test_modules.models import TestModuleModel
 from src.repo.models import RepoConfig

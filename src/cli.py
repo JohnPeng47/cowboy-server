@@ -7,8 +7,8 @@ from braintrust import init_dataset
 from functools import wraps
 import git
 
-from cowboy_lib.test_modules import TestModule
-from cowboy_lib.repo import SourceRepo
+from src.lib.test_modules import TestModule
+from src.lib.repo import SourceRepo
 
 from src.runner.local.run_test import run_test
 from src.test_modules.iter_tms import iter_test_modules
@@ -205,8 +205,6 @@ async def setup_eval_repo(repo_name: str,
             print(tm.get_targeted_files_from_chunks())
             print(targeted_srcfiles)
 
-            continue
-
             # NEWTODO: not handling cases where there are multiple testfiles mapped to a TestModule
             tm_dataset, newfile_contents, deleted = await handicap_tm(
                 dataset,
@@ -217,7 +215,7 @@ async def setup_eval_repo(repo_name: str,
                 to_keep=keep, 
                 to_delete=delete,
             )
-            persist_tm(tm_dataset)
+            persist_tm(tm_dataset, tm)
 
             if tm.test_file.path and newfile_contents and deleted:
                 handicapped.append((tm.test_file.path, newfile_contents, deleted))
@@ -225,7 +223,7 @@ async def setup_eval_repo(repo_name: str,
                 if num_tms and processed_tms == num_tms:
                     break
 
-        except (NoTestsToDelete, NoDiff, Exception):
+        except (NoTestsToDelete, NoDiff):
             print(red_text(f"Skipping {tm.name} due to no diff or no tests to delete"))
             continue
 

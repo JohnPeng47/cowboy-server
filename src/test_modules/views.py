@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from cowboy_lib.repo import SourceRepo
+from src.lib.repo import SourceRepo
 
 from src.database.core import get_db
 from src.queue.core import TaskQueue, get_queue

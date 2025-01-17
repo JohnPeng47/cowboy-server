@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Any, Optional, List
 import inspect
 
-from cowboy_lib.test_modules import TestModule
-from cowboy_lib.coverage import CoverageResult
-from cowboy_lib.repo.repository import PatchFile
+from src.lib.test_modules import TestModule
+from src.lib.coverage import CoverageResult
+from src.lib.repo.repository import PatchFile
 
 from src.utils import green_text
 from src.logger import buildtm_logger as log

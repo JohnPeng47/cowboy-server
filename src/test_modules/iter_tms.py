@@ -1,5 +1,5 @@
-from cowboy_lib.utils import get_current_git_commit
-from cowboy_lib.repo.source_repo import SourceRepo
+from src.lib.utils import get_current_git_commit
+from src.lib.repo.source_repo import SourceRepo
 
 from src.test_modules.models import TestModule
 

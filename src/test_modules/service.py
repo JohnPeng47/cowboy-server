@@ -1,4 +1,4 @@
-from cowboy_lib.repo import SourceRepo
+from src.lib.repo import SourceRepo
 
 from src.repo.models import RepoConfig
 from src.ast.service import create_node

@@ -1,5 +1,5 @@
 import pytest
-from cowboy_lib.coverage import Coverage, TestCoverage
+from src.lib.coverage import Coverage, TestCoverage
 
 @pytest.fixture
 def setup_coverages():

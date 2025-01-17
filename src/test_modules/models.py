@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import List, Optional
 from pydantic import BaseModel
 
-from cowboy_lib.test_modules.test_module import TestModule
-from cowboy_lib.repo.source_repo import SourceRepo
+from src.lib.test_modules.test_module import TestModule
+from src.lib.repo.source_repo import SourceRepo
 
 from src.database.core import Base
 from src.ast.models import NodeModel

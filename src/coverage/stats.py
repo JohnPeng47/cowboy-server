@@ -1,5 +1,5 @@
 from src.coverage.models import CoverageModel
-from cowboy_lib.coverage import Coverage
+from src.lib.coverage import Coverage
 
 from src.test_modules.models import TestModuleModel, TestModule
 

@@ -1,5 +1,5 @@
 import pytest
-from cowboy_lib.repo import SourceRepo
+from src.lib.repo import SourceRepo
 from src.local.db import get_repo
 
 from pathlib import Path

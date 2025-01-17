@@ -1,4 +1,4 @@
-from cowboy_lib.repo import SourceRepo
+from src.lib.repo import SourceRepo
 from src.test_modules.service import (
     get_all_tms,
     get_tms_by_filename,

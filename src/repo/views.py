@@ -1,4 +1,4 @@
-from cowboy_lib.repo import GitRepo
+from src.lib.repo import GitRepo
 
 from src.database.core import get_db
 from src.models import HTTPSuccess

@@ -1,4 +1,4 @@
-from cowboy_lib.coverage import Coverage
+from src.lib.coverage import Coverage
 from src.test_gen.models import AugmentTestResult
 
 from .models import CoverageModel

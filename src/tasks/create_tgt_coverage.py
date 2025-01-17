@@ -1,5 +1,5 @@
-from cowboy_lib.repo import SourceRepo
-from cowboy_lib.test_modules import TargetCode
+from src.lib.repo import SourceRepo
+from src.lib.test_modules import TargetCode
 
 # from .models import TestModule
 # # Long term tasks represent tasks that we potentially want to offload to celery

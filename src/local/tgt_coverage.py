@@ -1,8 +1,8 @@
 from typing import List, Tuple
 
-from cowboy_lib.repo import SourceRepo
-from cowboy_lib.coverage import TestCoverage
-from cowboy_lib.test_modules import TestModule
+from src.lib.repo import SourceRepo
+from src.lib.coverage import TestCoverage
+from src.lib.test_modules import TestModule
 
 from src.tasks.create_tgt_coverage import get_tm_target_coverage
 from src.runner.local.run_test import run_test as run_test_local

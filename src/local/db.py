@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from src.repo.models import RepoConfig
 from src.runner.local.run_test import get_repo_config 
 from src.config import EVAL_DATA_ROOT
-from cowboy_lib.test_modules import TestModule
+from src.lib.test_modules import TestModule
 
 # Pseudo DB:
 # Ensures that all calls to persisted data models goes through this file

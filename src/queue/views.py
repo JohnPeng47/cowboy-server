@@ -1,4 +1,4 @@
-from cowboy_lib.api.runner.shared import Task
+from src.lib.api.runner.shared import Task
 
 from .service import list_tasks, dequeue_task, complete_task
 from .models import CompleteTaskRequest

@@ -1,6 +1,6 @@
-from cowboy_lib.repo.repository import PatchFileContext, GitRepo
-from cowboy_lib.coverage import CoverageResult
-from cowboy_lib.api.runner.shared import RunTestTaskArgs, FunctionArg
+from src.lib.repo.repository import PatchFileContext, GitRepo
+from src.lib.coverage import CoverageResult
+from src.lib.api.runner.shared import RunTestTaskArgs, FunctionArg
 
 from pydantic import BaseModel, validator
 from typing import List, Optional

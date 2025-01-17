@@ -3,7 +3,7 @@ from src.local.db import get_tm
 from src.runner.local.run_test import run_test
 from src.test_modules.iter_tms import iter_test_modules
 
-from cowboy_lib.repo import SourceRepo
+from src.lib.repo import SourceRepo
 
 import pytest
 from tests.utils import GitCommitContext

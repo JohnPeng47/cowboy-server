@@ -2,7 +2,7 @@ from src.eval.create_dataset import handicap_tm
 from tests.utils import GitCommitContext
 import pytest
 from src.repo.models import RepoConfig
-from cowboy_lib.repo import SourceRepo
+from src.lib.repo import SourceRepo
 from src.local.db import get_tm
 
 pytestmark = pytest.mark.asyncio

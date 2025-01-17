@@ -1,5 +1,5 @@
-from cowboy_lib.repo import SourceRepo, GitRepo
-from cowboy_lib.test_modules.test_module import TestModule
+from src.lib.repo import SourceRepo, GitRepo
+from src.lib.test_modules.test_module import TestModule
 
 from .augment_test.composer import Composer
 from .models import AugmentTestResult

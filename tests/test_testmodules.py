@@ -1,5 +1,5 @@
-from cowboy_lib.repo.source_file import TestFile
-from cowboy_lib.test_modules import TestModule
+from src.lib.repo.source_file import TestFile
+from src.lib.test_modules import TestModule
 
 from pathlib import Path
 

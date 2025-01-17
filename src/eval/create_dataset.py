@@ -5,9 +5,9 @@ from sqlalchemy.orm import sessionmaker
 from braintrust import Dataset
 from pydantic import BaseModel
 
-from cowboy_lib.test_modules import TestModule
-from cowboy_lib.ast import NodeType
-from cowboy_lib.coverage import TestCoverage
+from src.lib.test_modules import TestModule
+from src.lib.ast import NodeType
+from src.lib.coverage import TestCoverage
 
 from src.llm import LLMModel, LMP
 from src.config import TESTCONFIG_ROOT

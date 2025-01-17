@@ -1,12 +1,12 @@
-from cowboy_lib.coverage import CoverageResult, TestError, TestCoverage
-from cowboy_lib.repo.repository import PatchFile
-from cowboy_lib.repo.source_file import Function, TestFile
+from src.lib.coverage import CoverageResult, TestError, TestCoverage
+from src.lib.repo.repository import PatchFile
+from src.lib.repo.source_file import Function, TestFile
 
 from typing import Tuple, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from test_gen.augment_test.types import StratResult
-    from cowboy_lib.test_modules import TestModule
+    from src.lib.test_modules import TestModule
 
 from .eval_base import Evaluator
 

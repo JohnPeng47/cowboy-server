@@ -1,4 +1,4 @@
-from cowboy_lib.api.runner.shared import Task
+from src.lib.api.runner.shared import Task
 
 from typing import Optional, List, Dict
 

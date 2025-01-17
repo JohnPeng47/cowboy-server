@@ -1,4 +1,4 @@
-from cowboy_lib.repo import SourceRepo
+from src.lib.repo import SourceRepo
 from src.local.models import read_rows
 from src.local.db import get_tm
 

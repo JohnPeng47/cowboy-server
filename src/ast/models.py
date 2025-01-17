@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 
-from cowboy_lib.ast.code import ASTNode
-from cowboy_lib.repo.source_repo import SourceRepo
+from src.lib.ast.code import ASTNode
+from src.lib.repo.source_repo import SourceRepo
 from src.database.core import Base
 
 

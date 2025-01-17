@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
-from cowboy_lib.repo.source_file import TestFile, SourceFile, NodeType, NodeNotFound
-from cowboy_lib.ast import PythonAST
+from src.lib.repo.source_file import TestFile, SourceFile, NodeType, NodeNotFound
+from src.lib.ast import PythonAST
 
 def test_source_file_basic_operations():
     """Test basic SourceFile operations and properties"""

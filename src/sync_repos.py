@@ -1,5 +1,5 @@
-from cowboy_lib.repo.repository import GitRepo
-from cowboy_lib.repo.diff import DiffMode
+from src.lib.repo.repository import GitRepo
+from src.lib.repo.diff import DiffMode
 
 from src.queue.core import TaskQueue
 from src.auth.service import get_user_token
